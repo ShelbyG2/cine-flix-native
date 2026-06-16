@@ -1,10 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     // Optional, provides the @Serialize annotation for autogeneration of Serializers.
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
-
+val localProps = Properties()
+val file = file("local.properties")
 android {
     namespace = "tech.unrealistic.cineflix"
     compileSdk = 37
@@ -17,7 +21,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -33,6 +36,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -60,4 +64,22 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     // Material3 Icon catalog
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Core network client (Updated from 2.9.0)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+// Official serialization converter (Replaces JakeWharton's library)
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
+
+// Core JSON engine
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    // Provides the AsyncImage composable for Jetpack Compose
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+
+// Required by Coil 3 to download online movie posters (e.g. from TMDb URLs)
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+
+    //network logger
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
+
