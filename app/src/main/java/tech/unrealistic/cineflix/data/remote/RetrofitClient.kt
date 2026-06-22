@@ -10,7 +10,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import tech.unrealistic.cineflix.BuildConfig
 
 object RetrofitClient {
-    private  const val  BASE_URL= "https://api.themoviedb.org/3/"
+    const val  BASE_URL= "https://api.themoviedb.org/3/"
     // ignore unwanted responses
     private val json = Json {ignoreUnknownKeys= true}
 

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MovieResponse (
+data class TmdbResponse (
     val page: Int,
     val  results : List<Movie>
 )
