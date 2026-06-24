@@ -1,6 +1,5 @@
 package tech.unrealistic.cineflix.data.remote.models
 
-import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
