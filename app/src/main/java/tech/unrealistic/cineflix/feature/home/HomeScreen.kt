@@ -1,30 +1,45 @@
 package tech.unrealistic.cineflix.feature.home
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.LineHeightStyle.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import tech.unrealistic.cineflix.core.components.MovieCard
-import tech.unrealistic.cineflix.data.remote.RetrofitClient
+import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.data.remote.models.Movie
+import tech.unrealistic.cineflix.data.remote.models.Tv
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen (onNavigate :(()-> Unit)? =null, viewModel: HomeViewModel = viewModel() ){
     //observe any changes in the view model
@@ -37,7 +52,49 @@ fun HomeScreen (onNavigate :(()-> Unit)? =null, viewModel: HomeViewModel = viewM
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
             is HomeUiState.Success ->{
-                MovieGrid(movies = state.data.results)
+
+               Column(modifier = Modifier
+                   .fillMaxSize()
+                   .verticalScroll(rememberScrollState())
+                   .padding(vertical = 16.dp)) {
+                   val specialFeaturedMovie = state.trendingMovies.random()
+                   val carouselState = rememberCarouselState(itemCount = { state.trendingTvShows.size })
+
+                   HorizontalCenteredHeroCarousel (
+                       state = carouselState,
+                       itemSpacing = 8.dp,
+
+                   ) { itemIndex ->
+                       val heroShow = state.trendingTvShows.getOrNull(itemIndex)
+                       MediaCard(
+                           tvShow = heroShow,
+                           hero = true
+                       )
+
+
+                   }
+//                   Box(
+//                       modifier = Modifier
+//                           .fillMaxSize()
+//                           .height(360.dp)
+//                           .padding(bottom = 6.dp)
+//
+//                   ){MediaCard(
+//                       movie = specialFeaturedMovie,
+//
+//                   )}
+
+                   MediaSection(
+                       title = "TrendingMovies",
+                       movies = state.trendingMovies,
+                       onNavigate= onNavigate,
+                       )
+                   MediaSection(
+                       title = "Trending Tv Shows",
+                       tvShows = state.trendingTvShows,
+                       onNavigate = onNavigate
+                   )
+               }
                 
             }
             is HomeUiState.Error->{
@@ -58,7 +115,53 @@ fun MovieGrid(modifier: Modifier = Modifier, movies: List<Movie>) {
         modifier = Modifier.fillMaxSize()
     ) {
         items( items=movies ,key={it.id}){ movie ->
-            MovieCard(movie = movie)
+            MediaCard(movie = movie)
         }
     }
+}
+
+@Composable
+fun MediaSection (
+    title: String,
+    movies: List<Movie> = emptyList(),
+    tvShows: List<Tv> = emptyList(),
+    onNavigate: (()-> Unit)?,
+    modifier: Modifier = Modifier
+){
+Column(modifier = modifier.padding(bottom = 24.dp)) {
+
+
+    Text(
+        text = title,
+         color = MaterialTheme.colorScheme.primary,
+        fontSize = 20.sp,
+        fontStyle = FontStyle.Normal,
+        modifier = Modifier.padding(16.dp, 8.dp),
+        textAlign = TextAlign.Center
+    )
+    LazyHorizontalGrid(
+        rows = GridCells.Fixed(1),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .height(210.dp)
+
+    ) {
+        if(movies.isNotEmpty()){
+            items (items = movies, key={it.id}){ movie->
+                MediaCard(movie= movie,
+
+                )
+
+            }
+        }else {
+            items(items = tvShows, key = {it.id}){ tv ->
+                MediaCard( tvShow = tv,
+
+                )
+
+            }
+        }
+    }
+}
 }
