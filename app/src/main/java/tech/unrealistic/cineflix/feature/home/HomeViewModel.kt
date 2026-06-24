@@ -2,17 +2,21 @@ package tech.unrealistic.cineflix.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
-import tech.unrealistic.cineflix.data.remote.TmdbService
-import tech.unrealistic.cineflix.data.remote.models.TmdbResponse
+import tech.unrealistic.cineflix.data.remote.models.Movie
+import tech.unrealistic.cineflix.data.remote.models.Tv
 
 sealed interface HomeUiState{
     object Loading: HomeUiState
-    data class Success(val data: TmdbResponse): HomeUiState
+    data class Success(
+        val trendingMovies: List<Movie>,
+        val trendingTvShows: List<Tv>
+    ): HomeUiState
     data class Error ( val message: String ): HomeUiState
 }
 
@@ -22,16 +26,24 @@ class HomeViewModel : ViewModel(){
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
             init{
-                fetchPopularMovies()
+                fetchAllHomeData()
             }
-    private fun fetchPopularMovies(){
+    private fun fetchAllHomeData(){
         viewModelScope.launch {
             _uiState.value= HomeUiState.Loading
             try {
-                val response = RetrofitClient.tmdbService.getPopularMovies()
+                val trendingMoviesDeferred  = async { RetrofitClient.tmdbService.getTrendingMovies() }
+                val trendingTvDeferred = async { RetrofitClient.tmdbService.getTrendingShows() }
+
+                val movieResponse=  trendingMoviesDeferred.await()
+                val tvResponse = trendingTvDeferred.await()
+
 
                 //If successful, pass data to UI
-                _uiState.value= HomeUiState.Success(response)
+                _uiState.value= HomeUiState.Success(
+                    movieResponse.results,
+                    tvResponse.results
+                )
             }catch (e : Exception){
                 _uiState.value= HomeUiState.Error(e.localizedMessage?: "An unknown error occurred")
             }
