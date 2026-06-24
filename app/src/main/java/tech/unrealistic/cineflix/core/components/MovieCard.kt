@@ -22,7 +22,7 @@ import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
 
-interface media <T>
+
 @Composable
 fun MediaCard(modifier: Modifier = Modifier,
               movie: Movie?= null,
