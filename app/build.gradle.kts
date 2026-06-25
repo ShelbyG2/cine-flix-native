@@ -81,5 +81,8 @@ dependencies {
 
     //network logger
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //color palette extractoir
+    implementation("androidx.palette:palette-ktx:1.0.0")
 }
 
