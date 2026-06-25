@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
 
@@ -15,7 +16,8 @@ sealed interface HomeUiState{
     object Loading: HomeUiState
     data class Success(
         val trendingMovies: List<Movie>,
-        val trendingTvShows: List<Tv>
+        val trendingTvShows: List<Tv>,
+        val trendingMixed: List<MediaItem>
     ): HomeUiState
     data class Error ( val message: String ): HomeUiState
 }
@@ -34,15 +36,19 @@ class HomeViewModel : ViewModel(){
             try {
                 val trendingMoviesDeferred  = async { RetrofitClient.tmdbService.getTrendingMovies() }
                 val trendingTvDeferred = async { RetrofitClient.tmdbService.getTrendingShows() }
+                val trendingDeferred = async { RetrofitClient.tmdbService.getTrendingMixed() }
 
                 val movieResponse=  trendingMoviesDeferred.await()
                 val tvResponse = trendingTvDeferred.await()
+                val trendingMixedResponse = trendingDeferred.await()
 
 
                 //If successful, pass data to UI
                 _uiState.value= HomeUiState.Success(
                     movieResponse.results,
-                    tvResponse.results
+                    tvResponse.results,
+                    trendingMixedResponse.results
+
                 )
             }catch (e : Exception){
                 _uiState.value= HomeUiState.Error(e.localizedMessage?: "An unknown error occurred")
