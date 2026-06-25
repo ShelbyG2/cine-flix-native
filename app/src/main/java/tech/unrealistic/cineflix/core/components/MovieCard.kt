@@ -19,20 +19,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
 
 
 @Composable
 fun MediaCard(modifier: Modifier = Modifier,
-              movie: Movie?= null,
-              tvShow: Tv?= null,
+              media: MediaItem,
               hero: Boolean? = null
 ) {
     val isHero = hero?: false
 
-         val posterPath = movie?.posterPath ?: tvShow?.posterPath
-         val displayTitle = movie?.title ?: tvShow?.name
+         val displayTitle = when (media){
+             is Movie -> media.title
+             is Tv -> media.name
+         }
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier= if (isHero){
@@ -44,7 +46,7 @@ fun MediaCard(modifier: Modifier = Modifier,
         ) {
 
 
-            val posterUrl = "https://image.tmdb.org/t/p/w500$posterPath"
+            val posterUrl = "https://image.tmdb.org/t/p/w500${media.posterPath}"
             AsyncImage(
                 model = posterUrl,
                 contentDescription = displayTitle,
@@ -67,6 +69,7 @@ fun MediaCard(modifier: Modifier = Modifier,
                             MaterialTheme.colorScheme.background.copy(0.95f))
                          ))
         )
+        if (!isHero)
         Text(
             text = displayTitle ?: "Unknown title ",
             maxLines = 1,
