@@ -20,8 +20,8 @@ interface TmdbService {
         @Query("page") page: Int =1
     ) : TmdbResponse<Tv>
 
-    @GET("popular/all/day")
-    suspend fun getPopularShows(
+    @GET("trending/all/day")
+    suspend fun getTrendingMixed(
         @Query("language") language: String= "en-US",
         @Query("page") page: Int =1
     ) : TmdbResponse<MediaItem>
