@@ -3,16 +3,13 @@ package tech.unrealistic.cineflix
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -57,7 +54,7 @@ fun CineflixApp() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize(), ) { innerPadding ->
 
             NavDisplay(
                 backStack= backStack,
@@ -65,7 +62,12 @@ fun CineflixApp() {
                 modifier= Modifier.padding(innerPadding),
                 entryProvider = {key ->
                     when(key){
-                        is Home -> NavEntry(key){ HomeScreen () }
+                        is Home -> NavEntry(key){ HomeScreen (
+                            onNavigate = {
+                                backStack.clear()
+                                backStack.add(Discover)
+                            }
+                        ) }
                         is Favourites -> NavEntry(key){ FavouriteScreen() }
                         is Discover-> NavEntry(key){ DiscoverScreen() }
                         is Profile -> NavEntry(key){ProfileScreen () }
