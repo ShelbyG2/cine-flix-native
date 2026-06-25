@@ -9,15 +9,16 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     background = CineflixBackground,
     surface = CineflixSurface,
+    onSurface = Color.Gray,
     primary = CineflixPrimary,
     secondary = CineflixSecondary,
     onBackground = CineflixPrimary, // White text on dark background
-    onSurface = CineflixPrimary,    // White text on surface elements
     tertiary = CineflixSubtleGlow
 )
 
