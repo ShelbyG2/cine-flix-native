@@ -69,15 +69,15 @@ fun MediaCard(modifier: Modifier = Modifier,
                             MaterialTheme.colorScheme.background.copy(0.95f))
                          ))
         )
-        if (!isHero)
-        Text(
-            text = displayTitle ?: "Unknown title ",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface,
-
-
-        )
+//        if (!isHero)
+//        Text(
+//            text = displayTitle ?: "Unknown title ",
+//            maxLines = 1,
+//            overflow = TextOverflow.Ellipsis,
+//            color = MaterialTheme.colorScheme.onSurface,
+//
+//
+//        )
     }
 
 
