@@ -38,11 +38,11 @@ fun MediaCard(modifier: Modifier = Modifier,
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier= if (isHero){
-            Modifier.fillMaxSize()
+            modifier
         }else{Modifier.width(140.dp) }
     ) {
         Card(
-            modifier = Modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         ) {
 
 
@@ -52,9 +52,9 @@ fun MediaCard(modifier: Modifier = Modifier,
                 contentDescription = displayTitle,
 
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .aspectRatio(2f / 3f),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
 
         }
