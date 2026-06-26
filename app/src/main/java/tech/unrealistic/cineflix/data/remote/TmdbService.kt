@@ -25,4 +25,17 @@ interface TmdbService {
         @Query("language") language: String= "en-US",
         @Query("page") page: Int =1
     ) : TmdbResponse<MediaItem>
+
+
+    @GET("movie/top_rated")
+    suspend fun getRatedMovies(
+        @Query("language") language: String= "en-US",
+        @Query("page") page: Int =1
+    ) : TmdbResponse<MediaItem>
+
+    @GET("tv/top_rated")
+    suspend fun getRatedTv(
+        @Query("language") language: String= "en-US",
+        @Query("page") page: Int =1
+    ) : TmdbResponse<MediaItem>
 }

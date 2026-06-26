@@ -97,13 +97,13 @@ fun HomeScreen(
                             onNavigate = onNavigate
                         )
                         MediaSection(
-                                title      = "Latest Movies",
-                        items      = state.latestMovies,
+                                title      = "Rated Movies",
+                        items      = state.ratedMovies,
                         onNavigate = onNavigate
                         )
                         MediaSection(
-                            title      = "Latest Tv Shows",
-                            items      = state.latestTv,
+                            title      = "Rated Tv Shows",
+                            items      = state.ratedTv,
                             onNavigate = onNavigate
                         )
                     }

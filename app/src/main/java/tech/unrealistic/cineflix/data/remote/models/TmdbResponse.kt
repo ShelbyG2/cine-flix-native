@@ -81,3 +81,8 @@ object MediaSerializer :  JsonContentPolymorphicSerializer <MediaItem>(MediaItem
         else -> Movie.serializer()
     }
 }
+val MediaItem.displayTitle: String
+    get() = when (this) {
+        is Movie -> this.title
+        is Tv -> this.name
+    }
