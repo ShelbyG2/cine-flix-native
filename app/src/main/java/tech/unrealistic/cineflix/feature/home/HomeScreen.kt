@@ -1,14 +1,11 @@
 package tech.unrealistic.cineflix.feature.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -18,22 +15,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle  // ← lifecycle-aware
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.CustomTopBar
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
 
+
+@ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigate: (() -> Unit)? = null,
     viewModel:  HomeViewModel = viewModel()
 ) {
-    // collectAsStateWithLifecycle stops collecting when the screen
-    // is in the background — saves CPU and battery
+    // collectAsStateWithLifecycle stops collecting when the screen is in the background
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -53,9 +50,7 @@ fun HomeScreen(
             when (val state = uiState) {
 
                 is HomeUiState.Loading -> {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    HomeScreenSkeleton()
                 }
 
                 is HomeUiState.Error -> {
@@ -77,7 +72,7 @@ fun HomeScreen(
                             .verticalScroll(rememberScrollState())
 
                     ) {
-                        // ── Hero section with glassmorphism ───────────────
+
                         HeroSection(
                             items         = state.trendingMixed,
                             carouselState = carouselState,
@@ -85,7 +80,7 @@ fun HomeScreen(
                             topPadding    = 10.dp
                         )
 
-                        // ── Horizontal media rows ─────────────────────────
+
                         MediaSection(
                             title      = "Trending Movies",
                             items      = state.trendingMovies,
@@ -112,3 +107,7 @@ fun HomeScreen(
         }
     }
 }
+
+
+
+
