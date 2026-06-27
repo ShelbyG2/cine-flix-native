@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.IntSize
 fun Modifier.shimmerEffect(
     baseColor: Color = Color.LightGray.copy(alpha = 0.6f),
     highlightColor: Color = Color.LightGray.copy(0.2f),
-    durationMillis: Int = 200
+    durationMillis: Int = 1200
 ): Modifier = composed {
 
     //Keep track of the pixel bounds of the target composable
