@@ -1,4 +1,5 @@
 package tech.unrealistic.cineflix.data.remote
+
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -8,6 +9,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import tech.unrealistic.cineflix.BuildConfig
+import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     const val  BASE_URL= "https://api.themoviedb.org/3/"
@@ -33,6 +35,9 @@ object RetrofitClient {
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(apiKeyInterceptor)
         .addInterceptor(loggingInterceptor)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
         .build()
     val tmdbService: TmdbService by lazy {
         Retrofit.Builder()
