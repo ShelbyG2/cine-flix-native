@@ -30,6 +30,7 @@ fun MediaCard(modifier: Modifier = Modifier,
               hero: Boolean? = null
 ) {
     val isHero = hero?: false
+    val mediaType = media.mediaType
 
          val displayTitle = when (media){
              is Movie -> media.title
@@ -47,6 +48,7 @@ fun MediaCard(modifier: Modifier = Modifier,
 
 
             val posterUrl = "https://image.tmdb.org/t/p/w500${media.posterPath}"
+
             AsyncImage(
                 model = posterUrl,
                 contentDescription = displayTitle,
@@ -69,15 +71,15 @@ fun MediaCard(modifier: Modifier = Modifier,
                             MaterialTheme.colorScheme.background.copy(0.95f))
                          ))
         )
-//        if (!isHero)
-//        Text(
-//            text = displayTitle ?: "Unknown title ",
-//            maxLines = 1,
-//            overflow = TextOverflow.Ellipsis,
-//            color = MaterialTheme.colorScheme.onSurface,
-//
-//
-//        )
+        if (!isHero)
+        Text(
+            text = mediaType ?: "Unknown type ",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface,
+
+
+        )
     }
 
 

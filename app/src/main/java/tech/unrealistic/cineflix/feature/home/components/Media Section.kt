@@ -1,5 +1,6 @@
 package tech.unrealistic.cineflix.feature.home.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +20,7 @@ fun MediaSection(
     title:      String,
     items:      List<MediaItem>,          // unified type — no more movies/tvShows split
     modifier:   Modifier = Modifier,
-    onNavigate: (() -> Unit)? = null,
+    onMediaClick: ((Int, String) -> Unit),
 ) {
     if (items.isEmpty()) return           // don't render an empty section at all
 
@@ -44,6 +45,7 @@ fun MediaSection(
             ) { item ->
                 MediaCard(
                     media      = item,
+                    modifier = Modifier.clickable { onMediaClick(item.id, item.mediaType) }
 
                 )
             }
