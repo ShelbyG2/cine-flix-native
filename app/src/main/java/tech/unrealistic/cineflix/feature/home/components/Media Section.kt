@@ -45,7 +45,8 @@ fun MediaSection(
             ) { item ->
                 MediaCard(
                     media      = item,
-                    modifier = Modifier.clickable { onMediaClick(item.id, item.mediaType) }
+                    modifier = Modifier.clickable {
+                        onMediaClick(item.id, item.mediaType) }
 
                 )
             }
