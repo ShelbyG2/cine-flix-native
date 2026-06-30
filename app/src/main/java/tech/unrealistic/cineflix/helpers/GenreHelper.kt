@@ -1,4 +1,4 @@
-package tech.unrealistic.cineflix.data.remote
+package tech.unrealistic.cineflix.helpers
 
 import tech.unrealistic.cineflix.data.remote.models.Genre
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
