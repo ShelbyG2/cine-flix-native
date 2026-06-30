@@ -7,13 +7,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
-sealed interface HomeUiState{
-    object Loading: HomeUiState
+sealed interface HomeUiState {
+    object Loading : HomeUiState
     data class Success(
         val trendingMovies: List<Movie>,
         val trendingTvShows: List<Tv>,
@@ -21,49 +24,76 @@ sealed interface HomeUiState{
         val ratedTv: List<MediaItem>,
         val trendingMixed: List<MediaItem>
 
-        ): HomeUiState
-    data class Error ( val message: String ): HomeUiState
+    ) : HomeUiState
+
+    data class Error(val message: String) : HomeUiState
 }
 
-class HomeViewModel : ViewModel(){
+class HomeViewModel : ViewModel() {
     // _uiState is private so only the ViewModel can change it.
-// uiState is public so the UI can read it, but can't accidentally oveal trendingMixed: List<MediaItem>,rwrite it.
+// uiState is public so the UI can read it, but can't accidentally overwrite it.
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-            init{
-                fetchAllHomeData()
-            }
-    private fun fetchAllHomeData(){
-        viewModelScope.launch {
-            _uiState.value= HomeUiState.Loading
-            try {
-                val trendingMoviesDeferred  = async { RetrofitClient.tmdbService.getTrendingMovies() }
-                val trendingTvDeferred = async { RetrofitClient.tmdbService.getTrendingShows() }
-                val trendingDeferred = async { RetrofitClient.tmdbService.getTrendingMixed() }
-                val ratedMoviesDeferred = async { RetrofitClient.tmdbService.getRatedMovies() }
-                val ratedTvDeferred = async { RetrofitClient.tmdbService.getRatedTv() }
 
-                val movieResponse=  trendingMoviesDeferred.await()
-                val tvResponse = trendingTvDeferred.await()
-                val trendingMixedResponse = trendingDeferred.await()
-                val ratedMoviesResponse = ratedMoviesDeferred.await()
-                val ratedTvResponse = ratedTvDeferred.await()
-
-
-                //If successful, pass data to UI
-                _uiState.value= HomeUiState.Success(
-                    movieResponse.results,
-                    tvResponse.results,
-                    ratedMoviesResponse.results,
-                    ratedTvResponse.results,
-                    trendingMixedResponse.results
-
-
-
-                )
-            }catch (e : Exception){
-                _uiState.value= HomeUiState.Error(e.localizedMessage?: "An unknown error occurred")
-            }
-        }
+    init {
+        fetchAllHomeData()
     }
+
+    private fun fetchAllHomeData() {
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            try {
+
+                supervisorScope {
+
+                    val trendingMoviesDeferred =
+                        async { RetrofitClient.tmdbService.getTrendingMovies() }
+                    val trendingTvDeferred =
+                        async { RetrofitClient.tmdbService.getTrendingShows() }
+                    val trendingDeferred =
+                        async { RetrofitClient.tmdbService.getTrendingMixed() }
+                    val ratedMoviesDeferred =
+                        async { RetrofitClient.tmdbService.getRatedMovies() }
+                    val ratedTvDeferred = async { RetrofitClient.tmdbService.getRatedTv() }
+
+                    val movieResponse = trendingMoviesDeferred.await()
+                    val tvResponse = trendingTvDeferred.await()
+                    val trendingMixedResponse = trendingDeferred.await()
+                    val ratedMoviesResponse = ratedMoviesDeferred.await()
+                    val ratedTvResponse = ratedTvDeferred.await()
+
+
+                    //If successful, pass data to UI
+                    _uiState.value = HomeUiState.Success(
+                        movieResponse.results,
+                        tvResponse.results,
+                        ratedMoviesResponse.results,
+                        ratedTvResponse.results,
+                        trendingMixedResponse.results
+
+
+                    )
+                }
+
+            } catch (e: SocketTimeoutException) {
+                _uiState.value =
+                    HomeUiState.Error(
+                        message = "The server took too long to respond. Please turn on Wi-Fi or Cellular data."
+                    )
+            } catch (e: UnknownHostException) {
+                // Triggers ONLY when there is no internet connection at all
+                _uiState.value =
+                    HomeUiState.Error("No internet connection. Please turn on mobile data or Wi-Fi.")
+            } catch (e: Exception) {
+                _uiState.value =
+                    HomeUiState.Error(
+                        message = "An ${e.localizedMessage} error occurred"
+                    )
+
+            }
+
+        }
+
+    }
+
 }
