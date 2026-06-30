@@ -49,6 +49,17 @@ interface TmdbService {
         @Query("language") language: String = "en-US",
         @Query("page") page: Int = 1,
 
-
         ): MediaItem
+
+    @GET("movie/{id}")
+    suspend fun getMovieDetail(
+        @Path("id") id: Int,
+        @Query("language") language: String = "en-US"
+    ): MediaItem
+
+    @GET("tv/{id}")
+    suspend fun getTvDetail(
+        @Path("id") id: Int,
+        @Query("language") language: String = "en-US"
+    ): MediaItem
 }

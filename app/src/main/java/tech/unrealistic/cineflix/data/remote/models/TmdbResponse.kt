@@ -15,6 +15,11 @@ data class TmdbResponse<T>(
     val results: List<T>
 )
 
+@Serializable
+data class Genre(
+    val id: Int,
+    val name: String
+)
 @Serializable(with = MediaSerializer::class)
 sealed interface MediaItem {
     val id: Int
@@ -25,6 +30,7 @@ sealed interface MediaItem {
     val voteAverage: Double
     val voteCount: Int
     val genreIds: List<Int>
+    val genres: List<Genre>?
     val originalLanguage: String
     val popularity: Double
 
@@ -48,8 +54,16 @@ data class Movie(
     override val popularity: Double,
     val video: Boolean = false,
 
+    //Details exclusive filed
+    override  val genres: List<Genre> = emptyList(),
+    val runtime: Int? = null,
+    val status: String? = null,
+    val tagline: String? = null
 
-    ) : MediaItem
+
+    ) : MediaItem{
+    val genreNames: List<String> get() = genres.map { it.name }
+}
 
 
 @Serializable
@@ -67,19 +81,25 @@ data class Tv(
     @SerialName("genre_ids") override val genreIds: List<Int> = emptyList(),
     @SerialName("original_language") override val originalLanguage: String,
     @SerialName("original_name") val originalTitle: String,
-    override val popularity: Double
-) : MediaItem
+    override val popularity: Double,
+    //Details exclusive fields
+    override val genres: List<Genre> = emptyList(),
+    @SerialName("number_of_seasons") val numberOfSeasons: Int? = null,
+    @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null
+) : MediaItem{
+    val genreNames: List<String> get() = genres.map { it.name } .take(3)
+}
 
 
 object MediaSerializer : JsonContentPolymorphicSerializer<MediaItem>(MediaItem::class) {
-    override fun selectDeserializer(element: JsonElement): KSerializer<out MediaItem>{
+    override fun selectDeserializer(element: JsonElement): KSerializer<out MediaItem> {
         //Include the  "media_type" field ("movie" or "tv" )
 
         val jsonObject = element.jsonObject
         //First check using the standard media_type
 
         val mediaType = jsonObject["media_type"]?.jsonPrimitive?.content
-        if( mediaType == "tv") return  Tv.serializer()
+        if (mediaType == "tv") return Tv.serializer()
         if (mediaType == "movie") return Movie.serializer()
         return when {
             "name" in jsonObject || "first_air_date" in jsonObject -> Tv.serializer()
@@ -97,4 +117,7 @@ val MediaItem.displayTitle: String
         is Movie -> this.title
         is Tv -> this.name
     }
+
+
+
 
