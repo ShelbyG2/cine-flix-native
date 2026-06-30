@@ -39,25 +39,31 @@ import tech.unrealistic.cineflix.feature.home.components.MediaSection
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigate: (() -> Unit)? = null,
-    viewModel: HomeViewModel = viewModel()
+    onNavigate: (() -> Unit)? = null, viewModel: HomeViewModel = viewModel()
 ) {
     // collectAsStateWithLifecycle stops collecting when the screen is in the background
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isMediaDetailsSheetOpen by remember { mutableStateOf(false) }
     var selectedMediaId by remember { mutableStateOf<Int?>(null) }
+    var selectedMediaType by remember { mutableStateOf<String?>(null) }
+
     val mediaDetailsSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
+        skipPartiallyExpanded = true
     )
+    val openMediaDetails: (Int, String) -> Unit = { id, t ->
+        selectedMediaId = id
+        selectedMediaType = t
+        isMediaDetailsSheetOpen = true
+    }
+    if (isMediaDetailsSheetOpen){
+
+    }
 
     Scaffold(
         topBar = {
             CustomTopBar(
-                title = "CineFlix",
-                onSearchClick = { onNavigate?.invoke() }
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
+                title = "CineFlix", onSearchClick = { onNavigate?.invoke() })
+        }, containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
 
         Box(
@@ -92,8 +98,8 @@ fun HomeScreen(
 
                 is HomeUiState.Success -> {
                     val carouselState = rememberCarouselState(
-                        itemCount = { state.trendingMixed.size }
-                    )
+                        itemCount = { state.trendingMixed.size })
+
 
                     Column(
                         modifier = Modifier
@@ -109,48 +115,32 @@ fun HomeScreen(
                             topPadding = 10.dp
                         )
 
-
                         MediaSection(
                             title = "Trending Movies",
                             items = state.trendingMovies,
-                            onMediaClick = { id ->
-                                selectedMediaId = id
-                                isMediaDetailsSheetOpen = true
-
-                            }
+                            onMediaClick = openMediaDetails
                         )
                         MediaSection(
                             title = "Trending TV Shows",
                             items = state.trendingTvShows,
-                            onMediaClick = { id ->
-                                selectedMediaId = id
-                                isMediaDetailsSheetOpen = true
-
-                            }
+                            onMediaClick = openMediaDetails
                         )
                         MediaSection(
                             title = "Rated Movies",
                             items = state.ratedMovies,
-                            onMediaClick = { id ->
-                                selectedMediaId = id
-                                isMediaDetailsSheetOpen = true
-
-                            }
+                            onMediaClick = openMediaDetails
                         )
                         MediaSection(
                             title = "Rated Tv Shows",
                             items = state.ratedTv,
-                            onMediaClick = { id ->
-                                selectedMediaId = id
-                                isMediaDetailsSheetOpen = true
-
-                            }
+                            onMediaClick = openMediaDetails
                         )
                         MediaDetailsBottomSheet(
                             showBottomSheet = isMediaDetailsSheetOpen,
                             sheetState = mediaDetailsSheetState,
                             onDismissRequest = { isMediaDetailsSheetOpen = false },
-                            MediaId = selectedMediaId ?:0
+                            mediaId = selectedMediaId ?: 0,
+                            mediaType = selectedMediaType ?: "na"
                         )
                     }
                 }

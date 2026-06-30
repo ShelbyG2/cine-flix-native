@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -73,7 +72,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import tech.unrealistic.cineflix.core.components.MediaCard
-import tech.unrealistic.cineflix.data.remote.getGenreNames
+import tech.unrealistic.cineflix.data.remote.genreNames
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.displayTitle
 
@@ -267,7 +266,8 @@ private fun HeroInfoPanel(
             )
 
             // Genre chips — max 3
-            getGenreNames(item.genreIds.take(3)?: emptyList()).forEach { genreName ->
+
+            item.genreNames.take(3).forEach { genreName ->
                 GenreChip(
                     label        = genreName,
                     contentColor = contentColor
