@@ -1,9 +1,11 @@
 package tech.unrealistic.cineflix
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -15,14 +17,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.feature.home.DiscoverScreen
 import tech.unrealistic.cineflix.feature.home.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
 
 
+@RequiresApi(Build.VERSION_CODES.P)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CineflixApp() {
+fun CineflixApp(
+
+) {
   //Home is our default tab
     val backStack = remember { mutableStateListOf<Any>(Home) }
     // if the current tab in the stack  is null revert to default tab
@@ -30,7 +37,7 @@ fun CineflixApp() {
     //Check the tab we are currently on
     val currentTab = AppDestinations.entries.find {it.route == currentRoot}?: AppDestinations.HOME
 
-
+    val  mediaRepository = RetrofitClient.tmdbService
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -54,7 +61,7 @@ fun CineflixApp() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize(), ) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize() ) { innerPadding ->
 
             NavDisplay(
                 backStack= backStack,
