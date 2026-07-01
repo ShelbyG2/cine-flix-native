@@ -1,13 +1,9 @@
 package tech.unrealistic.cineflix.feature.home.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -48,10 +44,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +63,6 @@ import tech.unrealistic.cineflix.helpers.PaletteHelper
 fun HeroSection(
     items: List<MediaItem>,
     carouselState: CarouselState,
-    topPadding: Dp,
     modifier: Modifier = Modifier,
     onPlayClick: (MediaItem) -> Unit = {},
     onFavourite: (MediaItem) -> Unit = {},
@@ -116,7 +109,7 @@ fun HeroSection(
     }
 
     // ── Focused item reference ─────────────────────────────────────────────────
-    val focusedItem = items.getOrNull(carouselState.currentItem)
+    val focusedItem: MediaItem? = items.getOrNull(carouselState.currentItem)
 
     // ── Glass background ───────────────────────────────────────────────────────
     // This is where glassmorphism lives — the SECTION background, not the cards.
@@ -133,11 +126,11 @@ fun HeroSection(
                 state = carouselState,
                 itemSpacing = 10.dp,
                 modifier = Modifier
-                    .padding(top = topPadding)
                     .height(carouselHeight),
                 contentPadding = PaddingValues(
-                    horizontal = 10.dp, // Gives spacing on left/right edges of screen
-                    vertical = 0.dp
+                    start= 10.dp,
+                    end = 10.dp,
+                    top = 56.dp
                 ),
                 content = { index ->
                     val item = items.getOrNull(index) ?: return@HorizontalCenteredHeroCarousel
@@ -173,31 +166,21 @@ fun HeroSection(
                         )
                 })
 
-            // ── Info panel animates when focused item changes
-            AnimatedContent(
-                targetState = focusedItem, transitionSpec = {
-                    fadeIn(tween(400)) togetherWith fadeOut(tween(250))
-                }, label = "hero_info_panel", modifier = Modifier.padding()
 
-            ) { item ->
-                if (item != null) {
-                    HeroInfoPanel(
-                        item = item,
-                        isFavourite = favouriteIds.contains(item.id),
-                        onPlay = { onPlayClick(item) },
-                        onFavourite = { onFavourite(item) },
+                    HeroActionButtons (
+                        item = focusedItem,
+                        isFavourite = favouriteIds.contains(focusedItem?.id),
+                        onPlay = { focusedItem?.let { onPlayClick(it) } },
+                        onFavourite = { onFavourite(focusedItem!!) },
                         accentColor = animatedVibrant,
-                        onMediaClick=onMediaClick,
+                        onMediaClick =onMediaClick,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
                                 top = 0.dp, end = 16.dp
                             )
                     )
-                } else {
-                    Spacer(modifier = Modifier.height(120.dp))
-                }
-            }
+
         }
     }
 }
@@ -237,23 +220,24 @@ fun GlassHeroBackground(
 }
 
 @Composable
-private fun HeroInfoPanel(
-    item: MediaItem,
+private fun HeroActionButtons(
+    item: MediaItem?,
     isFavourite: Boolean,
     onPlay: () -> Unit,
     onFavourite: () -> Unit,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    onMediaClick: ((Int, String) -> Unit)
+    onMediaClick: (Int, String) -> Unit
 ) {
 
     val contentColor = Color.White
 
     Column(modifier = modifier) {
 
-        //  Action buttons
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 20.dp,
+                    vertical = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -282,14 +266,15 @@ private fun HeroInfoPanel(
             }
             // Info button glass icon button
             val detailScale by animateFloatAsState(
-                targetValue = if (isFavourite) 1.25f else 1.0f,
+                targetValue = 1.0f,
                 animationSpec = tween(200),
                 label = "fav_scale"
             )
             IconButton(
-                onClick = { onMediaClick(item.id, item.mediaType) }, colors = IconButtonDefaults.iconButtonColors(
+                onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
+                colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.White.copy(alpha = 0.15f),
-                    contentColor = if (isFavourite) Color(0xFFFF6B6B) else contentColor
+                    contentColor =   contentColor
                 ), modifier = Modifier
                     .size(52.dp)
                     .border(
@@ -344,39 +329,3 @@ private fun HeroInfoPanel(
 
 
 
-// ── Canvas noise helper ───────────────────────────────────────────────────────
-private fun DrawScope.drawNoise(color: Color, alpha: Float, density: Int) {
-    val rng = java.util.Random(42L)    // fixed seed — stable across frames
-    repeat(density) {
-        drawCircle(
-            color = color.copy(alpha = alpha * rng.nextFloat()),
-            radius = rng.nextFloat() * 1.2f,
-            center = Offset(
-                x = rng.nextFloat() * size.width, y = rng.nextFloat() * size.height
-            )
-        )
-    }
-}
-
-// ── Palette extraction ────────────────────────────────────────────────────────
-//private suspend fun extractPalette(
-//    context: android.content.Context,
-//    url:     String,
-//): Palette? = withContext(Dispatchers.IO) {
-//    try {
-//        val request = ImageRequest.Builder(context)
-//            .data(url)
-//            .bitmapConfig(Bitmap.Config.ARGB_8888)
-//            .allowHardware(false)
-//            .size(64, 96)
-//            .build()
-//        val bitmap = context.imageLoader
-//            .execute(request)
-//            .image
-//            ?.toBitmap()
-//            ?: return@withContext null
-//        Palette.from(bitmap).maximumColorCount(16).generate()
-//    } catch (e: Exception) {
-//        null
-//    }
-//}

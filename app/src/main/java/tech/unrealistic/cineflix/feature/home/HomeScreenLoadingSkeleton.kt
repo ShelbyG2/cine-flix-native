@@ -21,155 +21,158 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import tech.unrealistic.cineflix.core.components.FloatingTopBar
 import tech.unrealistic.cineflix.core.components.shimmerEffect
 import tech.unrealistic.cineflix.feature.home.components.GlassHeroBackground
 
 
 @Composable
-fun HomeScreenSkeleton (modifier: Modifier = Modifier) {
+fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
+    // 1. Setup density and top bar tracking state to match production exactly
+    var topBarHeight by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
 
-// Wrap in BoxWithConstraints to safely access maxHeight without warnings
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val calculatedHeroHeight = maxHeight * 0.5f
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            // ── 1. Hero Section Skeleton ──
-            HeroSectionSkeleton(
-                topPadding = 10.dp,
+        // 2. ROOT LAYER Stacking Box
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(calculatedHeroHeight)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // ── 1. Hero Section Skeleton ──
+                HeroSectionSkeleton(
+                    // Pass the tracked topBarHeight dynamically to avoid gaps
+                    topPadding = topBarHeight,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(calculatedHeroHeight)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ── 2. Horizontal Rows Skeletons ──
+                MediaSectionSkeleton(itemCount = 5)
+                MediaSectionSkeleton(itemCount = 5)
+            }
+
+            // ── 3. FLOATING APP BAR SKELETON LAYER ──
+            // Stays static, matches the transparent layout footprint of production perfectly
+            FloatingTopBar(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .onGloballyPositioned { coordinates ->
+                        topBarHeight = with(density) { coordinates.size.height.toDp() }
+                    },
+                onSearchClick = {},
+                isScrolled = false // Keep it false so it stays transparent while loading
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ── 2. Horizontal Rows Skeletons ──
-            // Mimics "Trending Movies"
-            MediaSectionSkeleton(itemCount = 5)
-
-            // Mimics "Trending TV Shows"
-            MediaSectionSkeleton(itemCount = 5)
         }
     }
 }
 
-@Composable 
-fun HeroSectionSkeleton(modifier: Modifier = Modifier,
-                                topPadding: Dp,) {
+@Composable
+fun HeroSectionSkeleton(
+    modifier: Modifier = Modifier,
+    topPadding: Dp,
+) {
+    val skeletonVibrant = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    val skeletonMuted = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
 
+    GlassHeroBackground(
+        vibrantColor = skeletonVibrant,
+        mutedColor = skeletonMuted,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
 
-        // Standard static fallback backdrop colors for the glass system panel while fetching data
-        val skeletonVibrant = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        val skeletonMuted = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-
-        GlassHeroBackground(
-            vibrantColor = skeletonVibrant,
-            mutedColor = skeletonMuted,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(top = 0.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-                // ── 1. Carousel Skeleton Track Block ────────────────────────────
-                // Replicates the structural space allocation footprint of your 340dp Carousel layer box
+            // ── 1. Carousel Skeleton Track Block ────────────────────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // 💡 Uses the exact topPadding dynamic token passed from HomeScreenSkeleton
+                    .padding(top = topPadding)
+                    .height(340.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = topPadding)
-                        .height(340.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.65f)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shimmerEffect()
+                )
+            }
+
+            // ── 2. Info Panel Skeleton ──────────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Mock Chips Row (Rating + Genres)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Mimics the exact main prominent featured horizontal item sheet element bounds
                     Box(
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(0.65f) // Matches HorizontalCenteredHeroCarousel display ratio
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .size(width = 45.dp, height = 24.dp)
+                            .clip(RoundedCornerShape(8.dp))
                             .shimmerEffect()
                     )
+                    repeat(2) {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 75.dp, height = 24.dp)
+                                .clip(RoundedCornerShape(50))
+                                .shimmerEffect()
+                        )
+                    }
                 }
 
-                // ── 2. Info Panel Skeleton ──────────────────────────────────────
-                // Replicates padding metrics inside HeroInfoPanel explicitly
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Mock Action Buttons Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Mock Title Line
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.6f)
-                            .height(28.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .weight(1f)
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
                             .shimmerEffect()
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Mock Chips Row (Rating + Genres)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Rating block shape
-                        Box(
-                            modifier = Modifier
-                                .size(width = 45.dp, height = 24.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .shimmerEffect()
-                        )
-                        // Genre Pill shapes
-                        repeat(2) {
-                            Box(
-                                modifier = Modifier
-                                    .size(width = 75.dp, height = 24.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .shimmerEffect()
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Mock Action Buttons Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Play Button placeholder tracking weight(1f) block
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp) // Proportional button baseline spec
-                                .clip(RoundedCornerShape(12.dp))
-                                .shimmerEffect()
-                        )
-
-                        // Favorite IconButton circular placeholder tracking size(52.dp)
-                        Box(
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(CircleShape)
-                                .shimmerEffect()
-                        )
-                    }
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .shimmerEffect()
+                    )
                 }
             }
         }
-
+    }
 }
 
 @Composable
