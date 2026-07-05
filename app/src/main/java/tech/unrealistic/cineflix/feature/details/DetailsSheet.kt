@@ -42,22 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import tech.unrealistic.cineflix.core.components.ActionButtons
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.displayTitle
+import tech.unrealistic.cineflix.feature.home.components.MediaSection
 import tech.unrealistic.cineflix.helpers.genreNames
-
-sealed interface DetailsSheetState {
-    object Loading : DetailsSheetState
-    data class Success(
-        val selectedShow: MediaItem
-    ) : DetailsSheetState
-
-    data class Error(
-        val message: String
-    ) : DetailsSheetState
-}
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +58,10 @@ fun MediaDetailsBottomSheet(
     mediaId: Int,
     mediaType: String,
     sheetState: SheetState,
+    onPlayClick: (MediaItem) -> Unit = {},
+    onFavourite: (MediaItem) -> Unit = {},
+    onMediaShare: (MediaItem)-> Unit = {}
+
 
     ) {
     if (showBottomSheet) {
@@ -104,13 +97,18 @@ fun MediaDetailsBottomSheet(
 
                     is DetailsSheetState.Success -> {
                         val mediaItem = state.selectedShow
+                        val similarShows = state.similarShows
                         val posterUrl = "https://image.tmdb.org/t/p/w500${mediaItem.backdropPath}"
+                        fun  onMediaClick  ( id:Int, type: String ) {
+                            sheetViewModel.fetchSheetDetails(type, id)
+                        }
                         Box(
                             modifier = Modifier
                                 .height(300.dp)
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                        ) {
+                        )
+                        {
 
                             AsyncImage(
                                 model = posterUrl,
@@ -122,17 +120,21 @@ fun MediaDetailsBottomSheet(
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(250.dp)
+                                    .height(100.dp)
                                     .background(
                                         brush = Brush.verticalGradient(
                                             listOf(
                                                 Color.Transparent,
-                                                MaterialTheme.colorScheme.surfaceContainer.copy(0.85f),
-                                                MaterialTheme.colorScheme.surfaceContainer.copy(0.9f)
+                                                MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                    0.85f
+                                                ),
+                                                MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                    0.95f
+                                                )
 
                                             ),
-                                            0f, 250F
-                                        )
+
+                                            )
 
                                     )
                                     .align(Alignment.BottomCenter)
@@ -179,7 +181,6 @@ fun MediaDetailsBottomSheet(
                                             Text(
                                                 text     = genre,
                                                 style    = MaterialTheme.typography.labelSmall,
-
                                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                                 maxLines = 1
                                             )
@@ -198,6 +199,31 @@ fun MediaDetailsBottomSheet(
 
                             }
                         }
+
+                        ActionButtons(
+                            item = mediaItem,
+                            onMediaShare = { onMediaShare(mediaItem) },
+                            isFavourite = false,
+                            onFavourite = { onFavourite(mediaItem) },
+                            onPlay = { mediaItem?.let { onPlayClick(it) } },
+                        )
+                        mediaItem.overview?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier= Modifier.padding(10.dp)
+                            )
+                        }
+
+                        MediaSection(
+                            title = "More Like this ",
+                            items = similarShows,
+                            onMediaClick = {
+                                id:Int, type: String ->
+                                sheetViewModel.fetchSheetDetails(type, id)
+
+                            }
+                        )
 
                     }
 

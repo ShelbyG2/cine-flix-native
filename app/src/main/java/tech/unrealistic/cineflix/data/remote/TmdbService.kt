@@ -42,19 +42,11 @@ interface TmdbService {
         @Query("page") page: Int = 1
     ): TmdbResponse<MediaItem>
 
-    @GET("{type}/{id}")
-    suspend fun getMediaDetails(
-        @Path("type") type: String,
-        @Path("id") id: Int,
-        @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1,
-
-        ): MediaItem
 
     @GET("movie/{id}")
     suspend fun getMovieDetail(
         @Path("id") id: Int,
-        @Query("language") language: String = "en-US"
+        @Query("language") language: String = "en-US",
     ): MediaItem
 
     @GET("tv/{id}")
@@ -62,4 +54,19 @@ interface TmdbService {
         @Path("id") id: Int,
         @Query("language") language: String = "en-US"
     ): MediaItem
+
+    @GET("movie/{id}/similar")
+    suspend fun getSimilarMovie(
+        @Path("id") id: Int,
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
+    ): TmdbResponse<MediaItem>
+
+    @GET("tv/{id}/similar")
+    suspend fun getSimilarTv(
+        @Path("id") id: Int,
+        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
+    ): TmdbResponse <MediaItem>
+
 }
