@@ -2,8 +2,10 @@ package tech.unrealistic.cineflix.feature.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,12 +16,16 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,9 +52,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.core.components.ActionButtons
+import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.displayTitle
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import tech.unrealistic.cineflix.helpers.formatTime
 import tech.unrealistic.cineflix.helpers.genreNames
 
 
@@ -60,10 +71,10 @@ fun MediaDetailsBottomSheet(
     sheetState: SheetState,
     onPlayClick: (MediaItem) -> Unit = {},
     onFavourite: (MediaItem) -> Unit = {},
-    onMediaShare: (MediaItem)-> Unit = {}
+    onMediaShare: (MediaItem) -> Unit = {}
 
 
-    ) {
+) {
     if (showBottomSheet) {
 
 
@@ -72,10 +83,12 @@ fun MediaDetailsBottomSheet(
             modifier = modifier,
             sheetState = sheetState,
             contentWindowInsets = { WindowInsets.navigationBars },
-            dragHandle = {}
-        ) {
+            dragHandle = {}) {
             val sheetViewModel: DetailsSheetViewModel = viewModel()
+            val currentEpisodes by sheetViewModel.currentSeasonEpisode.collectAsStateWithLifecycle()
+
             val uiState by sheetViewModel.uiState.collectAsStateWithLifecycle()
+            val scrollState= rememberScrollState()
 
             LaunchedEffect(mediaId, mediaType) {
                 val id = mediaId ?: return@LaunchedEffect
@@ -88,27 +101,28 @@ fun MediaDetailsBottomSheet(
 
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
-                    .statusBarsPadding(),
+                    .statusBarsPadding().verticalScroll(scrollState)
             ) {
                 when (val state = uiState) {
                     is DetailsSheetState.Loading -> {
                         CircularProgressIndicator()
                     }
 
-                    is DetailsSheetState.Success -> {
-                        val mediaItem = state.selectedShow
-                        val similarShows = state.similarShows
-                        val posterUrl = "https://image.tmdb.org/t/p/w500${mediaItem.backdropPath}"
-                        fun  onMediaClick  ( id:Int, type: String ) {
-                            sheetViewModel.fetchSheetDetails(type, id)
+                    is DetailsSheetState.MovieSuccess, is DetailsSheetState.TvSuccess -> {
+                        val (mediaItem, similarShows) = when (state) {
+                            is DetailsSheetState.MovieSuccess -> state.movie to state.similarShows
+                            is DetailsSheetState.TvSuccess -> state.tv to state.similarShows
+                            else -> throw IllegalStateException(" Invalid state context")
                         }
+
+                        val posterUrl = "https://image.tmdb.org/t/p/w500${mediaItem.backdropPath}"
+
                         Box(
                             modifier = Modifier
                                 .height(300.dp)
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                        )
-                        {
+                        ) {
 
                             AsyncImage(
                                 model = posterUrl,
@@ -165,23 +179,25 @@ fun MediaDetailsBottomSheet(
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
+                                    .padding(10.dp)
                             ) {
                                 Row {
                                     mediaItem.genreNames.forEach { genre ->
                                         Surface(
                                             shape = RoundedCornerShape(50),    // pill
                                             color = Color.White.copy(alpha = 0.12f),
-                                            modifier = Modifier
-                                                .border(
-                                                    0.8.dp,
-                                                    Color.White.copy(alpha = 0.25f),
-                                                    RoundedCornerShape(50)
-                                                )
+                                            modifier = Modifier.border(
+                                                0.8.dp,
+                                                Color.White.copy(alpha = 0.25f),
+                                                RoundedCornerShape(50)
+                                            )
                                         ) {
                                             Text(
-                                                text     = genre,
-                                                style    = MaterialTheme.typography.labelSmall,
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                text = genre,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.padding(
+                                                    horizontal = 10.dp, vertical = 4.dp
+                                                ),
                                                 maxLines = 1
                                             )
                                         }
@@ -189,7 +205,8 @@ fun MediaDetailsBottomSheet(
                                 }
                                 Text(
                                     text = mediaItem.displayTitle,
-                                    style = MaterialTheme.typography.titleLarge.copy(
+                                    modifier = Modifier.padding(horizontal = 10.dp),
+                                    style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
                                     maxLines = 1,
@@ -198,6 +215,43 @@ fun MediaDetailsBottomSheet(
 
 
                             }
+                        }
+                        Row(
+                            modifier = Modifier.padding(10.dp),
+                            Arrangement.spacedBy(10.dp)
+                        ) {
+                            if (state is DetailsSheetState.MovieSuccess) {
+                                val item = state.movie
+                                Text(
+                                    "• ${formatTime(item.runtime!!)}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    "• ${item.originCountry?.firstOrNull()}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    "• ${item.releaseDate?.substringBefore("-")}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+
+                            }
+                            if (state is DetailsSheetState.TvSuccess) {
+                                val item = state.tv
+                                Text(
+                                    "• ${item.originCountry?.firstOrNull()}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    "• ${item.releaseDate?.substringBefore("-")}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    "• ${item.numberOfSeasons} seasons",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
                         }
 
                         ActionButtons(
@@ -211,33 +265,98 @@ fun MediaDetailsBottomSheet(
                             Text(
                                 text = it,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier= Modifier.padding(10.dp)
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+                        if (state is DetailsSheetState.TvSuccess) {
+                            val item = state.tv
+                            TvSeasonsAndEpisodesSection(
+                                seasons = item.numberOfSeasons!!,
+                                currentEpisodes,
+                                onSeasonSelected = { selectedNumber ->
+                                    sheetViewModel.fetchEpisodesOnly(
+                                        selectedNumber,
+                                        item.id
+                                    )
+                                }
                             )
                         }
 
                         MediaSection(
                             title = "More Like this ",
                             items = similarShows,
-                            onMediaClick = {
-                                id:Int, type: String ->
+                            onMediaClick = { id: Int, type: String ->
                                 sheetViewModel.fetchSheetDetails(type, id)
 
-                            }
-                        )
+                            })
 
                     }
 
                     is DetailsSheetState.Error -> {
                         Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
+                            text = state.message, color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
-
 
             }
         }
     }
 }
 
+
+@Composable
+fun TvSeasonsAndEpisodesSection(
+    seasons: Int,
+    episodesState: List<Episode>, // Dynamically provided based on selected season
+    onSeasonSelected: (Int) -> Unit // Callback to ViewModel to load new episode list
+) {
+    var selectedSeasonNumber by remember { mutableStateOf(1) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Episodes",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        // 1. Horizontal Season Selector Row
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
+            items(seasons) { Index ->
+                val seasonNumber= Index +1
+                val isSelected = seasonNumber == selectedSeasonNumber
+
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        selectedSeasonNumber =seasonNumber
+                            onSeasonSelected(seasonNumber)
+                    },
+                    label = { Text("Season ${seasonNumber}") }
+                )
+            }
+        }
+
+        // 2. Vertical Episodes Column (Using Column + forEach to prevent nested scroll crashes)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            episodesState.forEach { episode ->
+                Row() {
+                    AsyncImage(
+                        model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
+                        contentDescription = "Season Image",
+
+                    )
+                }
+            }
+        }
+    }
+}
