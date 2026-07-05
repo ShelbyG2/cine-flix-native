@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
-import tech.unrealistic.cineflix.core.components.MediaDetailsBottomSheet
+import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
 
@@ -62,7 +62,7 @@ fun HomeScreen(
     var selectedMediaType by remember { mutableStateOf<String?>(null) }
 
     val mediaDetailsSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
+        skipPartiallyExpanded = false
     )
     val openMediaDetails: (Int, String) -> Unit = { id, t ->
         selectedMediaId = id
@@ -146,10 +146,10 @@ fun HomeScreen(
                     )
                     MediaDetailsBottomSheet(
                         showBottomSheet = isMediaDetailsSheetOpen,
-                        sheetState = mediaDetailsSheetState,
                         onDismissRequest = { isMediaDetailsSheetOpen = false },
                         mediaId = selectedMediaId ?: 0,
-                        mediaType = selectedMediaType ?: "na"
+                        mediaType = selectedMediaType ?: "na",
+                        sheetState = mediaDetailsSheetState,
                     )
                 }
                 FloatingTopBar(

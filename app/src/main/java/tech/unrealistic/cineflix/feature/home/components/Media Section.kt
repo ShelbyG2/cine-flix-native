@@ -17,10 +17,10 @@ import tech.unrealistic.cineflix.data.remote.models.MediaItem
 
 @Composable
 fun MediaSection(
-    title:      String,
-    items:      List<MediaItem>,          // unified type — no more movies/tvShows split
-    modifier:   Modifier = Modifier,
-    onMediaClick: ((Int, String) -> Unit),
+    title: String,
+    items: List<MediaItem>,          // unified type — no more movies/tvShows split
+    modifier: Modifier = Modifier,
+    onMediaClick:((Int, String) -> Unit),
 ) {
     if (items.isEmpty()) return           // don't render an empty section at all
 
