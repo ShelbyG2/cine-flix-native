@@ -5,34 +5,15 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.runtime.Composable
@@ -42,18 +23,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import tech.unrealistic.cineflix.core.components.ActionButtons
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.helpers.PaletteHelper
@@ -167,19 +147,18 @@ fun HeroSection(
                 })
 
 
-                    HeroActionButtons (
-                        item = focusedItem,
-                        isFavourite = favouriteIds.contains(focusedItem?.id),
-                        onPlay = { focusedItem?.let { onPlayClick(it) } },
-                        onFavourite = { onFavourite(focusedItem!!) },
-                        accentColor = animatedVibrant,
-                        onMediaClick =onMediaClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                top = 0.dp, end = 16.dp
-                            )
+            ActionButtons  (
+                item = focusedItem,
+                isFavourite = favouriteIds.contains(focusedItem?.id),
+                onPlay = { focusedItem?.let { onPlayClick(it) } },
+                onFavourite = { onFavourite(focusedItem!!) },
+                onMediaClick =onMediaClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = 0.dp, end = 16.dp
                     )
+            )
 
         }
     }
@@ -216,112 +195,6 @@ fun GlassHeroBackground(
 
 
         content()
-    }
-}
-
-@Composable
-private fun HeroActionButtons(
-    item: MediaItem?,
-    isFavourite: Boolean,
-    onPlay: () -> Unit,
-    onFavourite: () -> Unit,
-    accentColor: Color,
-    modifier: Modifier = Modifier,
-    onMediaClick: (Int, String) -> Unit
-) {
-
-    val contentColor = Color.White
-
-    Column(modifier = modifier) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 20.dp,
-                    vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            // Play button  primary solid action
-            Button(
-                onClick = onPlay,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White, contentColor = Color.Black
-                ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Play", style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-            // Info button glass icon button
-            val detailScale by animateFloatAsState(
-                targetValue = 1.0f,
-                animationSpec = tween(200),
-                label = "fav_scale"
-            )
-            IconButton(
-                onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.White.copy(alpha = 0.15f),
-                    contentColor =   contentColor
-                ), modifier = Modifier
-                    .size(52.dp)
-                    .border(
-                        width = 1.dp, color = Color.White.copy(alpha = 0.30f), shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = "Add to favourites",
-                    modifier = Modifier
-                        .size(22.dp)
-                        .graphicsLayer {
-                            scaleX = detailScale
-                            scaleY = detailScale
-                        })
-            }
-
-            //  Favourite button glass icon button
-            val favouriteScale by animateFloatAsState(
-                targetValue = if (isFavourite) 1.25f else 1.0f,
-                animationSpec = tween(200),
-                label = "fav_scale"
-            )
-
-            IconButton(
-                onClick = onFavourite, colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.White.copy(alpha = 0.15f),
-                    contentColor = if (isFavourite) Color(0xFFFF6B6B) else contentColor
-                ), modifier = Modifier
-                    .size(52.dp)
-                    .border(
-                        width = 1.dp, color = Color.White.copy(alpha = 0.30f), shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = if (isFavourite) Icons.Filled.Favorite
-                    else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (isFavourite) "Remove from favourites"
-                    else "Add to favourites",
-                    modifier = Modifier
-                        .size(22.dp)
-                        .graphicsLayer {
-                            scaleX = favouriteScale
-                            scaleY = favouriteScale
-                        })
-            }
-        }
     }
 }
 
