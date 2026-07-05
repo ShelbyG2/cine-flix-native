@@ -6,6 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
+import tech.unrealistic.cineflix.data.remote.models.Season
 import tech.unrealistic.cineflix.data.remote.models.TmdbResponse
 import tech.unrealistic.cineflix.data.remote.models.Tv
 
@@ -47,13 +48,13 @@ interface TmdbService {
     suspend fun getMovieDetail(
         @Path("id") id: Int,
         @Query("language") language: String = "en-US",
-    ): MediaItem
+    ): Movie
 
     @GET("tv/{id}")
     suspend fun getTvDetail(
         @Path("id") id: Int,
         @Query("language") language: String = "en-US"
-    ): MediaItem
+    ): Tv
 
     @GET("movie/{id}/similar")
     suspend fun getSimilarMovie(
@@ -68,5 +69,12 @@ interface TmdbService {
         @Query("language") language: String = "en-US",
         @Query("page") page: Int = 1
     ): TmdbResponse <MediaItem>
+
+    @GET("tv/{id}/season/{season_number}")
+    suspend fun getSeason(
+        @Path("id") seriesId: Int,
+        @Path("season_number") seasonNumber:Int,
+
+    ): Season
 
 }

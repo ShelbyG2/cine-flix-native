@@ -15,11 +15,13 @@ data class TmdbResponse<T>(
     val results: List<T>
 )
 
+
 @Serializable
 data class Genre(
     val id: Int,
     val name: String
 )
+
 @Serializable(with = MediaSerializer::class)
 sealed interface MediaItem {
     val id: Int
@@ -51,17 +53,18 @@ data class Movie(
     @SerialName("genre_ids") override val genreIds: List<Int> = emptyList(),
     @SerialName("original_language") override val originalLanguage: String,
     @SerialName("original_title") val originalTitle: String,
+    @SerialName("origin_country") val originCountry: List<String>? = null,
     override val popularity: Double,
     val video: Boolean = false,
 
     //Details exclusive filed
-    override  val genres: List<Genre> = emptyList(),
+    override val genres: List<Genre> = emptyList(),
     val runtime: Int? = null,
     val status: String? = null,
     val tagline: String? = null
 
 
-    ) : MediaItem{
+) : MediaItem {
     val genreNames: List<String> get() = genres.map { it.name }
 }
 
@@ -81,13 +84,15 @@ data class Tv(
     @SerialName("genre_ids") override val genreIds: List<Int> = emptyList(),
     @SerialName("original_language") override val originalLanguage: String,
     @SerialName("original_name") val originalTitle: String,
+    @SerialName("origin_country") val originCountry: List<String>? = null,
     override val popularity: Double,
     //Details exclusive fields
     override val genres: List<Genre> = emptyList(),
     @SerialName("number_of_seasons") val numberOfSeasons: Int? = null,
-    @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null
-) : MediaItem{
-    val genreNames: List<String> get() = genres.map { it.name } .take(3)
+    @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null,
+
+    ) : MediaItem {
+    val genreNames: List<String> get() = genres.map { it.name }.take(3)
 }
 
 
@@ -112,6 +117,7 @@ object MediaSerializer : JsonContentPolymorphicSerializer<MediaItem>(MediaItem::
     }
 }
 
+
 val MediaItem.displayTitle: String
     get() = when (this) {
         is Movie -> this.title
@@ -120,4 +126,26 @@ val MediaItem.displayTitle: String
 
 
 
+@Serializable
+@SerialName("season")
+data class Season(
+    val id: Int,
+    val name: String? = null,
+    @SerialName("season_number") val seasonNumber: Int,
+    @SerialName("air_date") val airDate: String? = null,
+    val episodes: List<Episode> = emptyList(),
+    val overview: String? = null,
+)
 
+@Serializable
+@SerialName("episode")
+data class Episode(
+    val id: Int,
+    val name: String,
+    val runtime: Int?,
+    val overview: String,
+    @SerialName("episode_number") val episodeNumber: Int,
+    @SerialName("still_path") val stillPath : String? =null,
+    @SerialName("air_date") val airDate: String
+
+    )
