@@ -36,7 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -91,10 +91,8 @@ fun MediaDetailsBottomSheet(
             val scrollState= rememberScrollState()
 
             LaunchedEffect(mediaId, mediaType) {
-                val id = mediaId ?: return@LaunchedEffect
-                val type = mediaType ?: return@LaunchedEffect
 
-                sheetViewModel.fetchSheetDetails(type, id)
+                sheetViewModel.fetchSheetDetails(mediaType, mediaId)
             }
 
             Column(
@@ -259,7 +257,7 @@ fun MediaDetailsBottomSheet(
                             onMediaShare = { onMediaShare(mediaItem) },
                             isFavourite = false,
                             onFavourite = { onFavourite(mediaItem) },
-                            onPlay = { mediaItem?.let { onPlayClick(it) } },
+                            onPlay = { onPlayClick(mediaItem) },
                         )
                         mediaItem.overview?.let {
                             Text(
@@ -311,7 +309,7 @@ fun TvSeasonsAndEpisodesSection(
     episodesState: List<Episode>, // Dynamically provided based on selected season
     onSeasonSelected: (Int) -> Unit // Callback to ViewModel to load new episode list
 ) {
-    var selectedSeasonNumber by remember { mutableStateOf(1) }
+    var selectedSeasonNumber by remember { mutableIntStateOf(1) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -326,8 +324,8 @@ fun TvSeasonsAndEpisodesSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(bottom = 12.dp)
         ) {
-            items(seasons) { Index ->
-                val seasonNumber= Index +1
+            items(seasons) { index ->
+                val seasonNumber= index +1
                 val isSelected = seasonNumber == selectedSeasonNumber
 
                 FilterChip(
@@ -336,7 +334,7 @@ fun TvSeasonsAndEpisodesSection(
                         selectedSeasonNumber =seasonNumber
                             onSeasonSelected(seasonNumber)
                     },
-                    label = { Text("Season ${seasonNumber}") }
+                    label = { Text("Season $seasonNumber") }
                 )
             }
         }
@@ -349,7 +347,7 @@ fun TvSeasonsAndEpisodesSection(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             episodesState.forEach { episode ->
-                Row() {
+                Row {
                     AsyncImage(
                         model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
                         contentDescription = "Season Image",
