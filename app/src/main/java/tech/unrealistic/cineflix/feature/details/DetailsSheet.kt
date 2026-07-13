@@ -2,12 +2,15 @@ package tech.unrealistic.cineflix.feature.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -88,7 +93,7 @@ fun MediaDetailsBottomSheet(
             val currentEpisodes by sheetViewModel.currentSeasonEpisode.collectAsStateWithLifecycle()
 
             val uiState by sheetViewModel.uiState.collectAsStateWithLifecycle()
-            val scrollState= rememberScrollState()
+            val scrollState = rememberScrollState()
 
             LaunchedEffect(mediaId, mediaType) {
 
@@ -99,11 +104,20 @@ fun MediaDetailsBottomSheet(
 
                 modifier = Modifier
                     .fillMaxHeight(0.8f)
-                    .statusBarsPadding().verticalScroll(scrollState)
+                    .statusBarsPadding()
+                    .verticalScroll(scrollState)
             ) {
                 when (val state = uiState) {
                     is DetailsSheetState.Loading -> {
-                        CircularProgressIndicator()
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) { CircularProgressIndicator() }
+
+
                     }
 
                     is DetailsSheetState.MovieSuccess, is DetailsSheetState.TvSuccess -> {
@@ -120,7 +134,8 @@ fun MediaDetailsBottomSheet(
                                 .height(300.dp)
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                        ) {
+                        )
+                        {
 
                             AsyncImage(
                                 model = posterUrl,
@@ -157,7 +172,7 @@ fun MediaDetailsBottomSheet(
                                     .align(Alignment.TopEnd)
                                     .padding(top = 16.dp, end = 16.dp)
                                     .clip(CircleShape)
-                                    .size(32.dp)
+
                                     .background(MaterialTheme.colorScheme.background.copy(0.5f))
                                     .border(
                                         width = 0.8.dp,
@@ -304,6 +319,18 @@ fun MediaDetailsBottomSheet(
 
 
 @Composable
+fun MediaHeroSection(modifier: Modifier = Modifier,
+                     mediaItem: MediaItem,
+                     isTvShow: Boolean,
+                     onDismissRequest: () -> Unit,
+                     onPlayClick: (MediaItem) -> Unit,
+                     onFavourite: (MediaItem) -> Unit,
+                     onMediaShare: (MediaItem) -> Unit
+) {
+
+}
+
+@Composable
 fun TvSeasonsAndEpisodesSection(
     seasons: Int,
     episodesState: List<Episode>, // Dynamically provided based on selected season
@@ -322,39 +349,105 @@ fun TvSeasonsAndEpisodesSection(
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 12.dp)
-        ) {
+            modifier = Modifier.padding(bottom = 12.dp),
+
+            ) {
             items(seasons) { index ->
-                val seasonNumber= index +1
+                val seasonNumber = index + 1
                 val isSelected = seasonNumber == selectedSeasonNumber
 
                 FilterChip(
                     selected = isSelected,
                     onClick = {
-                        selectedSeasonNumber =seasonNumber
-                            onSeasonSelected(seasonNumber)
+                        selectedSeasonNumber = seasonNumber
+                        onSeasonSelected(seasonNumber)
                     },
                     label = { Text("Season $seasonNumber") }
                 )
             }
         }
 
-        // 2. Vertical Episodes Column (Using Column + forEach to prevent nested scroll crashes)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
+
         ) {
-            episodesState.forEach { episode ->
-                Row {
+            episodesState.forEachIndexed { index, episode ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* handle episode click */ } // affordance
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     AsyncImage(
                         model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
-                        contentDescription = "Season Image",
+                        contentDescription = "Episode still",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(130.dp)
+                            .aspectRatio(16f / 9f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.DarkGray)
+                    )
 
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = "${index + 1}. ${episode.name ?: "Episode ${index + 1}"}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = episode.overview,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = formatTime(episode.runtime ?: 0),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = episode.airDate,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+
+
+                if (index < episodesState.lastIndex) {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        color = Color.LightGray,
+                        thickness = 0.5.dp
                     )
                 }
             }
         }
+
     }
 }
+
+
