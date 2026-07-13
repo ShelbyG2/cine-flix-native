@@ -11,7 +11,7 @@ import okhttp3.OkHttpClient
 
 
 @OptIn(UnstableApi::class)
-fun CreateCustomStreamingPlayer(
+fun createCustomStreamingPlayer(
     context: Context,
     extractedStreamUrl: String,
     originReferer: String
