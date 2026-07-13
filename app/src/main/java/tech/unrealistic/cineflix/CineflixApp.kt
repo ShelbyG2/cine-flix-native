@@ -33,7 +33,7 @@ fun CineflixApp(
   //Home is our default tab
     val backStack = remember { mutableStateListOf<Any>(Home) }
     // if the current tab in the stack  is null revert to default tab
-    val currentRoot = backStack.firstOrNull()?: Home
+    val currentRoot = backStack.firstOrNull{it !is Player && it!is MediaDetailModal}?: Home
     //Check the tab we are currently on
     val currentTab = AppDestinations.entries.find {it.route == currentRoot}?: AppDestinations.HOME
 

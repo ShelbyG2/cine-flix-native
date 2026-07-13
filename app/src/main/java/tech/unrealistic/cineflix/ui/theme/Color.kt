@@ -47,17 +47,6 @@ internal val ColorOrange700    = Color(0xFFC05621)
 internal val ColorOrange800    = Color(0xFF9C4221)
 internal val ColorOrange900    = Color(0xFF7B341E)
 
-// ── Yellow ────────────────────────────────────────────────────────────────
-internal val ColorYellow100    = Color(0xFFFFFFF0)
-internal val ColorYellow200    = Color(0xFFFEFCBF)
-internal val ColorYellow300    = Color(0xFFFAF089)
-internal val ColorYellow400    = Color(0xFFF6E05E)
-internal val ColorYellow500    = Color(0xFFECC94B)
-internal val ColorYellow600    = Color(0xFFD69E2E)
-internal val ColorYellow700    = Color(0xFFB7791F)
-internal val ColorYellow800    = Color(0xFF975A16)
-internal val ColorYellow900    = Color(0xFF744210)
-
 // ── Green ─────────────────────────────────────────────────────────────────
 internal val ColorGreen100     = Color(0xFFF0FFF4)
 internal val ColorGreen200     = Color(0xFFC6F6D5)
@@ -123,7 +112,7 @@ internal val ColorNavbar           = Color(0xFF1B1B1B)  // Navbar
 internal val ColorCover            = Color(0xFF131313)  // Cover / Home / Player
 internal val ColorPrimaryBrand     = Color(0xFF131313)  // Primary
 internal val ColorText             = Color(0xFF040404)  // Text
-internal val ColorLightBackground  = Color(0xFFECECEC)  // Light Background
+internal val ColorLightBackground  = Color(0xFF848484)  // Light Background
 internal val ColorStroke           = Color(0xFF969696)  // Stroke
 internal val ColorSecondaryBrand   = Color(0xFFB8B8B8)  // Secondary Color
 internal val ColorSubText          = Color(0xFF878787)  // Sub Text
@@ -184,7 +173,7 @@ internal val md_dark_onErrorContainer     = ColorRed100
 internal val md_dark_background           = ColorCover             // #131313
 internal val md_dark_onBackground         = ColorWhite
 internal val md_dark_surface              = ColorNavbar            // #1b1b1b
-internal val md_dark_onSurface            = ColorWhite
+internal val md_dark_onSurface            = ColorGray300
 internal val md_dark_surfaceVariant       = ColorBlack2B           // #2b2b2b
 internal val md_dark_onSurfaceVariant     = ColorSecondaryBrand    // #b8b8b8
 internal val md_dark_outline              = ColorStroke            // #969696
