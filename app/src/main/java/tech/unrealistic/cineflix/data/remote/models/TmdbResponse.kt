@@ -35,6 +35,8 @@ sealed interface MediaItem {
     val genres: List<Genre>?
     val originalLanguage: String
     val popularity: Double
+    val originCountry:List<String>?
+    val releaseDate: String?
 
 }
 
@@ -47,13 +49,13 @@ data class Movie(
     override val overview: String,
     @SerialName("poster_path") override val posterPath: String? = null,
     @SerialName("backdrop_path") override val backdropPath: String?,
-    @SerialName("release_date") val releaseDate: String?,
+    @SerialName("release_date") override val releaseDate: String?,
     @SerialName("vote_average") override val voteAverage: Double,
     @SerialName("vote_count") override val voteCount: Int,
     @SerialName("genre_ids") override val genreIds: List<Int> = emptyList(),
     @SerialName("original_language") override val originalLanguage: String,
     @SerialName("original_title") val originalTitle: String,
-    @SerialName("origin_country") val originCountry: List<String>? = null,
+    @SerialName("origin_country")override val originCountry: List<String>? = null,
     override val popularity: Double,
     val video: Boolean = false,
 
@@ -78,13 +80,13 @@ data class Tv(
     override val overview: String,
     @SerialName("poster_path") override val posterPath: String?,
     @SerialName("backdrop_path") override val backdropPath: String?,
-    @SerialName("first_air_date") val releaseDate: String? = null, // TMDB uses "first_air_date"
+    @SerialName("first_air_date") override val releaseDate: String? = null, // TMDB uses "first_air_date"
     @SerialName("vote_average") override val voteAverage: Double,
     @SerialName("vote_count") override val voteCount: Int,
     @SerialName("genre_ids") override val genreIds: List<Int> = emptyList(),
     @SerialName("original_language") override val originalLanguage: String,
     @SerialName("original_name") val originalTitle: String,
-    @SerialName("origin_country") val originCountry: List<String>? = null,
+    @SerialName("origin_country")override val originCountry: List<String>? = null,
     override val popularity: Double,
     //Details exclusive fields
     override val genres: List<Genre> = emptyList(),
