@@ -1,68 +1,41 @@
 package tech.unrealistic.cineflix.feature.details
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.AsyncImage
-import tech.unrealistic.cineflix.core.components.ActionButtons
-import tech.unrealistic.cineflix.data.remote.models.Episode
-import tech.unrealistic.cineflix.data.remote.models.MediaItem
-import tech.unrealistic.cineflix.data.remote.models.displayTitle
+import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
+import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
-import tech.unrealistic.cineflix.helpers.formatTime
-import tech.unrealistic.cineflix.helpers.genreNames
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,270 +47,133 @@ fun MediaDetailsBottomSheet(
     mediaId: Int,
     mediaType: String,
     sheetState: SheetState,
-    onPlayClick: (MediaItem) -> Unit = {},
-    onFavourite: (MediaItem) -> Unit = {},
-    onMediaShare: (MediaItem) -> Unit = {}
-
-
+    onPlayClick: (Any) -> Unit = {},
+    onFavourite: (Any) -> Unit = {},
+    onMediaShare: (Any) -> Unit = {}
 ) {
     if (showBottomSheet) {
-
-
         ModalBottomSheet(
-            onDismissRequest,
+            onDismissRequest = onDismissRequest,
             modifier = modifier,
             sheetState = sheetState,
             contentWindowInsets = { WindowInsets.navigationBars },
-            dragHandle = {}) {
+            dragHandle = {}
+        ) {
             val sheetViewModel: DetailsSheetViewModel = viewModel()
             val currentEpisodes by sheetViewModel.currentSeasonEpisode.collectAsStateWithLifecycle()
-
             val uiState by sheetViewModel.uiState.collectAsStateWithLifecycle()
-            val scrollState = rememberScrollState()
+
+            // Hoist the season selection state here so it survives episode recompositions
+            var selectedSeason by rememberSaveable { mutableIntStateOf(1) }
 
             LaunchedEffect(mediaId, mediaType) {
-
+                selectedSeason = 1 // Reset season when a new show is opened
                 sheetViewModel.fetchSheetDetails(mediaType, mediaId)
             }
 
-            Column(
-
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxHeight(0.8f)
+                    .fillMaxHeight(0.85f)
                     .statusBarsPadding()
-                    .verticalScroll(scrollState)
             ) {
                 when (val state = uiState) {
                     is DetailsSheetState.Loading -> {
-
+                        item {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp),
+                                    .height(300.dp),
                                 contentAlignment = Alignment.Center
-                            ) { CircularProgressIndicator() }
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
 
-
+                    is DetailsSheetState.Error -> {
+                        item {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     }
 
                     is DetailsSheetState.MovieSuccess, is DetailsSheetState.TvSuccess -> {
                         val (mediaItem, similarShows) = when (state) {
                             is DetailsSheetState.MovieSuccess -> state.movie to state.similarShows
                             is DetailsSheetState.TvSuccess -> state.tv to state.similarShows
-                            else -> throw IllegalStateException(" Invalid state context")
+                            else -> throw IllegalStateException("Invalid state context")
                         }
 
-                        val posterUrl = "https://image.tmdb.org/t/p/w500${mediaItem.backdropPath}"
-
-                        Box(
-                            modifier = Modifier
-                                .height(300.dp)
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                        {
-
-                            AsyncImage(
-                                model = posterUrl,
-                                contentDescription = mediaItem.displayTitle,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-
-                            )
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                                    .background(
-                                        brush = Brush.verticalGradient(
-                                            listOf(
-                                                Color.Transparent,
-                                                MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                    0.85f
-                                                ),
-                                                MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                    0.95f
-                                                )
-
-                                            ),
-
-                                            )
-
-                                    )
-                                    .align(Alignment.BottomCenter)
-                            )
-                            IconButton(
-                                onClick = onDismissRequest,
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(top = 16.dp, end = 16.dp)
-                                    .clip(CircleShape)
-
-                                    .background(MaterialTheme.colorScheme.background.copy(0.5f))
-                                    .border(
-                                        width = 0.8.dp,
-                                        MaterialTheme.colorScheme.primary.copy(0.25f),
-                                        shape = CircleShape
-                                    )
-
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close Details",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(10.dp)
-                            ) {
-                                Row {
-                                    mediaItem.genreNames.forEach { genre ->
-                                        Surface(
-                                            shape = RoundedCornerShape(50),    // pill
-                                            color = Color.White.copy(alpha = 0.12f),
-                                            modifier = Modifier.border(
-                                                0.8.dp,
-                                                Color.White.copy(alpha = 0.25f),
-                                                RoundedCornerShape(50)
-                                            )
-                                        ) {
-                                            Text(
-                                                text = genre,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                modifier = Modifier.padding(
-                                                    horizontal = 10.dp, vertical = 4.dp
-                                                ),
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
-                                }
-                                Text(
-                                    text = mediaItem.displayTitle,
-                                    modifier = Modifier.padding(horizontal = 10.dp),
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.padding(10.dp),
-                            Arrangement.spacedBy(10.dp)
-                        ) {
-                            if (state is DetailsSheetState.MovieSuccess) {
-                                val item = state.movie
-                                Text(
-                                    "• ${formatTime(item.runtime!!)}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "• ${item.originCountry?.firstOrNull()}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "• ${item.releaseDate?.substringBefore("-")}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                            }
-                            if (state is DetailsSheetState.TvSuccess) {
-                                val item = state.tv
-                                Text(
-                                    "• ${item.originCountry?.firstOrNull()}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "• ${item.releaseDate?.substringBefore("-")}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    "• ${item.numberOfSeasons} seasons",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                        }
-
-                        ActionButtons(
-                            item = mediaItem,
-                            onMediaShare = { onMediaShare(mediaItem) },
-                            isFavourite = false,
-                            onFavourite = { onFavourite(mediaItem) },
-                            onPlay = { onPlayClick(mediaItem) },
-                        )
-                        mediaItem.overview?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(10.dp)
+                        // 1. HERO SECTION & METADATA
+                        item {
+                            DetailSheetHeroSection(
+                                mediaItem = mediaItem,
+                                isTvShow = state is DetailsSheetState.TvSuccess,
+                                onDismissRequest = onDismissRequest,
+                                onPlayClick = onPlayClick,
+                                onFavourite = onFavourite,
+                                onMediaShare = onMediaShare
                             )
                         }
+
+                        // 2. TV SHOW LAZY EPISODES SECTION
                         if (state is DetailsSheetState.TvSuccess) {
-                            val item = state.tv
-                            TvSeasonsAndEpisodesSection(
-                                seasons = item.numberOfSeasons!!,
-                                currentEpisodes,
-                                onSeasonSelected = { selectedNumber ->
-                                    sheetViewModel.fetchEpisodesOnly(
-                                        selectedNumber,
-                                        item.id
-                                    )
-                                }
-                            )
+                            val tvItem = state.tv
+
+                            item {
+                                TvSeasonSelector(
+                                    seasons = tvItem.numberOfSeasons ?: 1,
+                                    selectedSeasonNumber = selectedSeason,
+                                    onSeasonSelected = { newSeason ->
+                                        selectedSeason = newSeason
+                                        sheetViewModel.fetchEpisodesOnly(newSeason, tvItem.id)
+                                    }
+                                )
+                            }
+
+                            itemsIndexed(
+                                items = currentEpisodes,
+                                key = { _, episode -> episode.id ?: episode.hashCode() }
+                            ) { index, episode ->
+                                TvEpisodeItem(
+                                    episode = episode,
+                                    index = index,
+                                    isLast = index == currentEpisodes.lastIndex
+                                )
+                            }
                         }
 
-                        MediaSection(
-                            title = "More Like this ",
-                            items = similarShows,
-                            onMediaClick = { id: Int, type: String ->
-                                sheetViewModel.fetchSheetDetails(type, id)
-
-                            })
-
-                    }
-
-                    is DetailsSheetState.Error -> {
-                        Text(
-                            text = state.message, color = MaterialTheme.colorScheme.error
-                        )
+                        // 3. RELATED MEDIA ROW
+                        item {
+                            MediaSection(
+                                title = "More Like This",
+                                items = similarShows,
+                                onMediaClick = { id: Int, type: String ->
+                                    sheetViewModel.fetchSheetDetails(type, id)
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
                     }
                 }
-
             }
         }
     }
 }
 
 
-@Composable
-fun MediaHeroSection(modifier: Modifier = Modifier,
-                     mediaItem: MediaItem,
-                     isTvShow: Boolean,
-                     onDismissRequest: () -> Unit,
-                     onPlayClick: (MediaItem) -> Unit,
-                     onFavourite: (MediaItem) -> Unit,
-                     onMediaShare: (MediaItem) -> Unit
-) {
 
-}
+
 
 @Composable
-fun TvSeasonsAndEpisodesSection(
+private fun TvSeasonSelector(
     seasons: Int,
-    episodesState: List<Episode>, // Dynamically provided based on selected season
-    onSeasonSelected: (Int) -> Unit // Callback to ViewModel to load new episode list
+    selectedSeasonNumber: Int,
+    onSeasonSelected: (Int) -> Unit
 ) {
-    var selectedSeasonNumber by remember { mutableIntStateOf(1) }
-
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Episodes",
@@ -345,109 +181,19 @@ fun TvSeasonsAndEpisodesSection(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        // 1. Horizontal Season Selector Row
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 12.dp),
-
-            ) {
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
             items(seasons) { index ->
                 val seasonNumber = index + 1
-                val isSelected = seasonNumber == selectedSeasonNumber
-
                 FilterChip(
-                    selected = isSelected,
-                    onClick = {
-                        selectedSeasonNumber = seasonNumber
-                        onSeasonSelected(seasonNumber)
-                    },
+                    selected = seasonNumber == selectedSeasonNumber,
+                    onClick = { onSeasonSelected(seasonNumber) },
                     label = { Text("Season $seasonNumber") }
                 )
             }
         }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-
-        ) {
-            episodesState.forEachIndexed { index, episode ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { /* handle episode click */ } // affordance
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    AsyncImage(
-                        model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
-                        contentDescription = "Episode still",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(130.dp)
-                            .aspectRatio(16f / 9f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.DarkGray)
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 12.dp)
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "${index + 1}. ${episode.name ?: "Episode ${index + 1}"}",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Text(
-                            text = episode.overview,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = formatTime(episode.runtime ?: 0),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = episode.airDate,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
-
-
-                if (index < episodesState.lastIndex) {
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        color = Color.LightGray,
-                        thickness = 0.5.dp
-                    )
-                }
-            }
-        }
-
     }
 }
-
-
