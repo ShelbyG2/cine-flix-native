@@ -2,6 +2,8 @@ package tech.unrealistic.cineflix
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -10,18 +12,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.feature.home.DiscoverScreen
 import tech.unrealistic.cineflix.feature.home.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
+import tech.unrealistic.cineflix.feature.splash.SplashScreen
+
+
+/**
+ * Top-level app stages:
+ *  Splash (2.8s) → Onboarding (first launch only) → Main app
+ */
+enum class AppStage { SPLASH, ONBOARDING, MAIN }
 
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -30,7 +45,46 @@ import tech.unrealistic.cineflix.feature.home.ProfileScreen
 fun CineflixApp(
 
 ) {
-  //Home is our default tab
+    val context = LocalContext.current
+
+    // Splash always plays; onboarding shows only on the very first launch.
+    var appStage by remember { mutableStateOf(AppStage.SPLASH) }
+
+    Crossfade(
+        targetState = appStage,
+        animationSpec = tween(500),
+        label = "app_stage"
+    ) { stage ->
+        when (stage) {
+            AppStage.SPLASH -> SplashScreen(
+                onFinished = {
+                    appStage = if (OnboardingPreferences.hasCompletedOnboarding(context)) {
+                        AppStage.MAIN
+                    } else {
+                        AppStage.ONBOARDING
+                    }
+                }
+            )
+
+            AppStage.ONBOARDING -> {
+                // Real onboarding screens land in the following commits;
+                // for now complete the flag and move on.
+                SplashScreen(onFinished = {
+                    OnboardingPreferences.markOnboardingComplete(context)
+                    appStage = AppStage.MAIN
+                })
+            }
+
+            AppStage.MAIN -> MainAppContent()
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.P)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MainAppContent() {
+    //Home is our default tab
     val backStack = remember { mutableStateListOf<Any>(Home) }
     // if the current tab in the stack  is null revert to default tab
     val currentRoot = backStack.firstOrNull{it !is Player && it!is MediaDetailModal}?: Home
@@ -49,7 +103,7 @@ fun CineflixApp(
                             contentDescription = it.label,
                             tint = if (it == currentTab) Color.White else Color.Gray
 
-                            )
+                        )
                     },
                     label = { Text(it.label) },
                     selected = it == currentTab,
@@ -87,6 +141,3 @@ fun CineflixApp(
         }
     }
 }
-
-
-
