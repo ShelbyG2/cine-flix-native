@@ -29,6 +29,7 @@ import tech.unrealistic.cineflix.feature.home.DiscoverScreen
 import tech.unrealistic.cineflix.feature.home.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
+import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
 import tech.unrealistic.cineflix.feature.splash.SplashScreen
 
 
@@ -66,14 +67,12 @@ fun CineflixApp(
                 }
             )
 
-            AppStage.ONBOARDING -> {
-                // Real onboarding screens land in the following commits;
-                // for now complete the flag and move on.
-                SplashScreen(onFinished = {
+            AppStage.ONBOARDING -> OnboardingFlow(
+                onFinished = {
                     OnboardingPreferences.markOnboardingComplete(context)
                     appStage = AppStage.MAIN
-                })
-            }
+                }
+            )
 
             AppStage.MAIN -> MainAppContent()
         }
