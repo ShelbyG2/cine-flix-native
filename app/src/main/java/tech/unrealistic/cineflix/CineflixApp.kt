@@ -25,7 +25,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
-import tech.unrealistic.cineflix.feature.home.DiscoverScreen
+import tech.unrealistic.cineflix.feature.discover.DiscoverScreen
 import tech.unrealistic.cineflix.feature.home.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
@@ -129,7 +129,14 @@ private fun MainAppContent() {
                             }
                         ) }
                         is Favourites -> NavEntry(key){ FavouriteScreen() }
-                        is Discover-> NavEntry(key){ DiscoverScreen() }
+                        is Discover -> NavEntry(key) {
+                            DiscoverScreen(
+                                onNavigate = {
+                                    backStack.clear()
+                                    backStack.add(Home)
+                                }
+                            )
+                        }
                         is Profile -> NavEntry(key){ProfileScreen () }
 
                         else -> NavEntry(key){Text("Not found")}

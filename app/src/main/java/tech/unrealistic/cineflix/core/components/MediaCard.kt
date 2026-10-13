@@ -45,6 +45,7 @@ fun MediaCard(
     hero: Boolean? = null,
     isFocused: Boolean? = null,
     accentColor: Color? = null,
+    fillWidth: Boolean = false,   // true → poster stretches to the parent width (grid cells)
 ) {
     val isHero = hero ?: false
     val mediaType = media.mediaType
@@ -55,7 +56,7 @@ fun MediaCard(
     }
     Box(
         contentAlignment = Alignment.BottomCenter,
-        modifier = if (isHero) modifier else Modifier.width(140.dp)
+        modifier = if (isHero) modifier else if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(140.dp)
 
     ) {
         Card(

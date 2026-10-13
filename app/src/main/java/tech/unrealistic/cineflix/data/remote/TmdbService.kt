@@ -77,4 +77,39 @@ interface TmdbService {
 
     ): Season
 
+    // ── Discover tab ─────────────────────────────────────────────────────
+    @GET("discover/movie")
+    suspend fun discoverMovies(
+        @Query("page") page: Int = 1,
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("with_genres") withGenres: String? = null,
+        @Query("include_adult") includeAdult: Boolean = false,
+        @Query("vote_count.gte") voteCountGte: Int? = null
+    ): TmdbResponse<Movie>
+
+    @GET("discover/tv")
+    suspend fun discoverTvShows(
+        @Query("page") page: Int = 1,
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("with_genres") withGenres: String? = null,
+        @Query("include_adult") includeAdult: Boolean = false,
+        @Query("vote_count.gte") voteCountGte: Int? = null
+    ): TmdbResponse<Tv>
+
+    // Separate movie/tv search endpoints (instead of search/multi) because
+    // multi can return "person" results the MediaItem serializer can't decode
+    @GET("search/movie")
+    suspend fun searchMovies(
+        @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        @Query("include_adult") includeAdult: Boolean = false
+    ): TmdbResponse<Movie>
+
+    @GET("search/tv")
+    suspend fun searchTvShows(
+        @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        @Query("include_adult") includeAdult: Boolean = false
+    ): TmdbResponse<Tv>
+
 }
