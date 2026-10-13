@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
@@ -49,11 +48,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
+import tech.unrealistic.cineflix.ui.theme.ShapeButton
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.WordmarkStyle
+import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 // ── Slide content ────────────────────────────────────────────────────────────
 
@@ -102,9 +104,15 @@ fun CinematicIntroScreen(
     val slide = introSlides[page]
     val isLastSlide = page == pageCount - 1
 
+    val motion = AppTheme.motion
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+
     // Ken Burns — slow continuous zoom on the current image
+    // Decorative: frozen at 1× under reduce-motion
     val kenBurns = rememberInfiniteTransition(label = "ken_burns")
-    val kenBurnsScale by kenBurns.animateFloat(
+    val animatedKenBurns by kenBurns.animateFloat(
         initialValue = 1f,
         targetValue = 1.12f,
         animationSpec = infiniteRepeatable(
@@ -113,6 +121,7 @@ fun CinematicIntroScreen(
         ),
         label = "ken_burns_scale"
     )
+    val kenBurnsScale = if (motion.reduceMotion) 1f else animatedKenBurns
 
     Box(modifier = modifier.fillMaxSize()) {
 
@@ -147,7 +156,7 @@ fun CinematicIntroScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.65f),
+                            colors.imageTopScrim,
                             Color.Transparent
                         )
                     )
@@ -162,7 +171,8 @@ fun CinematicIntroScreen(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
                             0.35f to Color.Transparent,
-                            0.70f to MaterialTheme.colorScheme.background.copy(alpha = 0.75f),
+                            0.70f to MaterialTheme.colorScheme.background
+                                .withAlpha(colors.heroMutedAlpha),
                             1.00f to MaterialTheme.colorScheme.background
                         )
                     )
@@ -178,7 +188,7 @@ fun CinematicIntroScreen(
                         colors = listOf(
                             Color.Transparent,
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.45f)
+                            colors.imageVignette
                         ),
                         radius = 1_200f
                     )
@@ -190,36 +200,35 @@ fun CinematicIntroScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
+                .padding(horizontal = spacing.gap20, vertical = spacing.gap14),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "CINEFLIX",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 4.sp
-                ),
-                color = Color.White
+                style = WordmarkStyle,
+                color = colors.onImage
             )
 
-            // Skip pill — liquid glass / frosted
+            // Skip pill — liquid glass / frosted, 48dp target
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.12f))
+                    .clip(ShapePill)
+                    .background(colors.onImageChipSurface)
                     .border(
-                        width = 0.5.dp,
-                        color = Color.White.copy(alpha = 0.25f),
-                        shape = RoundedCornerShape(50)
+                        width = sizes.hairline,
+                        color = colors.onImageChipBorder,
+                        shape = ShapePill
                     )
                     .clickable(onClick = onSkip)
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
+                    .height(sizes.touchTarget)
+                    .padding(horizontal = spacing.gap18),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Skip",
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = colors.onImageMuted
                 )
             }
         }
@@ -230,7 +239,7 @@ fun CinematicIntroScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 18.dp)
+                .padding(horizontal = spacing.gap20, vertical = spacing.gap18)
         ) {
 
             // Feature card + chips swap together with an AnimatePresence-style
@@ -249,29 +258,32 @@ fun CinematicIntroScreen(
 
                 Column {
                     // Chip tags above the card
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(spacing.sm)) {
                         currentSlide.chips.forEach { chip ->
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.10f))
+                                    .clip(ShapePill)
+                                    .background(colors.onImageChipSurface)
                                     .border(
-                                        width = 0.8.dp,
-                                        color = Color.White.copy(alpha = 0.22f),
-                                        shape = RoundedCornerShape(50)
+                                        width = sizes.glassBorderWidth,
+                                        color = colors.onImageChipBorder,
+                                        shape = ShapePill
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 5.dp)
+                                    .padding(
+                                        horizontal = spacing.gap12,
+                                        vertical = spacing.gap5
+                                    )
                             ) {
                                 Text(
                                     text = chip,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White.copy(alpha = 0.85f)
+                                    color = colors.onImageMuted
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(spacing.gap12))
 
                     // Floating liquid glass feature card
                     Box {
@@ -281,28 +293,26 @@ fun CinematicIntroScreen(
                             shape = MaterialTheme.shapes.extraLarge
                         )
 
-                        Column(modifier = Modifier.padding(20.dp)) {
+                        Column(modifier = Modifier.padding(spacing.gap20)) {
                             Text(
                                 text = currentSlide.title,
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = Color.White
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = colors.onImage
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(spacing.sm))
                             Text(
                                 text = currentSlide.subtitle,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color.White.copy(alpha = 0.75f)
+                                color = colors.onImageMuted
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(spacing.gap20))
 
-            // Progress dots — active expands into a white pill
+            // Progress dots — active expands into a pill (instant under reduce-motion)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -311,53 +321,54 @@ fun CinematicIntroScreen(
                 repeat(pageCount) { index ->
                     val isActive = index == page
                     val dotWidth by animateDpAsState(
-                        targetValue = if (isActive) 24.dp else 8.dp,
-                        animationSpec = tween(350, easing = FastOutSlowInEasing),
+                        targetValue = if (isActive) sizes.dotActiveW else sizes.dotInactiveW,
+                        animationSpec = tween(
+                            if (motion.reduceMotion) 0 else 350,
+                            easing = FastOutSlowInEasing
+                        ),
                         label = "dot_width"
                     )
                     Box(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .height(8.dp)
+                            .padding(horizontal = spacing.xs)
+                            .height(sizes.dotH)
                             .width(dotWidth)
-                            .clip(RoundedCornerShape(50))
+                            .clip(ShapePill)
                             .background(
-                                if (isActive) Color.White
-                                else Color.White.copy(alpha = 0.30f)
+                                if (isActive) colors.onImage
+                                else colors.progressDotInactive
                             )
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(spacing.gap18))
 
             // Next / Get Started
             Button(
                 onClick = {
                     if (isLastSlide) onNext() else page++
                 },
-                shape = RoundedCornerShape(14.dp),
+                shape = ShapeButton,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF131313)
+                    containerColor = colors.onImage,
+                    contentColor = colors.onImageInverse
                 ),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    horizontal = 24.dp,
-                    vertical = 14.dp
+                    horizontal = spacing.buttonPaddingH,
+                    vertical = spacing.buttonPaddingVTall
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = if (isLastSlide) "Get Started" else "Next",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
+                    style = LabelStrongStyle
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(spacing.sm))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(sizes.iconCompact)
                 )
             }
         }

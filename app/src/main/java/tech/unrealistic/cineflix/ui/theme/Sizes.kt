@@ -51,6 +51,36 @@ data class AppSizes(
     // ── State views (empty / error / offline) ─────────────────────────────
     val stateIcon:      Dp = 40.dp,  // icon in error/empty states
 
+    // ── Progress dots (onboarding) ─────────────────────────────────────────
+    val dotActiveW:   Dp = 24.dp,
+    val dotInactiveW: Dp = 8.dp,
+    val dotH:         Dp = 8.dp,
+
+    // ── Glass sphere artwork (onboarding) ──────────────────────────────────
+    val sphereBox:      Dp = 220.dp,
+    val sphereRing:     Dp = 200.dp,
+    val sphereOrb:      Dp = 170.dp,
+    val githubMarkLarge: Dp = 74.dp,
+    val sphereShadowW:  Dp = 150.dp,
+    val sphereShadowH:  Dp = 20.dp,
+    val specularW:      Dp = 70.dp,
+    val specularH:      Dp = 40.dp,
+    val rimSliverW:     Dp = 46.dp,
+    val rimSliverH:     Dp = 16.dp,
+    val ringBorderWide: Dp = 2.dp,
+    val ringBorderThin: Dp = 1.5.dp,
+
+    // ── 3D folder artwork (onboarding) ────────────────────────────────────
+    val folderTabW:    Dp = 96.dp,
+    val folderTabH:    Dp = 26.dp,
+    val folderBodyW:   Dp = 200.dp,
+    val folderBodyH:   Dp = 150.dp,
+    val fileLineH:     Dp = 8.dp,
+    val fileLineWidths: List<Dp> = listOf(120.dp, 88.dp, 104.dp),
+    val downloadDisc:  Dp = 40.dp,
+    val folderShadowW: Dp = 170.dp,
+    val folderShadowH: Dp = 22.dp,
+
     // ── Details sheet ───────────────────────────────────────────────────
     val detailsHeroHeight: Dp = 300.dp,  // backdrop height
     val detailsHeroFadeH:  Dp = 140.dp,  // backdrop→surface fade height

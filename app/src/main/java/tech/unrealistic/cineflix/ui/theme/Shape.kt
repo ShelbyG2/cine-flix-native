@@ -72,3 +72,22 @@ val ShapeCircle = CircleShape
 
 /** 50dp radius — large glass orbs / spheres. */
 val ShapeRound = RoundedCornerShape(50.dp)
+
+/** 14dp radius — onboarding CTA buttons. */
+val ShapeButton = RoundedCornerShape(14.dp)
+
+/** Folder tab — top 18dp, bottom 6dp (onboarding 3D folder artwork). */
+val ShapeTab = RoundedCornerShape(
+    topStart = 18.dp,
+    topEnd = 18.dp,
+    bottomStart = 6.dp,
+    bottomEnd = 6.dp
+)
+
+/** Folder body — top 8dp, bottom 18dp (onboarding 3D folder artwork). */
+val ShapeFolderBody = RoundedCornerShape(
+    topStart = 8.dp,
+    topEnd = 8.dp,
+    bottomStart = 18.dp,
+    bottomEnd = 18.dp
+)

@@ -233,6 +233,9 @@ data class AppExtendedColors(
     val imageScrimEnd:      Color,   // gradient end (dark)
     val scrimStrong:        Color,   // modal / focus dimming
     val scrimSoft:          Color,   // light dimming (cards, pills)
+    val imageTopScrim:      Color,   // top scrim over full-bleed images (both modes)
+    val imageVignette:      Color,   // radial vignette over images (both modes)
+    val progressDotInactive: Color,  // inactive onboarding dot (over imagery)
 
     // ── Accents used over imagery (identical in both modes)
     val ratingStar:         Color,
@@ -251,6 +254,9 @@ data class AppExtendedColors(
     val heroMidAlpha:       Float,   // palette hero gradient — mid stop
     val heroMutedAlpha:     Float,   // palette hero gradient — muted stop
     val glassNoiseDensity:  Int,     // grain dots per overlay
+    val sphereShade:        Color,   // bottom shading of the onboarding glass orb
+    val pulseRingAlpha1:    Float,   // inner glow ring border alpha
+    val pulseRingAlpha2:    Float,   // outer glow ring border alpha
 
     // ── Navigation chrome
     val navSelectedIcon:    Color,
@@ -289,6 +295,9 @@ internal val LightExtendedColors = AppExtendedColors(
     imageScrimEnd      = Color(0xC0000000),
     scrimStrong        = Color(0xCC000000),
     scrimSoft          = Color(0xA6000000),  // 65% — white text stays ≥7:1 on light surfaces
+    imageTopScrim      = Color(0xA6000000),  // 65% black
+    imageVignette      = Color(0x73000000),  // 45% black
+    progressDotInactive = Color(0x4DFFFFFF), // 30% white
 
     ratingStar         = Color(0xFFF5B301),
     favouriteActive    = Color(0xFFFF6B6B),
@@ -305,6 +314,9 @@ internal val LightExtendedColors = AppExtendedColors(
     heroMidAlpha       = 0.60f,
     heroMutedAlpha     = 0.75f,
     glassNoiseDensity  = 400,
+    sphereShade        = Color(0x40000000),  // 25% black
+    pulseRingAlpha1    = 0.8f,
+    pulseRingAlpha2    = 0.6f,
 
     navSelectedIcon    = ColorTeal700,       // 5.0:1 on light nav surface
     navUnselectedIcon  = ColorTextSecondary, // 5.3:1
@@ -341,6 +353,9 @@ internal val DarkExtendedColors = AppExtendedColors(
     imageScrimEnd      = Color(0xC0000000),
     scrimStrong        = Color(0xCC000000),
     scrimSoft          = Color(0x66000000),
+    imageTopScrim      = Color(0xA6000000),  // 65% black — identical over images in dark mode
+    imageVignette      = Color(0x73000000),  // 45% black
+    progressDotInactive = Color(0x4DFFFFFF), // 30% white
 
     ratingStar         = Color(0xFFF5B301),
     favouriteActive    = Color(0xFFFF6B6B),
@@ -357,6 +372,9 @@ internal val DarkExtendedColors = AppExtendedColors(
     heroMidAlpha       = 0.60f,
     heroMutedAlpha     = 0.75f,
     glassNoiseDensity  = 400,
+    sphereShade        = Color(0x40000000),  // 25% black
+    pulseRingAlpha1    = 0.8f,
+    pulseRingAlpha2    = 0.6f,
 
     navSelectedIcon    = ColorWhite,          // 17.4:1 on #1b1b1b
     navUnselectedIcon  = Color(0xFF9E9E9E),   // 5.9:1

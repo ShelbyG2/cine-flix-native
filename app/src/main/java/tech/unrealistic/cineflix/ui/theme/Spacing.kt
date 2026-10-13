@@ -47,11 +47,17 @@ data class AppSpacing(
     // ── Sub-scale steps (used where the ×2 scale has no step) ───────────────
     val gap2:   Dp = 2.dp,
     val gap3:   Dp = 3.dp,
+    val gap5:   Dp = 5.dp,
     val gap6:   Dp = 6.dp,
     val gap10:  Dp = 10.dp,
     val gap12:  Dp = 12.dp,
+    val gap14:  Dp = 14.dp,
+    val gap18:  Dp = 18.dp,
     val gap20:  Dp = 20.dp,
+    val gap22:  Dp = 22.dp,
     val gap24:  Dp = 24.dp,
+    val gap26:  Dp = 26.dp,
+    val gap28:  Dp = 28.dp,
     val gap40:  Dp = 40.dp,
 
     // ── Semantic component spacing ──────────────────────────────────────────
@@ -63,6 +69,7 @@ data class AppSpacing(
     val actionRowV:      Dp = 16.dp,  // ActionButtons row vertical
     val buttonPaddingH:  Dp = 24.dp,  // Play button content padding
     val buttonPaddingV:  Dp = 12.dp,
+    val buttonPaddingVTall: Dp = 14.dp,  // onboarding CTA content padding
     val buttonGap:       Dp = 6.dp,   // icon↔label inside buttons
     val sectionPaddingBottom: Dp = 28.dp,  // below each MediaSection
     val heroTopInset:    Dp = 56.dp,  // carousel inset under the floating top bar
