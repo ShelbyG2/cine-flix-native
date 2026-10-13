@@ -50,6 +50,9 @@ data class AppSizes(
 
     // ── State views (empty / error / offline) ─────────────────────────────
     val stateIcon:      Dp = 40.dp,  // icon in error/empty states
+    val stateIconLg:    Dp = 56.dp,  // icon in full-screen error/empty states
+    val spinner:        Dp = 28.dp,  // inline loading indicator
+    val gridCellMin:    Dp = 110.dp, // adaptive poster grid cell minimum
 
     // ── Splash ──────────────────────────────────────────────────────────────
     val splashRingCanvas: Dp = 120.dp,
@@ -91,6 +94,7 @@ data class AppSizes(
     val detailsHeroFadeH:  Dp = 140.dp,  // backdrop→surface fade height
     val iconCompact:       Dp = 18.dp,   // close / like glyphs inside 48dp targets
     val episodeStillW:     Dp = 130.dp,  // episode thumbnail width
+    val libraryCardW:      Dp = 220.dp,  // liked-episode card width
 
     // ── Skeleton placeholders (mirror production dimensions) ─────────────
     val skeletonHeroTrackH: Dp = 340.dp,

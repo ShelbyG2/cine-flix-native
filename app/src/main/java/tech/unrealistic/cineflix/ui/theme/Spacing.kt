@@ -60,6 +60,7 @@ data class AppSpacing(
     val gap26:  Dp = 26.dp,
     val gap28:  Dp = 28.dp,
     val gap40:  Dp = 40.dp,
+    val gap48:  Dp = 48.dp,
 
     // ── Semantic component spacing ──────────────────────────────────────────
     val topBarPadding:   Dp = 10.dp,  // FloatingTopBar inner padding

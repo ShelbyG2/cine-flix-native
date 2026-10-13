@@ -249,12 +249,15 @@ data class AppExtendedColors(
     val pillBorder:         Color,   // hairline rim on glass pills
     val ratingChipFillAlpha:  Float,  // palette-accent chip fill alpha
     val ratingChipBorderAlpha: Float, // palette-accent chip border alpha
+    val chipUnselectedAlpha:  Float,  // filter chip fill, unselected
+    val chipSelectedAlpha:    Float,  // filter chip fill, selected
     val posterFadeAlpha:      Float,  // poster→background fade strength
     val heroTopAlpha:       Float,   // palette hero gradient — top stop
     val heroMidAlpha:       Float,   // palette hero gradient — mid stop
     val heroMutedAlpha:     Float,   // palette hero gradient — muted stop
     val glassNoiseDensity:  Int,     // grain dots per overlay
     val sphereShade:        Color,   // bottom shading of the onboarding glass orb
+    val playerBackground:   Color,   // video surface — black in BOTH modes
     val pulseRingAlpha1:    Float,   // inner glow ring border alpha
     val pulseRingAlpha2:    Float,   // outer glow ring border alpha
 
@@ -309,6 +312,8 @@ internal val LightExtendedColors = AppExtendedColors(
     pillBorder         = Color(0x40FFFFFF),  // 25% white rim (visible on dark pill)
     ratingChipFillAlpha  = 0.35f,
     ratingChipBorderAlpha = 0.50f,
+    chipUnselectedAlpha  = 0.5f,
+    chipSelectedAlpha    = 0.25f,
     posterFadeAlpha      = 0.95f,
     heroTopAlpha       = 0.85f,
     heroMidAlpha       = 0.60f,
@@ -317,6 +322,7 @@ internal val LightExtendedColors = AppExtendedColors(
     sphereShade        = Color(0x40000000),  // 25% black
     pulseRingAlpha1    = 0.8f,
     pulseRingAlpha2    = 0.6f,
+    playerBackground   = ColorBlack,         // letterboxing stays black in light mode
 
     navSelectedIcon    = ColorTeal700,       // 5.0:1 on light nav surface
     navUnselectedIcon  = ColorTextSecondary, // 5.3:1
@@ -367,6 +373,8 @@ internal val DarkExtendedColors = AppExtendedColors(
     pillBorder         = Color(0x26FFFFFF),  // 15% white rim
     ratingChipFillAlpha  = 0.35f,
     ratingChipBorderAlpha = 0.50f,
+    chipUnselectedAlpha  = 0.5f,
+    chipSelectedAlpha    = 0.25f,
     posterFadeAlpha      = 0.95f,
     heroTopAlpha       = 0.85f,
     heroMidAlpha       = 0.60f,
@@ -375,6 +383,7 @@ internal val DarkExtendedColors = AppExtendedColors(
     sphereShade        = Color(0x40000000),  // 25% black
     pulseRingAlpha1    = 0.8f,
     pulseRingAlpha2    = 0.6f,
+    playerBackground   = ColorBlack,         // letterboxing stays black
 
     navSelectedIcon    = ColorWhite,          // 17.4:1 on #1b1b1b
     navUnselectedIcon  = Color(0xFF9E9E9E),   // 5.9:1

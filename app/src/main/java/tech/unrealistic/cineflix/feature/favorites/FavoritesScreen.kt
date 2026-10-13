@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -54,6 +53,8 @@ import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 
 /**
  * Favourites — the user's local library.
@@ -111,7 +112,12 @@ fun FavouriteScreen(
             text = "My Library",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)
+            modifier = Modifier.padding(
+                start = AppTheme.spacing.md,
+                top = AppTheme.spacing.md,
+                end = AppTheme.spacing.md,
+                bottom = AppTheme.spacing.xs
+            )
         )
 
         when (val state = uiState) {
@@ -123,26 +129,26 @@ fun FavouriteScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .padding(AppTheme.spacing.lg),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = Icons.TwoTone.WifiOff,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(56.dp)
+                        modifier = Modifier.size(AppTheme.sizes.stateIconLg)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.md))
                     Text(
                         text = state.message,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
                     Button(
                         onClick = viewModel::onRetry,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         Text(text = "Try Again", style = MaterialTheme.typography.labelLarge)
                     }
@@ -188,17 +194,23 @@ fun FavouriteScreen(
                             text = "Liked Episodes",
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            modifier = Modifier.padding(
+                                horizontal = AppTheme.spacing.md,
+                                vertical = AppTheme.spacing.sm
+                            )
                         )
                         Text(
                             text = "Episodes you want to revisit",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = AppTheme.spacing.md)
                         )
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            contentPadding = PaddingValues(
+                                horizontal = AppTheme.spacing.md,
+                                vertical = AppTheme.spacing.gap12
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12)
                         ) {
                             items(
                                 items = state.episodes,
@@ -217,7 +229,7 @@ fun FavouriteScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.gap24))
                 }
             }
         }
@@ -257,22 +269,28 @@ private fun LibraryRow(
     onItemClick: (Int, String) -> Unit,
     savedStyle: Boolean = false
 ) {
-    Column(modifier = Modifier.padding(bottom = 24.dp)) {
+    Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.md,
+                vertical = AppTheme.spacing.sm
+            )
         )
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = AppTheme.spacing.md)
         )
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(
+                horizontal = AppTheme.spacing.md,
+                vertical = AppTheme.spacing.gap12
+            ),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12)
         ) {
             items(items = items, key = { "${it.mediaType}_${it.id}" }) { item ->
                 if (savedStyle) {
@@ -307,7 +325,7 @@ private fun LikedEpisodeCard(
     onClick: () -> Unit,
     onUnlike: () -> Unit
 ) {
-    Column(modifier = Modifier.width(220.dp)) {
+    Column(modifier = Modifier.width(AppTheme.sizes.libraryCardW)) {
         Box {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
@@ -316,7 +334,7 @@ private fun LikedEpisodeCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { onClick() }
             )
@@ -324,16 +342,16 @@ private fun LikedEpisodeCard(
                 onClick = onUnlike,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(Color.Black.copy(alpha = 0.55f))
+                    .padding(AppTheme.sizes.overlayButtonPad)
+                    .size(AppTheme.sizes.touchTarget)   // 48dp target
+                    .clip(ShapeCircle)
+                    .background(AppTheme.colors.imageChipSurface)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = "Unlike episode",
-                    tint = Color(0xFFFF6B6B),
-                    modifier = Modifier.size(16.dp)
+                    tint = AppTheme.colors.favouriteActive,
+                    modifier = Modifier.size(AppTheme.sizes.iconSm)
                 )
             }
         }
@@ -343,7 +361,7 @@ private fun LikedEpisodeCard(
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 6.dp)
+            modifier = Modifier.padding(top = AppTheme.spacing.gap6)
         )
         Text(
             text = episode.airDate,
@@ -364,33 +382,36 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 48.dp),
+            .padding(
+                horizontal = AppTheme.spacing.lg,
+                vertical = AppTheme.spacing.gap48
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = Icons.Filled.Favorite,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(AppTheme.sizes.stateIconLg)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(AppTheme.spacing.md))
         Text(
             text = "Your library is empty",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
         Text(
             text = "Tap the heart on any title to add it here, or the bookmark to save it for later.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
         Button(
             onClick = onExplore,
-            shape = RoundedCornerShape(12.dp)
+            shape = MaterialTheme.shapes.medium
         ) {
             Text(text = "Explore Titles", style = MaterialTheme.typography.labelLarge)
         }
@@ -402,27 +423,36 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
 private fun LibrarySkeleton(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         repeat(2) {
-            Column(modifier = Modifier.padding(bottom = 24.dp)) {
+            Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
                 // title placeholder — mirrors titleLarge spatial height
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .width(160.dp)
-                        .height(24.dp)
-                        .clip(RoundedCornerShape(6.dp))
+                        .padding(
+                            horizontal = AppTheme.spacing.md,
+                            vertical = AppTheme.spacing.sm
+                        )
+                        .width(AppTheme.sizes.skeletonTitleW)
+                        .height(AppTheme.sizes.skeletonTitleH)
+                        .clip(MaterialTheme.shapes.small)
                         .shimmerEffect()
                 )
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(
+                        horizontal = AppTheme.spacing.md,
+                        vertical = AppTheme.spacing.gap12
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
                     userScrollEnabled = false
                 ) {
                     items(5) {
                         Box(
                             modifier = Modifier
-                                .width(140.dp)
-                                .height(210.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .width(AppTheme.sizes.mediaCardWidth)
+                                .height(
+                                    AppTheme.sizes.mediaCardWidth *
+                                            AppTheme.sizes.mediaCardPosterRatio
+                                )
+                                .clip(MaterialTheme.shapes.medium)
                                 .shimmerEffect()
                         )
                     }
