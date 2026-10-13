@@ -190,7 +190,7 @@ val AppTypography = Typography(
     // ── USER SPEC: Lexend Light 16sp ─────────────────────────────────────
     bodyLarge = TextStyle(
         fontFamily    = LexendFamily,
-        fontWeight    = FontWeight.Light,                    // 300
+        fontWeight    = FontWeight.Normal,                   // 400 (was Light — legibility over glass)
         fontSize      = FontSizeSpec16,                      // 16sp ← spec
         lineHeight    = lineHeightFor(16f, 1.40f),           // 22.4sp (body 140%)
         letterSpacing = 0.sp
@@ -204,10 +204,11 @@ val AppTypography = Typography(
         lineHeight    = lineHeightFor(18f, 1.40f),           // 25.2sp
         letterSpacing = 0.sp
     ),
+
     bodySmall = TextStyle(
         fontFamily    = LexendFamily,
-        fontWeight    = FontWeight.Light,
-        fontSize      = FontSizeSm,                          // 14sp
+        fontWeight    = FontWeight.Normal,                    // 400 (was Light — legibility)
+        fontSize      = FontSizeSm,                           // 14sp
         lineHeight    = lineHeightFor(14f, 1.40f),           // 19.6sp
         letterSpacing = 0.sp
     ),
@@ -227,11 +228,43 @@ val AppTypography = Typography(
         lineHeight    = lineHeightFor(12f, 1.40f),
         letterSpacing = 0.sp
     ),
+
     labelSmall = TextStyle(
         fontFamily    = LexendFamily,
         fontWeight    = FontWeight.Normal,
-        fontSize      = FontSizeXs,                         // 10sp
+        fontSize      = FontSizeXs,                           // 10sp
         lineHeight    = lineHeightFor(10f, 1.40f),
         letterSpacing = 0.sp
     ),
+)
+
+// ── Extra named styles (Typography only has M3 slots, so app-specific
+//    styles live here — composables reference these instead of setting
+//    fontSize / fontWeight / letterSpacing inline) ─────────────────────────
+
+/** CINEFLIX wordmark — replaces `letterSpacing = 4.sp` literals in TopBar. */
+val WordmarkStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.Bold,
+    fontSize      = FontSizeSpec18,                      // 18sp
+    lineHeight    = lineHeightFor(18f, 1.10f),
+    letterSpacing = 1.5.sp
+)
+
+/** Emphasised button label — e.g. the Play button (replaces `.copy(weight)`). */
+val LabelStrongStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.SemiBold,
+    fontSize      = FontSizeSm,                           // 14sp
+    lineHeight    = lineHeightFor(14f, 1.40f),
+    letterSpacing = 0.sp
+)
+
+/** Metadata caption — `year • runtime • country`, ratings, timestamps. */
+val CaptionStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.Normal,
+    fontSize      = 12.sp,
+    lineHeight    = lineHeightFor(12f, 1.40f),
+    letterSpacing = 0.sp
 )

@@ -1,5 +1,6 @@
 package tech.unrealistic.cineflix.ui.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,7 +9,11 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary              = md_dark_primary,
@@ -91,9 +96,39 @@ fun CineflixTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    // Status bar / nav bar icon colour follows the theme (light mode → dark icons)
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalAppExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+        LocalAppSpacing provides AppSpacing(),
+        LocalAppSizes provides AppSizes(),
+        LocalAppMotion provides AppMotion(reduceMotion = rememberReduceMotion()),
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            shapes = AppShapes,
+            content = content
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AppTheme — single access point for every design token.
+// Composables use MaterialTheme.* for M3 roles and AppTheme.* for the rest.
+// ═══════════════════════════════════════════════════════════════════════════
+object AppTheme {
+    val colors:  AppExtendedColors @Composable get() = LocalAppExtendedColors.current
+    val spacing: AppSpacing        @Composable get() = LocalAppSpacing.current
+    val sizes:   AppSizes          @Composable get() = LocalAppSizes.current
+    val motion:  AppMotion         @Composable get() = LocalAppMotion.current
 }
