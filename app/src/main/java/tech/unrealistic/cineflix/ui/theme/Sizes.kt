@@ -29,9 +29,14 @@ data class AppSizes(
     val chipTouchArea:  Dp = 48.dp,  // FilterChip / GenreChip hit height
 
     // ── Component sizes ─────────────────────────────────────────────────────
+    // ── Stroke widths ───────────────────────────────────────────────────
+    val hairline:         Dp = 0.5.dp,  // pills, dividers
+    val glassBorderWidth: Dp = 0.8.dp,  // glass rim
+    val borderWidth:      Dp = 1.dp,    // standard border
+
     val actionButton:   Dp = 52.dp,  // play / favourite / share round buttons
     val roundAction:    Dp = 30.dp,  // visible round icon buttons on cards
-    val likeButton:     Dp = 32.dp,  // episode like button (visual)
+    val likeButton:     Dp = 48.dp,  // episode like button (hit target ≥48)
     val dragHandleWidth:  Dp = 36.dp,
     val dragHandleHeight: Dp = 4.dp,
     val searchBarHeight:  Dp = 48.dp,
@@ -39,10 +44,9 @@ data class AppSizes(
     val skeletonAction: Dp = 52.dp,  // shimmer placeholder for action buttons
 
     // ── Card / poster dimensions (content grid) ─────────────────────────────
-    val mediaCardWidth:    Dp = 120.dp,
-    val mediaCardPosterRatio: Float = 1.5f,   // height = width × ratio
-    val heroCardWidth:     Dp = 300.dp,
-    val heroCardHeight:    Dp = 180.dp,
+    val mediaCardWidth:    Dp = 140.dp,
+    val mediaCardPosterRatio: Float = 1.5f,   // height = width × ratio (2:3)
+    val overlayButtonPad:  Dp = 6.dp,   // inset of corner buttons on posters
 )
 
 val LocalAppSizes = staticCompositionLocalOf { AppSizes() }

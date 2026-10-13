@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,12 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import tech.unrealistic.cineflix.R
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.WordmarkStyle
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,13 +31,16 @@ import tech.unrealistic.cineflix.R
 fun FloatingTopBar(
     modifier: Modifier = Modifier,
     onSearchClick: () -> Unit,
-    isScrolled:Boolean
+    isScrolled: Boolean
 
-    ) {
+) {
+    val motion = AppTheme.motion
+    val colors = AppTheme.colors
+
     //Animate background color change
     val backgroundColor by animateColorAsState(
-        targetValue = if (isScrolled) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent,
-        animationSpec = tween(durationMillis = 300),
+        targetValue = if (isScrolled) MaterialTheme.colorScheme.surfaceContainer else androidx.compose.ui.graphics.Color.Transparent,
+        animationSpec = tween(durationMillis = motion.mediumMs),
         label = "bar_bg"
     )
 
@@ -47,46 +48,42 @@ fun FloatingTopBar(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(10.dp)
-        ,
+            .padding(AppTheme.spacing.topBarPadding),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // The Logo
+        // The Logo — legible on imagery (light) and on the bar (theme role)
         Text(
             text = "CINEFLIX",
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Black,
-                letterSpacing = 4.sp
-            ),
-            color = Color.White
+            style = WordmarkStyle,
+            color = if (isScrolled) MaterialTheme.colorScheme.onSurface else colors.onImage
         )
 
         // The Floating Glass Panel (Pill Shape)
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(Color.Black.copy(alpha = 0.4f)) // Semi-transparent dark background
+                .clip(ShapePill)
+                .background(colors.scrimStrong) // dark pill keeps the icon legible in both modes
                 .border(
-                    width = 0.5.dp,
-                    color = Color.White.copy(alpha = 0.15f), // Subtle highlight edge
-                    shape = RoundedCornerShape(50)
+                    width = AppTheme.sizes.hairline,
+                    color = colors.pillBorder,
+                    shape = ShapePill
                 )
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+                .padding(AppTheme.spacing.gap2),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap2)
         ) {
 
-            // Search Icon inside the panel
+            // Search Icon inside the panel — 48dp touch target
             IconButton(
                 onClick = onSearchClick,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(AppTheme.sizes.topBarControl)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = "Search",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    tint = colors.onImage,
+                    modifier = Modifier.size(AppTheme.sizes.iconMd)
                 )
             }
 

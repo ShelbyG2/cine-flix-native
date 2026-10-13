@@ -2,7 +2,6 @@ package tech.unrealistic.cineflix.ui.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -224,9 +223,6 @@ data class AppExtendedColors(
     val glassGloss:         Color,   // specular gloss / streak tint
     val glassNoise:         Color,   // noise grain dot color
     val glassNoiseAlpha:    Float,   // grain strength, tuned per mode
-    val glassBorderWidth:   Dp,      // hairline rim width
-    val hairline:           Dp,      // 0.5dp hairline (pills, dividers)
-    val borderWidth:        Dp,      // standard 1dp border
 
     // ── On-image roles (ALWAYS light-on-dark in BOTH modes — images are darkened
     //    by imageScrim before text is drawn over them)
@@ -242,6 +238,15 @@ data class AppExtendedColors(
     val ratingStar:         Color,
     val favouriteActive:    Color,
     val savedActive:        Color,
+
+    // ── Chips / overlays / pills
+    val imageChipSurface:   Color,   // corner buttons on posters (dark disc, both modes)
+    val onImageChipSurface: Color,   // genre chip fill over images (both modes)
+    val onImageChipBorder:  Color,   // genre chip border over images (both modes)
+    val pillBorder:         Color,   // hairline rim on glass pills
+    val ratingChipFillAlpha:  Float,  // palette-accent chip fill alpha
+    val ratingChipBorderAlpha: Float, // palette-accent chip border alpha
+    val posterFadeAlpha:      Float,  // poster→background fade strength
 
     // ── Navigation chrome
     val navSelectedIcon:    Color,
@@ -272,9 +277,6 @@ internal val LightExtendedColors = AppExtendedColors(
     glassGloss         = Color(0x80FFFFFF),  // 50% white specular
     glassNoise         = Color(0x14000000),  // dark grain (visible on light glass)
     glassNoiseAlpha    = 0.05f,
-    glassBorderWidth   = 0.8.dp,
-    hairline           = 0.5.dp,
-    borderWidth        = 1.dp,
 
     onImage            = ColorWhite,
     onImageMuted       = Color(0xD9FFFFFF),
@@ -287,6 +289,14 @@ internal val LightExtendedColors = AppExtendedColors(
     ratingStar         = Color(0xFFF5B301),
     favouriteActive    = Color(0xFFFF6B6B),
     savedActive        = Color(0xFFFFC107),
+
+    imageChipSurface   = Color(0x8C000000),  // 55% black — legible over any poster
+    onImageChipSurface = Color(0x1FFFFFFF),  // 12% white
+    onImageChipBorder  = Color(0x40FFFFFF),  // 25% white
+    pillBorder         = Color(0x40FFFFFF),  // 25% white rim (visible on dark pill)
+    ratingChipFillAlpha  = 0.35f,
+    ratingChipBorderAlpha = 0.50f,
+    posterFadeAlpha      = 0.95f,
 
     navSelectedIcon    = ColorTeal700,       // 5.0:1 on light nav surface
     navUnselectedIcon  = ColorTextSecondary, // 5.3:1
@@ -315,9 +325,6 @@ internal val DarkExtendedColors = AppExtendedColors(
     glassGloss         = Color(0x33FFFFFF),  // 20% white specular
     glassNoise         = Color(0x14FFFFFF),  // light grain
     glassNoiseAlpha    = 0.03f,
-    glassBorderWidth   = 0.8.dp,
-    hairline           = 0.5.dp,
-    borderWidth        = 1.dp,
 
     onImage            = ColorWhite,
     onImageMuted       = Color(0xD9FFFFFF),
@@ -330,6 +337,14 @@ internal val DarkExtendedColors = AppExtendedColors(
     ratingStar         = Color(0xFFF5B301),
     favouriteActive    = Color(0xFFFF6B6B),
     savedActive        = Color(0xFFFFC107),
+
+    imageChipSurface   = Color(0x8C000000),  // 55% black
+    onImageChipSurface = Color(0x1FFFFFFF),  // 12% white
+    onImageChipBorder  = Color(0x40FFFFFF),  // 25% white
+    pillBorder         = Color(0x26FFFFFF),  // 15% white rim
+    ratingChipFillAlpha  = 0.35f,
+    ratingChipBorderAlpha = 0.50f,
+    posterFadeAlpha      = 0.95f,
 
     navSelectedIcon    = ColorWhite,          // 17.4:1 on #1b1b1b
     navUnselectedIcon  = Color(0xFF9E9E9E),   // 5.9:1

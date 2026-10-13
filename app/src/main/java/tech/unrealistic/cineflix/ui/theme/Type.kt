@@ -268,3 +268,15 @@ val CaptionStyle = TextStyle(
     lineHeight    = lineHeightFor(12f, 1.40f),
     letterSpacing = 0.sp
 )
+
+/** Emphasised caption — rating chips, badges over imagery. */
+val CaptionStrongStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.SemiBold,
+    fontSize      = 12.sp,
+    lineHeight    = lineHeightFor(12f, 1.40f),
+    letterSpacing = 0.sp
+)
+
+/** Extra leading factor for long-form body text (ExpandableText). */
+const val BodyLineHeightBoost = 1.2f

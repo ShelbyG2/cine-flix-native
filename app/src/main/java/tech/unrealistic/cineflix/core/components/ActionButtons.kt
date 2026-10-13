@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
@@ -33,11 +31,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 
 @Composable
 fun ActionButtons(
@@ -52,7 +50,13 @@ fun ActionButtons(
     onSave: (() -> Unit)? = null
 ) {
 
-    val contentColor = Color.White
+    val colors = AppTheme.colors
+    val motion = AppTheme.motion
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+
+    // Always light-on-dark: buttons sit over (scrimmed) imagery in BOTH modes
+    val contentColor = colors.onImage
 
     Column(modifier = modifier) {
 
@@ -60,59 +64,58 @@ fun ActionButtons(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 20.dp,
-                    vertical = 16.dp
+                    horizontal = spacing.actionRowH,
+                    vertical = spacing.actionRowV
                 ),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing.gap12),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             // Play button  primary solid action
             Button(
                 onClick = onPlay,
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White, contentColor = Color.Black
+                    containerColor = colors.onImage, contentColor = colors.onImageInverse
                 ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                contentPadding = PaddingValues(
+                    horizontal = spacing.buttonPaddingH,
+                    vertical = spacing.buttonPaddingV
+                ),
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(sizes.iconMd)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Play", style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                Spacer(modifier = Modifier.width(spacing.buttonGap))
+                Text(text = "Play", style = LabelStrongStyle)
             }
             if (onMediaClick != null) {  // Info button glass icon button
                 val detailScale by animateFloatAsState(
                     targetValue = 1.0f,
-                    animationSpec = tween(200),
+                    animationSpec = tween(motion.shortMs),
                     label = "fav_scale"
                 )
                 IconButton(
                     onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
+                        containerColor = colors.scrimSoft,
                         contentColor = contentColor
                     ), modifier = Modifier
-                        .size(52.dp)
+                        .size(sizes.actionButton)
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
+                            width = sizes.borderWidth,
+                            color = colors.pillBorder,
+                            shape = ShapeCircle
                         )
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Info,
-                        contentDescription = "Add to favourites",
+                        contentDescription = "Show details",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = detailScale
                                 scaleY = detailScale
@@ -121,30 +124,39 @@ fun ActionButtons(
             }
 
             //  Favourite button glass icon button
+            //  Pop animations are decorative — disabled under reduce-motion
             val favouriteScale by animateFloatAsState(
-                targetValue = if (isFavourite) 1.25f else 1.0f,
-                animationSpec = tween(200),
+                targetValue = when {
+                    motion.reduceMotion -> 1.0f
+                    isFavourite -> 1.25f
+                    else -> 1.0f
+                },
+                animationSpec = tween(motion.shortMs),
                 label = "fav_scale"
             )
 
             //  Saved (watchlist) button glass icon button
             val savedScale by animateFloatAsState(
-                targetValue = if (isSaved) 1.25f else 1.0f,
-                animationSpec = tween(200),
+                targetValue = when {
+                    motion.reduceMotion -> 1.0f
+                    isSaved -> 1.25f
+                    else -> 1.0f
+                },
+                animationSpec = tween(motion.shortMs),
                 label = "save_scale"
             )
 
             if (onSave != null) {
                 IconButton(
                     onClick = onSave, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        contentColor = if (isSaved) Color(0xFFFFC107) else contentColor
+                        containerColor = colors.scrimSoft,
+                        contentColor = if (isSaved) colors.savedActive else contentColor
                     ), modifier = Modifier
-                        .size(52.dp)
+                        .size(sizes.actionButton)
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
+                            width = sizes.borderWidth,
+                            color = colors.pillBorder,
+                            shape = ShapeCircle
                         )
                 ) {
                     Icon(
@@ -153,7 +165,7 @@ fun ActionButtons(
                         contentDescription = if (isSaved) "Remove from saved"
                         else "Save for later",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = savedScale
                                 scaleY = savedScale
@@ -164,14 +176,14 @@ fun ActionButtons(
             if (onFavourite != null) {
                 IconButton(
                     onClick = onFavourite, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        contentColor = if (isFavourite) Color(0xFFFF6B6B) else contentColor
+                        containerColor = colors.scrimSoft,
+                        contentColor = if (isFavourite) colors.favouriteActive else contentColor
                     ), modifier = Modifier
-                        .size(52.dp)
+                        .size(sizes.actionButton)
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
+                            width = sizes.borderWidth,
+                            color = colors.pillBorder,
+                            shape = ShapeCircle
                         )
                 ) {
                     Icon(
@@ -180,7 +192,7 @@ fun ActionButtons(
                         contentDescription = if (isFavourite) "Remove from favourites"
                         else "Add to favourites",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = favouriteScale
                                 scaleY = favouriteScale
@@ -193,22 +205,22 @@ fun ActionButtons(
             if (onMediaShare != null) {
                 IconButton(
                     onClick = onMediaShare, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
+                        containerColor = colors.scrimSoft,
+                        contentColor = contentColor
 
                         ), modifier = Modifier
-                        .size(52.dp)
+                        .size(sizes.actionButton)
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
+                            width = sizes.borderWidth,
+                            color = colors.pillBorder,
+                            shape = ShapeCircle
                         )
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Share,
-                        contentDescription = if (isFavourite) "Remove from favourites"
-                        else "Add to favourites",
+                        contentDescription = "Share",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = favouriteScale
                                 scaleY = favouriteScale

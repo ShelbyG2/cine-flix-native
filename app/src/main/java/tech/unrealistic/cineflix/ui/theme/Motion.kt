@@ -19,6 +19,7 @@ data class AppMotion(
     val shortMs:  Int = 150,
     val mediumMs: Int = 300,
     val longMs:   Int = 500,
+    val shimmerMs: Int = 1200,  // skeleton sweep — static when reduceMotion
 )
 
 val LocalAppMotion = staticCompositionLocalOf { AppMotion() }
