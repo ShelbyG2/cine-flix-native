@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -18,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation3.runtime.NavEntry
@@ -31,6 +31,7 @@ import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
 import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
 import tech.unrealistic.cineflix.feature.splash.SplashScreen
+import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 
 /**
@@ -53,7 +54,7 @@ fun CineflixApp(
 
     Crossfade(
         targetState = appStage,
-        animationSpec = tween(500),
+        animationSpec = tween(AppTheme.motion.longMs),
         label = "app_stage"
     ) { stage ->
         when (stage) {
@@ -100,11 +101,20 @@ private fun MainAppContent() {
                         Icon(
                             painterResource(it.icon),
                             contentDescription = it.label,
-                            tint = if (it == currentTab) Color.White else Color.Gray
-
+                            // Theme roles: AA in BOTH modes (white/grey hardcoded
+                            // failed in light mode where the nav surface is light)
+                            tint = if (it == currentTab) AppTheme.colors.navSelectedIcon
+                            else AppTheme.colors.navUnselectedIcon
                         )
                     },
-                    label = { Text(it.label) },
+                    label = {
+                        Text(
+                            text = it.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (it == currentTab) AppTheme.colors.navSelectedIcon
+                            else AppTheme.colors.navUnselectedIcon
+                        )
+                    },
                     selected = it == currentTab,
                     onClick = {
                         backStack.clear()
