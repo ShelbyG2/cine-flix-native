@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solid play triangle used for Android 13+ themed icons (monochrome layer). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M49.942,41.030L63.703,48.771A6.0,6.0 0 0 1 63.703,59.229L49.942,66.970A6.0,6.0 0 0 1 41.000,61.741L41.000,46.259A6.0,6.0 0 0 1 49.942,41.030Z" />
+</vector>
