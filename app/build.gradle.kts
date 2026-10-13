@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     // Optional, provides the @Serialize annotation for autogeneration of Serializers.
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.ksp)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 val localProps = Properties()
@@ -90,13 +91,16 @@ dependencies {
     implementation("androidx.palette:palette-ktx:1.0.0")
 
     //google fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.5")
-
-  //exoplayer
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.5")    //exoplayer
     implementation("androidx.media3:media3-exoplayer:1.10.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
     implementation("androidx.media3:media3-ui:1.10.1")
     implementation("androidx.media3:media3-ui-compose-material3:1.10.1")
     implementation("androidx.media3:media3-datasource-okhttp:1.10.1")
+
+    // Room — local database for favourites / saved / liked episodes
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }
 
