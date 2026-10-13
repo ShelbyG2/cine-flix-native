@@ -26,7 +26,7 @@ import androidx.navigation3.ui.NavDisplay
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.feature.discover.DiscoverScreen
-import tech.unrealistic.cineflix.feature.home.FavouriteScreen
+import tech.unrealistic.cineflix.feature.favorites.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
 import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
@@ -128,7 +128,14 @@ private fun MainAppContent() {
                                 backStack.add(Discover)
                             }
                         ) }
-                        is Favourites -> NavEntry(key){ FavouriteScreen() }
+                        is Favourites -> NavEntry(key) {
+                            FavouriteScreen(
+                                onNavigate = {
+                                    backStack.clear()
+                                    backStack.add(Discover)
+                                }
+                            )
+                        }
                         is Discover -> NavEntry(key) {
                             DiscoverScreen(
                                 onNavigate = {

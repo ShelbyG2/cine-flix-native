@@ -18,8 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
@@ -53,6 +55,8 @@ fun MediaCard(
     fillWidth: Boolean = false,   // true → poster stretches to the parent width (grid cells)
     isSaved: Boolean = false,
     onSaveToggle: (() -> Unit)? = null,
+    isFavourite: Boolean = false,
+    onFavouriteToggle: (() -> Unit)? = null,
 ) {
     val isHero = hero ?: false
     val mediaType = media.mediaType
@@ -98,6 +102,28 @@ fun MediaCard(
                             )
                         )
                 )
+                // ── Favourite (heart) overlay — top-start corner, quick-remove ──
+                if (onFavouriteToggle != null && !isHero) {
+                    IconButton(
+                        onClick = onFavouriteToggle,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(6.dp)
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                    ) {
+                        Icon(
+                            imageVector = if (isFavourite) Icons.Filled.Favorite
+                            else Icons.Outlined.FavoriteBorder,
+                            contentDescription = if (isFavourite) "Remove from favourites"
+                            else "Add to favourites",
+                            tint = if (isFavourite) Color(0xFFFF6B6B) else Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
                 // ── Save (bookmark) overlay — top-end corner, one-tap watchlist ──
                 if (onSaveToggle != null && !isHero) {
                     IconButton(
