@@ -49,6 +49,7 @@ data class AppSpacing(
     val gap3:   Dp = 3.dp,
     val gap5:   Dp = 5.dp,
     val gap6:   Dp = 6.dp,
+    val gap7:   Dp = 7.dp,
     val gap10:  Dp = 10.dp,
     val gap12:  Dp = 12.dp,
     val gap14:  Dp = 14.dp,

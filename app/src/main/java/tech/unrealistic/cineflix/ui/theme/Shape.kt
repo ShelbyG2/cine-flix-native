@@ -76,6 +76,9 @@ val ShapeRound = RoundedCornerShape(50.dp)
 /** 14dp radius — onboarding CTA buttons. */
 val ShapeButton = RoundedCornerShape(14.dp)
 
+/** 22dp radius — splash play button squircle. */
+val ShapePlay = RoundedCornerShape(22.dp)
+
 /** Folder tab — top 18dp, bottom 6dp (onboarding 3D folder artwork). */
 val ShapeTab = RoundedCornerShape(
     topStart = 18.dp,

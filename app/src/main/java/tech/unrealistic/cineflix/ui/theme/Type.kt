@@ -296,5 +296,14 @@ val TitleStrongStyle = TextStyle(
     letterSpacing = 0.sp
 )
 
+/** Splash wordmark — per-letter staggered fade (Bold, wide tracking). */
+val SplashWordmarkStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.Black,
+    fontSize      = FontSizeH4,                          // 25sp (headlineMedium)
+    lineHeight    = lineHeightFor(25f, 1.10f),
+    letterSpacing = 6.sp
+)
+
 /** Extra leading factor for long-form body text (ExpandableText). */
 const val BodyLineHeightBoost = 1.2f

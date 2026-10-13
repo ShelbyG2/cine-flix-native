@@ -51,6 +51,11 @@ data class AppSizes(
     // ── State views (empty / error / offline) ─────────────────────────────
     val stateIcon:      Dp = 40.dp,  // icon in error/empty states
 
+    // ── Splash ──────────────────────────────────────────────────────────────
+    val splashRingCanvas: Dp = 120.dp,
+    val playButton:       Dp = 76.dp,
+    val playGlyph:        Dp = 30.dp,
+
     // ── Progress dots (onboarding) ─────────────────────────────────────────
     val dotActiveW:   Dp = 24.dp,
     val dotInactiveW: Dp = 8.dp,
