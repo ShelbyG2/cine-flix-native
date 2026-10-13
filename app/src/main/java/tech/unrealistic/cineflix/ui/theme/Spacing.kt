@@ -66,6 +66,7 @@ data class AppSpacing(
     val buttonGap:       Dp = 6.dp,   // icon↔label inside buttons
     val sectionPaddingBottom: Dp = 28.dp,  // below each MediaSection
     val heroTopInset:    Dp = 56.dp,  // carousel inset under the floating top bar
+    val titleOverlap:    Dp = 24.dp,  // details hero title block overlap onto backdrop
 )
 
 // staticCompositionLocalOf — spacing never changes at runtime

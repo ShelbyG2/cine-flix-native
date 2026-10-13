@@ -278,5 +278,23 @@ val CaptionStrongStyle = TextStyle(
     letterSpacing = 0.sp
 )
 
+/** Detail-sheet title (Bold h4 — replaces headlineMedium.copy(Bold)). */
+val HeadlineStrongStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.Bold,
+    fontSize      = FontSizeH4,                          // 25sp
+    lineHeight    = lineHeightFor(25f, 1.10f),
+    letterSpacing = 0.sp
+)
+
+/** Episode / list item title (SemiBold h6 — replaces titleSmall + weight). */
+val TitleStrongStyle = TextStyle(
+    fontFamily    = LexendFamily,
+    fontWeight    = FontWeight.SemiBold,
+    fontSize      = FontSizeH6,                          // 16sp
+    lineHeight    = lineHeightFor(16f, 1.40f),
+    letterSpacing = 0.sp
+)
+
 /** Extra leading factor for long-form body text (ExpandableText). */
 const val BodyLineHeightBoost = 1.2f

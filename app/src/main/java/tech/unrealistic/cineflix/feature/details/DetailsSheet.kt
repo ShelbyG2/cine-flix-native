@@ -1,6 +1,7 @@
 package tech.unrealistic.cineflix.feature.details
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -33,9 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +68,24 @@ fun MediaDetailsBottomSheet(
             modifier = modifier,
             sheetState = sheetState,
             contentWindowInsets = { WindowInsets.navigationBars },
-            dragHandle = {}
+            dragHandle = {
+                // Themed drag handle — dismiss affordance (was: empty = no handle)
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = AppTheme.spacing.xs)
+                            .width(AppTheme.sizes.dragHandleWidth)
+                            .height(AppTheme.sizes.dragHandleHeight)
+                            .background(
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                ShapePill
+                            )
+                    )
+                }
+            }
         ) {
             val sheetViewModel: DetailsSheetViewModel = viewModel()
             val currentEpisodes by sheetViewModel.currentSeasonEpisode.collectAsStateWithLifecycle()
@@ -87,7 +110,7 @@ fun MediaDetailsBottomSheet(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(300.dp),
+                                    .height(AppTheme.sizes.detailsHeroHeight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator()
@@ -97,10 +120,14 @@ fun MediaDetailsBottomSheet(
 
                     is DetailsSheetState.Error -> {
                         item {
-                            Text(
-                                text = state.message,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(16.dp)
+                            ErrorState(
+                                message = state.message,
+                                onRetry = {
+                                    sheetViewModel.fetchSheetDetails(mediaType, mediaId)
+                                },
+                                modifier = Modifier.padding(
+                                    vertical = AppTheme.spacing.lg
+                                )
                             )
                         }
                     }
@@ -171,7 +198,7 @@ fun MediaDetailsBottomSheet(
                                     sheetViewModel.fetchSheetDetails(type, id)
                                 }
                             )
-                            Spacer(modifier = Modifier.height(32.dp))
+                            Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
                         }
                     }
                 }
@@ -194,20 +221,25 @@ private fun TvSeasonSelector(
         Text(
             text = "Episodes",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.md,
+                vertical = AppTheme.spacing.sm
+            )
         )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 12.dp)
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
+            modifier = Modifier.padding(bottom = AppTheme.spacing.gap12)
         ) {
             items(seasons) { index ->
                 val seasonNumber = index + 1
                 FilterChip(
                     selected = seasonNumber == selectedSeasonNumber,
                     onClick = { onSeasonSelected(seasonNumber) },
-                    label = { Text("Season $seasonNumber") }
+                    label = { Text("Season $seasonNumber") },
+                    // 48dp accessible chip height
+                    modifier = Modifier.height(AppTheme.sizes.chipTouchArea)
                 )
             }
         }

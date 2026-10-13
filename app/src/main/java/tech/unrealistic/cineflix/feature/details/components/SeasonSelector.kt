@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -26,14 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.helpers.formatTime
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
 
 @Composable
  fun TvEpisodeItem(
@@ -50,12 +48,16 @@ import tech.unrealistic.cineflix.helpers.formatTime
     val runtime = formatTime(episode.runtime ?: 0)
     val airDate = episode.airDate
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+    val colors = AppTheme.colors
+
+    Column(modifier = Modifier.padding(horizontal = spacing.md)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { /* Handle episode click */ }
-                .padding(vertical = 8.dp),
+                .padding(vertical = spacing.sm),
             verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
@@ -63,21 +65,20 @@ import tech.unrealistic.cineflix.helpers.formatTime
                 contentDescription = "Episode still",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .width(130.dp)
+                    .width(sizes.episodeStillW)
                     .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.DarkGray)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(colors.skeletonBase)
             )
 
             Column(
                 modifier = Modifier
-                    .padding(start = 12.dp)
+                    .padding(start = spacing.gap12)
                     .weight(1f)
             ) {
                 Text(
                     text = "${index + 1}. $name",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = TitleStrongStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -87,10 +88,10 @@ import tech.unrealistic.cineflix.helpers.formatTime
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = spacing.xs)
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(spacing.sm))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -98,33 +99,35 @@ import tech.unrealistic.cineflix.helpers.formatTime
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(spacing.gap12),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Dedicated colour role — AA in both modes (was a hardcoded grey)
                         Text(
                             text = runtime,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = airDate,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
                     if (onLike != null) {
                         IconButton(
                             onClick = onLike,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(sizes.likeButton)  // 48dp target
                         ) {
                             Icon(
                                 imageVector = if (isLiked) Icons.Filled.Favorite
                                 else Icons.Outlined.FavoriteBorder,
                                 contentDescription = if (isLiked) "Unlike episode"
                                 else "Like episode",
-                                tint = if (isLiked) Color(0xFFFF6B6B) else Color.Gray,
-                                modifier = Modifier.size(18.dp)
+                                tint = if (isLiked) colors.favouriteActive
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(sizes.iconCompact)
                             )
                         }
                     }
@@ -134,9 +137,9 @@ import tech.unrealistic.cineflix.helpers.formatTime
 
         if (!isLast) {
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                color = Color.LightGray.copy(alpha = 0.5f),
-                thickness = 0.5.dp
+                modifier = Modifier.padding(vertical = spacing.xs),
+                color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = sizes.hairline
             )
         }
     }

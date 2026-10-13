@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -32,15 +30,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.core.components.ActionButtons
 import tech.unrealistic.cineflix.core.components.ExpandableText
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.displayTitle
 import tech.unrealistic.cineflix.helpers.genreNames
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.HeadlineStrongStyle
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 @Composable
  fun DetailSheetHeroSection(
@@ -62,12 +62,15 @@ import tech.unrealistic.cineflix.helpers.genreNames
     val runtimeOrSeasons = if (isTvShow) "Seasons" else "Runtime"
     val country = mediaItem.originCountry?.firstOrNull()
     val overview = mediaItem.overview
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+    val colors = AppTheme.colors
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(sizes.detailsHeroHeight)
         ) {
             val posterUrl = "https://image.tmdb.org/t/p/w500$backdropPath"
 
@@ -83,7 +86,7 @@ import tech.unrealistic.cineflix.helpers.genreNames
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(sizes.detailsHeroFadeH)
                     .align(Alignment.BottomCenter)
                     .background(
                         brush = Brush.verticalGradient(
@@ -99,26 +102,26 @@ import tech.unrealistic.cineflix.helpers.genreNames
                 onClick = onDismissRequest,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 8.dp, end = 8.dp)
-                    .size(48.dp)
+                    .padding(top = spacing.sm, end = spacing.sm)
+                    .size(sizes.touchTarget)   // 48dp dismiss target
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                        .size(sizes.likeButton)
+                        .clip(ShapeCircle)
+                        .background(colors.scrimStrong)
                         .border(
-                            width = 0.8.dp,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
-                            shape = CircleShape
+                            width = sizes.glassBorderWidth,
+                            color = colors.pillBorder,
+                            shape = ShapeCircle
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.size(18.dp)
+                        tint = colors.onImage,   // light in BOTH modes over dark disc
+                        modifier = Modifier.size(sizes.iconCompact)
                     )
                 }
             }
@@ -127,26 +130,31 @@ import tech.unrealistic.cineflix.helpers.genreNames
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .offset(y = (-24).dp)
+                .padding(horizontal = spacing.md)
+                .offset(y = -spacing.titleOverlap)
         ) {
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                modifier = Modifier.padding(bottom = spacing.sm)
             ) {
                 items(genres) { genre ->
                     Surface(
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        shape = ShapePill,
+                        // Solid role — solid chip keeps text AA over the backdrop fade
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         border = BorderStroke(
-                            0.5.dp,
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                            sizes.hairline,
+                            colors.stroke
                         )
                     ) {
                         Text(
                             text = genre,
                             style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(
+                                horizontal = spacing.chipPaddingH,
+                                vertical = spacing.chipPaddingV
+                            )
                         )
                     }
                 }
@@ -154,14 +162,14 @@ import tech.unrealistic.cineflix.helpers.genreNames
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                style = HeadlineStrongStyle,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
             Row(
-                modifier = Modifier.padding(top = 6.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = spacing.gap6, bottom = spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -196,7 +204,7 @@ import tech.unrealistic.cineflix.helpers.genreNames
             )
 
             if (overview!!.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(spacing.md))
                 ExpandableText(
                     text = overview,
                     collapsedMaxLines = 3

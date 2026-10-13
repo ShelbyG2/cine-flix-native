@@ -51,6 +51,12 @@ data class AppSizes(
     // ── State views (empty / error / offline) ─────────────────────────────
     val stateIcon:      Dp = 40.dp,  // icon in error/empty states
 
+    // ── Details sheet ───────────────────────────────────────────────────
+    val detailsHeroHeight: Dp = 300.dp,  // backdrop height
+    val detailsHeroFadeH:  Dp = 140.dp,  // backdrop→surface fade height
+    val iconCompact:       Dp = 18.dp,   // close / like glyphs inside 48dp targets
+    val episodeStillW:     Dp = 130.dp,  // episode thumbnail width
+
     // ── Skeleton placeholders (mirror production dimensions) ─────────────
     val skeletonHeroTrackH: Dp = 340.dp,
     val skeletonChipW:      Dp = 45.dp,
