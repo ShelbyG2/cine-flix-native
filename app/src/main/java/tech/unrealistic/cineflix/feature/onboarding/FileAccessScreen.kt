@@ -72,10 +72,7 @@ fun FileAccessScreen(
         Box {
             GlassMorphOverlay(
                 modifier = Modifier.matchParentSize(),
-                cornerRadius = 24.dp,
-                frostedAlpha = 0.08f,
-                glossAlpha = 0.14f,
-                borderAlpha = 0.25f
+                shape = MaterialTheme.shapes.extraLarge
             )
 
             Column(modifier = Modifier.padding(22.dp)) {

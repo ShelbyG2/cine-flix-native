@@ -247,6 +247,10 @@ data class AppExtendedColors(
     val ratingChipFillAlpha:  Float,  // palette-accent chip fill alpha
     val ratingChipBorderAlpha: Float, // palette-accent chip border alpha
     val posterFadeAlpha:      Float,  // poster→background fade strength
+    val heroTopAlpha:       Float,   // palette hero gradient — top stop
+    val heroMidAlpha:       Float,   // palette hero gradient — mid stop
+    val heroMutedAlpha:     Float,   // palette hero gradient — muted stop
+    val glassNoiseDensity:  Int,     // grain dots per overlay
 
     // ── Navigation chrome
     val navSelectedIcon:    Color,
@@ -284,7 +288,7 @@ internal val LightExtendedColors = AppExtendedColors(
     imageScrimStart    = Color(0x00000000),
     imageScrimEnd      = Color(0xC0000000),
     scrimStrong        = Color(0xCC000000),
-    scrimSoft          = Color(0x66000000),
+    scrimSoft          = Color(0xA6000000),  // 65% — white text stays ≥7:1 on light surfaces
 
     ratingStar         = Color(0xFFF5B301),
     favouriteActive    = Color(0xFFFF6B6B),
@@ -297,6 +301,10 @@ internal val LightExtendedColors = AppExtendedColors(
     ratingChipFillAlpha  = 0.35f,
     ratingChipBorderAlpha = 0.50f,
     posterFadeAlpha      = 0.95f,
+    heroTopAlpha       = 0.85f,
+    heroMidAlpha       = 0.60f,
+    heroMutedAlpha     = 0.75f,
+    glassNoiseDensity  = 400,
 
     navSelectedIcon    = ColorTeal700,       // 5.0:1 on light nav surface
     navUnselectedIcon  = ColorTextSecondary, // 5.3:1
@@ -345,6 +353,10 @@ internal val DarkExtendedColors = AppExtendedColors(
     ratingChipFillAlpha  = 0.35f,
     ratingChipBorderAlpha = 0.50f,
     posterFadeAlpha      = 0.95f,
+    heroTopAlpha       = 0.85f,
+    heroMidAlpha       = 0.60f,
+    heroMutedAlpha     = 0.75f,
+    glassNoiseDensity  = 400,
 
     navSelectedIcon    = ColorWhite,          // 17.4:1 on #1b1b1b
     navUnselectedIcon  = Color(0xFF9E9E9E),   // 5.9:1

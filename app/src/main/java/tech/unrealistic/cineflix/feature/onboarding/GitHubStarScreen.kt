@@ -104,10 +104,7 @@ fun GitHubStarScreen(
         Box {
             GlassMorphOverlay(
                 modifier = Modifier.matchParentSize(),
-                cornerRadius = 50.dp,
-                frostedAlpha = 0.10f,
-                glossAlpha = 0.16f,
-                borderAlpha = 0.26f
+                shape = tech.unrealistic.cineflix.ui.theme.ShapeRound
             )
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),

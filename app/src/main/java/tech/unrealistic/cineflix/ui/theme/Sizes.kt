@@ -47,6 +47,19 @@ data class AppSizes(
     val mediaCardWidth:    Dp = 140.dp,
     val mediaCardPosterRatio: Float = 1.5f,   // height = width × ratio (2:3)
     val overlayButtonPad:  Dp = 6.dp,   // inset of corner buttons on posters
+
+    // ── State views (empty / error / offline) ─────────────────────────────
+    val stateIcon:      Dp = 40.dp,  // icon in error/empty states
+
+    // ── Skeleton placeholders (mirror production dimensions) ─────────────
+    val skeletonHeroTrackH: Dp = 340.dp,
+    val skeletonChipW:      Dp = 45.dp,
+    val skeletonChipH:      Dp = 24.dp,
+    val skeletonGenreW:     Dp = 75.dp,
+    val skeletonTitleW:     Dp = 160.dp,
+    val skeletonTitleH:     Dp = 24.dp,
+    val skeletonPosterW:    Dp = 120.dp,
+    val skeletonPosterH:    Dp = 180.dp,
 )
 
 val LocalAppSizes = staticCompositionLocalOf { AppSizes() }

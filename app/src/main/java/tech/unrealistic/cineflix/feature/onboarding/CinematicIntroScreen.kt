@@ -278,10 +278,7 @@ fun CinematicIntroScreen(
                         // Glass layers (frosted base, gloss, rim light, noise)
                         GlassMorphOverlay(
                             modifier = Modifier.matchParentSize(),
-                            cornerRadius = 24.dp,
-                            frostedAlpha = 0.10f,
-                            glossAlpha = 0.18f,
-                            borderAlpha = 0.28f
+                            shape = MaterialTheme.shapes.extraLarge
                         )
 
                         Column(modifier = Modifier.padding(20.dp)) {

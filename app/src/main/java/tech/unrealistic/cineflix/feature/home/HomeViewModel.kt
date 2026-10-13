@@ -39,6 +39,9 @@ class HomeViewModel : ViewModel() {
         fetchAllHomeData()
     }
 
+    /** Retry affordance for the error state — re-runs the existing fetch. */
+    fun onRetry() = fetchAllHomeData()
+
     private fun fetchAllHomeData() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading

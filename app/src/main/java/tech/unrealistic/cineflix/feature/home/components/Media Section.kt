@@ -11,9 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 @Composable
 fun MediaSection(
@@ -26,20 +26,23 @@ fun MediaSection(
 ) {
     if (items.isEmpty()) return           // don't render an empty section at all
 
-    Column(modifier = modifier.padding(bottom = 28.dp)) {
+    Column(modifier = modifier.padding(bottom = AppTheme.spacing.sectionPaddingBottom)) {
 
         Text(
             text     = title,
             style    = MaterialTheme.typography.titleLarge,
             color    = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.md,
+                vertical = AppTheme.spacing.sm
+            )
         )
 
         // LazyRow instead of LazyHorizontalGrid(Fixed(1)) —
         // Grid for a single row adds unnecessary overhead
         LazyRow(
-            contentPadding      = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding      = PaddingValues(horizontal = AppTheme.spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
         ) {
             items(
                 items = items,

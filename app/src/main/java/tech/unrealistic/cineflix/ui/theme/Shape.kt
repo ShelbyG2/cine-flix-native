@@ -69,3 +69,6 @@ val ShapePill = RoundedCornerShape(50)
 
 /** Circle — round icon buttons, avatars. Use instead of raw CircleShape in composables. */
 val ShapeCircle = CircleShape
+
+/** 50dp radius — large glass orbs / spheres. */
+val ShapeRound = RoundedCornerShape(50.dp)

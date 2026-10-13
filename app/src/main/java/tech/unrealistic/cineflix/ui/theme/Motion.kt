@@ -19,7 +19,8 @@ data class AppMotion(
     val shortMs:  Int = 150,
     val mediumMs: Int = 300,
     val longMs:   Int = 500,
-    val shimmerMs: Int = 1200,  // skeleton sweep — static when reduceMotion
+    val shimmerMs:  Int = 1200, // skeleton sweep — static when reduceMotion
+    val longFadeMs: Int = 800,   // palette hero colour crossfade
 )
 
 val LocalAppMotion = staticCompositionLocalOf { AppMotion() }
