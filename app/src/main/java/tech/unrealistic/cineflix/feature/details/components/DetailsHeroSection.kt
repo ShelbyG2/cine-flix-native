@@ -49,7 +49,10 @@ import tech.unrealistic.cineflix.helpers.genreNames
     onDismissRequest: () -> Unit,
     onPlayClick: (Any) -> Unit,
     onFavourite: (Any) -> Unit,
-    onMediaShare: (Any) -> Unit
+    onMediaShare: (Any) -> Unit,
+    isFavourite: Boolean = false,
+    isSaved: Boolean = false,
+    onSave: (Any) -> Unit = {}
 ) {
 
     val backdropPath = mediaItem.backdropPath
@@ -185,8 +188,10 @@ import tech.unrealistic.cineflix.helpers.genreNames
             ActionButtons(
                 item = mediaItem,
                 onMediaShare = { onMediaShare(mediaItem) },
-                isFavourite = false,
+                isFavourite = isFavourite,
                 onFavourite = { onFavourite(mediaItem) },
+                isSaved = isSaved,
+                onSave = { onSave(mediaItem) },
                 onPlay = { onPlayClick(mediaItem) }
             )
 

@@ -10,9 +10,16 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +39,9 @@ import tech.unrealistic.cineflix.helpers.formatTime
  fun TvEpisodeItem(
     episode: Episode,
     index: Int,
-    isLast: Boolean
+    isLast: Boolean,
+    isLiked: Boolean = false,
+    onLike: (() -> Unit)? = null
 ) {
 
     val stillPath = episode.stillPath
@@ -85,18 +94,40 @@ import tech.unrealistic.cineflix.helpers.formatTime
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = runtime,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = airDate,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = runtime,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = airDate,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+
+                    if (onLike != null) {
+                        IconButton(
+                            onClick = onLike,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isLiked) Icons.Filled.Favorite
+                                else Icons.Outlined.FavoriteBorder,
+                                contentDescription = if (isLiked) "Unlike episode"
+                                else "Like episode",
+                                tint = if (isLiked) Color(0xFFFF6B6B) else Color.Gray,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
+import tech.unrealistic.cineflix.data.local.LibraryRepository
+import tech.unrealistic.cineflix.data.local.LibraryItemEntity
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
@@ -60,6 +62,24 @@ fun HomeScreen(
     var isMediaDetailsSheetOpen by remember { mutableStateOf(false) }
     var selectedMediaId by remember { mutableStateOf<Int?>(null) }
     var selectedMediaType by remember { mutableStateOf<String?>(null) }
+
+    // ── Library (favourites / saved) state — single source of truth ──────
+    val favouriteKeys by LibraryRepository.favouriteKeys.collectAsStateWithLifecycle()
+    val savedKeys by LibraryRepository.savedKeys.collectAsStateWithLifecycle()
+    val likedEpisodeKeys by LibraryRepository.likedEpisodeKeys.collectAsStateWithLifecycle()
+
+    // key format is "listType:mediaType:mediaId" — the id lives at index 2.
+    // favourites for shows/movies exclude episodes (they get their own row).
+    val favouriteIds = remember(favouriteKeys) {
+        favouriteKeys.filter { !it.endsWith(":${LibraryItemEntity.TYPE_EPISODE}") }
+            .mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
+    val savedIds = remember(savedKeys) {
+        savedKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
+    val likedEpisodeIds = remember(likedEpisodeKeys) {
+        likedEpisodeKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
 
     val mediaDetailsSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false
@@ -121,28 +141,40 @@ fun HomeScreen(
                         carouselState = carouselState,
                         modifier = Modifier,
                         carouselHeight = carouselHeight,
-                        onMediaClick = openMediaDetails
+                        onMediaClick = openMediaDetails,
+                        favouriteIds = favouriteIds,
+                        onFavourite = { LibraryRepository.toggleFavourite(it.id, it.mediaType) },
+                        savedIds = savedIds,
+                        onSaved = { LibraryRepository.toggleSaved(it.id, it.mediaType) }
                     )
 
                     MediaSection(
                         title = "Trending Movies",
                         items = state.trendingMovies,
-                        onMediaClick = openMediaDetails
+                        onMediaClick = openMediaDetails,
+                        savedIds = savedIds,
+                        onSaveToggle = { LibraryRepository.toggleSaved(it.id, it.mediaType) }
                     )
                     MediaSection(
                         title = "Trending TV Shows",
                         items = state.trendingTvShows,
-                        onMediaClick = openMediaDetails
+                        onMediaClick = openMediaDetails,
+                        savedIds = savedIds,
+                        onSaveToggle = { LibraryRepository.toggleSaved(it.id, it.mediaType) }
                     )
                     MediaSection(
                         title = "Rated Movies",
                         items = state.ratedMovies,
-                        onMediaClick = openMediaDetails
+                        onMediaClick = openMediaDetails,
+                        savedIds = savedIds,
+                        onSaveToggle = { LibraryRepository.toggleSaved(it.id, it.mediaType) }
                     )
                     MediaSection(
                         title = "Rated Tv Shows",
                         items = state.ratedTv,
-                        onMediaClick = openMediaDetails
+                        onMediaClick = openMediaDetails,
+                        savedIds = savedIds,
+                        onSaveToggle = { LibraryRepository.toggleSaved(it.id, it.mediaType) }
                     )
                     MediaDetailsBottomSheet(
                         showBottomSheet = isMediaDetailsSheetOpen,
@@ -150,6 +182,18 @@ fun HomeScreen(
                         mediaId = selectedMediaId ?: 0,
                         mediaType = selectedMediaType ?: "na",
                         sheetState = mediaDetailsSheetState,
+                        isFavourite = (selectedMediaId ?: 0) in favouriteIds,
+                        onFavourite = {
+                            LibraryRepository.toggleFavourite(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        },
+                        isSaved = (selectedMediaId ?: 0) in savedIds,
+                        onSave = {
+                            LibraryRepository.toggleSaved(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        },
+                        likedEpisodeIds = likedEpisodeIds,
+                        onEpisodeLike = { seriesId, seasonNumber, episodeId ->
+                            LibraryRepository.toggleEpisodeLike(seriesId, seasonNumber, episodeId)
+                        }
                     )
                 }
                 FloatingTopBar(

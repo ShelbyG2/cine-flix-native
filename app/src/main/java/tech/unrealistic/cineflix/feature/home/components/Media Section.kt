@@ -21,6 +21,8 @@ fun MediaSection(
     items: List<MediaItem>,          // unified type — no more movies/tvShows split
     modifier: Modifier = Modifier,
     onMediaClick:((Int, String) -> Unit),
+    savedIds: Set<Int> = emptySet(),
+    onSaveToggle: ((MediaItem) -> Unit)? = null,
 ) {
     if (items.isEmpty()) return           // don't render an empty section at all
 
@@ -45,6 +47,8 @@ fun MediaSection(
             ) { item ->
                 MediaCard(
                     media      = item,
+                    isSaved = savedIds.contains(item.id),
+                    onSaveToggle = if (onSaveToggle != null) {{ onSaveToggle(item) }} else null,
                     modifier = Modifier.clickable {
                         onMediaClick(item.id, item.mediaType) }
 

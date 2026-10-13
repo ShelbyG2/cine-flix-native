@@ -49,7 +49,12 @@ fun MediaDetailsBottomSheet(
     sheetState: SheetState,
     onPlayClick: (Any) -> Unit = {},
     onFavourite: (Any) -> Unit = {},
-    onMediaShare: (Any) -> Unit = {}
+    onMediaShare: (Any) -> Unit = {},
+    isFavourite: Boolean = false,
+    isSaved: Boolean = false,
+    onSave: (Any) -> Unit = {},
+    likedEpisodeIds: Set<Int> = emptySet(),
+    onEpisodeLike: ((seriesId: Int, seasonNumber: Int, episodeId: Int) -> Unit)? = null
 ) {
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -115,7 +120,10 @@ fun MediaDetailsBottomSheet(
                                 onDismissRequest = onDismissRequest,
                                 onPlayClick = onPlayClick,
                                 onFavourite = onFavourite,
-                                onMediaShare = onMediaShare
+                                onMediaShare = onMediaShare,
+                                isFavourite = isFavourite,
+                                isSaved = isSaved,
+                                onSave = onSave
                             )
                         }
 
@@ -136,12 +144,20 @@ fun MediaDetailsBottomSheet(
 
                             itemsIndexed(
                                 items = currentEpisodes,
-                                key = { _, episode -> episode.id ?: episode.hashCode() }
+                                key = { _, episode -> episode.id }
                             ) { index, episode ->
                                 TvEpisodeItem(
                                     episode = episode,
                                     index = index,
-                                    isLast = index == currentEpisodes.lastIndex
+                                    isLast = index == currentEpisodes.lastIndex,
+                                    isLiked = likedEpisodeIds.contains(episode.id),
+                                    onLike = {
+                                        onEpisodeLike?.invoke(
+                                            tvItem.id,
+                                            selectedSeason,
+                                            episode.id
+                                        )
+                                    }
                                 )
                             }
                         }

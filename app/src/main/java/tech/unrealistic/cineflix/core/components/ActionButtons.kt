@@ -17,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
@@ -45,7 +47,9 @@ fun ActionButtons(
     onPlay: () -> Unit,
     onFavourite: (() -> Unit)? = null,
     onMediaClick: ((Int, String) -> Unit)? = null,
-    onMediaShare: (()->Unit )? = null
+    onMediaShare: (() -> Unit)? = null,
+    isSaved: Boolean = false,
+    onSave: (() -> Unit)? = null
 ) {
 
     val contentColor = Color.White
@@ -123,7 +127,39 @@ fun ActionButtons(
                 label = "fav_scale"
             )
 
+            //  Saved (watchlist) button glass icon button
+            val savedScale by animateFloatAsState(
+                targetValue = if (isSaved) 1.25f else 1.0f,
+                animationSpec = tween(200),
+                label = "save_scale"
+            )
 
+            if (onSave != null) {
+                IconButton(
+                    onClick = onSave, colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.White.copy(alpha = 0.15f),
+                        contentColor = if (isSaved) Color(0xFFFFC107) else contentColor
+                    ), modifier = Modifier
+                        .size(52.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = 0.30f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = if (isSaved) Icons.Filled.Bookmark
+                        else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isSaved) "Remove from saved"
+                        else "Save for later",
+                        modifier = Modifier
+                            .size(22.dp)
+                            .graphicsLayer {
+                                scaleX = savedScale
+                                scaleY = savedScale
+                            })
+                }
+            }
 
             if (onFavourite != null) {
                 IconButton(

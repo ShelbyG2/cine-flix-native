@@ -47,6 +47,8 @@ fun HeroSection(
     onPlayClick: (MediaItem) -> Unit = {},
     onFavourite: (MediaItem) -> Unit = {},
     favouriteIds: Set<Int> = emptySet(),
+    onSaved: (MediaItem) -> Unit = {},
+    savedIds: Set<Int> = emptySet(),
     carouselHeight: Dp,
     onMediaClick: ((Int, String) -> Unit)
 ) {
@@ -151,7 +153,9 @@ fun HeroSection(
                 item = focusedItem,
                 isFavourite = favouriteIds.contains(focusedItem?.id),
                 onPlay = { focusedItem?.let { onPlayClick(it) } },
-                onFavourite = { onFavourite(focusedItem!!) },
+                onFavourite = { focusedItem?.let { onFavourite(it) } },
+                isSaved = savedIds.contains(focusedItem?.id),
+                onSave = { focusedItem?.let { onSaved(it) } },
                 onMediaClick =onMediaClick,
                 modifier = Modifier
                     .fillMaxWidth()

@@ -66,6 +66,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.R
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.core.components.shimmerEffect
+import tech.unrealistic.cineflix.data.local.LibraryItemEntity
+import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Genre
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
@@ -91,6 +93,21 @@ fun DiscoverScreen(
     val selectedSort by viewModel.selectedSort.collectAsStateWithLifecycle()
     val selectedGenreId by viewModel.selectedGenreId.collectAsStateWithLifecycle()
     val availableGenres by viewModel.availableGenres.collectAsStateWithLifecycle()
+
+    // ── Library (favourites / saved) state ─────────────────────────────────
+    val favouriteKeys by LibraryRepository.favouriteKeys.collectAsStateWithLifecycle()
+    val savedKeys by LibraryRepository.savedKeys.collectAsStateWithLifecycle()
+    val likedEpisodeKeys by LibraryRepository.likedEpisodeKeys.collectAsStateWithLifecycle()
+    val favouriteIds = remember(favouriteKeys) {
+        favouriteKeys.filter { !it.endsWith(":${LibraryItemEntity.TYPE_EPISODE}") }
+            .mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
+    val savedIds = remember(savedKeys) {
+        savedKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
+    val likedEpisodeIds = remember(likedEpisodeKeys) {
+        likedEpisodeKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
+    }
 
     // Details sheet state — identical contract to HomeScreen
     var isMediaDetailsSheetOpen by remember { mutableStateOf(false) }
@@ -336,6 +353,8 @@ fun DiscoverScreen(
                                 MediaCard(
                                     media = item,
                                     fillWidth = true,
+                                    isSaved = savedIds.contains(item.id),
+                                    onSaveToggle = { LibraryRepository.toggleSaved(item.id, item.mediaType) },
                                     modifier = Modifier
                                         .clickable {
                                             openMediaDetails(item.id, item.mediaType)
@@ -371,6 +390,14 @@ fun DiscoverScreen(
         mediaId = selectedMediaId,
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
+        isFavourite = selectedMediaId in favouriteIds,
+        onFavourite = { LibraryRepository.toggleFavourite(selectedMediaId, selectedMediaType) },
+        isSaved = selectedMediaId in savedIds,
+        onSave = { LibraryRepository.toggleSaved(selectedMediaId, selectedMediaType) },
+        likedEpisodeIds = likedEpisodeIds,
+        onEpisodeLike = { seriesId, seasonNumber, episodeId ->
+            LibraryRepository.toggleEpisodeLike(seriesId, seasonNumber, episodeId)
+        }
     )
 }
 

@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -46,6 +51,8 @@ fun MediaCard(
     isFocused: Boolean? = null,
     accentColor: Color? = null,
     fillWidth: Boolean = false,   // true → poster stretches to the parent width (grid cells)
+    isSaved: Boolean = false,
+    onSaveToggle: (() -> Unit)? = null,
 ) {
     val isHero = hero ?: false
     val mediaType = media.mediaType
@@ -91,6 +98,28 @@ fun MediaCard(
                             )
                         )
                 )
+                // ── Save (bookmark) overlay — top-end corner, one-tap watchlist ──
+                if (onSaveToggle != null && !isHero) {
+                    IconButton(
+                        onClick = onSaveToggle,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.55f))
+                    ) {
+                        Icon(
+                            imageVector = if (isSaved) Icons.Filled.Bookmark
+                            else Icons.Outlined.BookmarkBorder,
+                            contentDescription = if (isSaved) "Remove from saved"
+                            else "Save for later",
+                            tint = if (isSaved) Color(0xFFFFC107) else Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
                 if (isHero && isFocused == true) {
                     Column(
                         modifier = Modifier
