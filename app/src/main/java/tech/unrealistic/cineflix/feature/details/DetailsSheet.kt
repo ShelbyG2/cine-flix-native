@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
+import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
 import tech.unrealistic.cineflix.ui.theme.AppTheme
@@ -80,7 +80,7 @@ fun MediaDetailsBottomSheet(
                             .width(AppTheme.sizes.dragHandleWidth)
                             .height(AppTheme.sizes.dragHandleHeight)
                             .background(
-                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                                 ShapePill
                             )
                     )
@@ -107,20 +107,14 @@ fun MediaDetailsBottomSheet(
                 when (val state = uiState) {
                     is DetailsSheetState.Loading -> {
                         item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(AppTheme.sizes.detailsHeroHeight),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
+                            DetailShimmerLayout()
                         }
                     }
 
                     is DetailsSheetState.Error -> {
                         item {
                             ErrorState(
+                                title = "Couldn't load details",
                                 message = state.message,
                                 onRetry = {
                                     sheetViewModel.fetchSheetDetails(mediaType, mediaId)
