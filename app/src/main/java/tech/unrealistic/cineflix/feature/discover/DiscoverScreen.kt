@@ -86,6 +86,9 @@ import tech.unrealistic.cineflix.ui.theme.withAlpha
 @Composable
 fun DiscoverScreen(
     onNavigate: (() -> Unit)? = null,
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
+        { _, _, _ -> },
     viewModel: DiscoverViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -368,6 +371,14 @@ fun DiscoverScreen(
         mediaId = selectedMediaId,
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
+        onPlay = { item ->
+            isMediaDetailsSheetOpen = false
+            onPlay(item)
+        },
+        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+            isMediaDetailsSheetOpen = false
+            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+        },
         onFavourite = { item -> LibraryRepository.toggleFavourite(item.id, item.mediaType) },
         onSave = { item -> LibraryRepository.toggleSaved(item.id, item.mediaType) },
         likedEpisodeIds = likedEpisodeIds,

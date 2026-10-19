@@ -15,4 +15,9 @@ data object Favourites : NavKey
 @Serializable
 data class MediaDetailModal(val valid: Int, val type: String) : NavKey
 @Serializable
-data class Player(val id: Int, val type: String)
+data class Player(
+    val id: Int,
+    val type: String,
+    val season: Int? = null,
+    val episode: Int? = null,
+)

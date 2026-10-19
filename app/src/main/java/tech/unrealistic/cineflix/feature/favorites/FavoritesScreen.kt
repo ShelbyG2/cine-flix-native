@@ -73,6 +73,9 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 @Composable
 fun FavouriteScreen(
     onNavigate: (() -> Unit)? = null,
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
+        { _, _, _ -> },
     viewModel: FavouritesViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -235,6 +238,14 @@ fun FavouriteScreen(
         mediaId = selectedMediaId,
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
+        onPlay = { item ->
+            isMediaDetailsSheetOpen = false
+            onPlay(item)
+        },
+        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+            isMediaDetailsSheetOpen = false
+            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+        },
         onFavourite = { item ->
             LibraryRepository.toggleFavourite(item.id, item.mediaType)
         },

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,11 +26,13 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.discover.DiscoverScreen
 import tech.unrealistic.cineflix.feature.favorites.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
 import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
+import tech.unrealistic.cineflix.feature.player.VideoPlayerScreen
 import tech.unrealistic.cineflix.feature.splash.SplashScreen
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 
@@ -93,6 +96,21 @@ private fun MainAppContent() {
 
     val  mediaRepository = RetrofitClient.tmdbService
 
+    // Playback is an overlay rather than a nav destination: the library tab
+    // and its scroll position stay alive underneath the landscape player.
+    var playback by remember { mutableStateOf<Player?>(null) }
+    val playItem: (MediaItem) -> Unit = { item ->
+        playback = if (item.mediaType == "tv") {
+            Player(id = item.id, type = "tv", season = 1, episode = 1)
+        } else {
+            Player(id = item.id, type = "movie")
+        }
+    }
+    val playEpisode: (Int, Int, Int) -> Unit = { seriesId, season, episode ->
+        playback = Player(id = seriesId, type = "tv", season = season, episode = episode)
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -136,14 +154,18 @@ private fun MainAppContent() {
                             onNavigate = {
                                 backStack.clear()
                                 backStack.add(Discover)
-                            }
+                            },
+                            onPlay = playItem,
+                            onPlayEpisode = playEpisode
                         ) }
                         is Favourites -> NavEntry(key) {
                             FavouriteScreen(
                                 onNavigate = {
                                     backStack.clear()
                                     backStack.add(Discover)
-                                }
+                                },
+                                onPlay = playItem,
+                                onPlayEpisode = playEpisode
                             )
                         }
                         is Discover -> NavEntry(key) {
@@ -151,7 +173,9 @@ private fun MainAppContent() {
                                 onNavigate = {
                                     backStack.clear()
                                     backStack.add(Home)
-                                }
+                                },
+                                onPlay = playItem,
+                                onPlayEpisode = playEpisode
                             )
                         }
                         is Profile -> NavEntry(key){ProfileScreen () }
@@ -160,6 +184,17 @@ private fun MainAppContent() {
                     }
 
                 }
+            )
+        }
+    }
+
+        playback?.let { request ->
+            VideoPlayerScreen(
+                tmdbId = request.id,
+                mediaType = request.type,
+                season = request.season,
+                episode = request.episode,
+                onExit = { playback = null }
             )
         }
     }

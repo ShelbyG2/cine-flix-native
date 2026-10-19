@@ -31,6 +31,7 @@ import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
@@ -42,7 +43,11 @@ import tech.unrealistic.cineflix.feature.home.components.MediaSection
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigate: (() -> Unit)? = null, viewModel: HomeViewModel = viewModel()
+    onNavigate: (() -> Unit)? = null,
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
+        { _, _, _ -> },
+    viewModel: HomeViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -134,6 +139,7 @@ fun HomeScreen(
                         modifier = Modifier,
                         carouselHeight = carouselHeight,
                         onMediaClick = openMediaDetails,
+                        onPlayClick = onPlay,
                         favouriteIds = favouriteIds,
                         onFavourite = { LibraryRepository.toggleFavourite(it.id, it.mediaType) },
                         savedIds = savedIds,
@@ -174,6 +180,14 @@ fun HomeScreen(
                         mediaId = selectedMediaId ?: 0,
                         mediaType = selectedMediaType ?: "na",
                         sheetState = mediaDetailsSheetState,
+                        onPlay = { item ->
+                            isMediaDetailsSheetOpen = false
+                            onPlay(item)
+                        },
+                        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+                            isMediaDetailsSheetOpen = false
+                            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+                        },
                         onFavourite = { item ->
                             LibraryRepository.toggleFavourite(item.id, item.mediaType)
                         },

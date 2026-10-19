@@ -39,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
 import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
 import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
@@ -57,7 +58,9 @@ fun MediaDetailsBottomSheet(
     mediaId: Int,
     mediaType: String,
     sheetState: SheetState,
-    onPlayClick: (MediaItem) -> Unit = {},
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
+        { _, _, _ -> },
     onFavourite: (MediaItem) -> Unit = {},
     onMediaShare: (MediaItem) -> Unit = {},
     onSave: (MediaItem) -> Unit = {},
@@ -153,7 +156,15 @@ fun MediaDetailsBottomSheet(
                                 mediaItem = mediaItem,
                                 isTvShow = state is DetailsSheetState.TvSuccess,
                                 onDismissRequest = onDismissRequest,
-                                onPlayClick = onPlayClick,
+                                // A film starts immediately; a series starts at
+                                // the first episode of the season on screen.
+                                onPlayClick = { item ->
+                                    if (item is Tv) {
+                                        onPlayEpisode(item.id, selectedSeason, 1)
+                                    } else {
+                                        onPlay(item)
+                                    }
+                                },
                                 onFavourite = onFavourite,
                                 onMediaShare = onMediaShare,
                                 isFavourite = isFavourite,
@@ -211,6 +222,13 @@ fun MediaDetailsBottomSheet(
                                         episode = episode,
                                         isLast = index == currentEpisodes.lastIndex,
                                         isLiked = likedEpisodeIds.contains(episode.id),
+                                        onPlay = {
+                                            onPlayEpisode(
+                                                tvItem.id,
+                                                selectedSeason,
+                                                episode.episodeNumber
+                                            )
+                                        },
                                         onLike = {
                                             onEpisodeLike?.invoke(
                                                 tvItem.id,
