@@ -1,7 +1,6 @@
 package tech.unrealistic.cineflix.feature.details.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +35,6 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
 @Composable
  fun TvEpisodeItem(
     episode: Episode,
-    index: Int,
     isLast: Boolean,
     isLiked: Boolean = false,
     onLike: (() -> Unit)? = null
@@ -44,8 +42,8 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
 
     val stillPath = episode.stillPath
     val name = episode.name
-    val overview = episode.overview
-    val runtime = formatTime(episode.runtime ?: 0)
+    val overview = episode.overview.takeIf { it.isNotBlank() }
+    val runtime = episode.runtime?.let { formatTime(it) }
     val airDate = episode.airDate
 
     val spacing = AppTheme.spacing
@@ -56,13 +54,13 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* Handle episode click */ }
+                // No click affordance until episode playback is wired up.
                 .padding(vertical = spacing.sm),
             verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500$stillPath",
-                contentDescription = "Episode still",
+                model = "https://image.tmdb.org/t/p/w300$stillPath",
+                contentDescription = "Episode ${episode.episodeNumber}: $name",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .width(sizes.episodeStillW)
@@ -77,19 +75,22 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
                     .weight(1f)
             ) {
                 Text(
-                    text = "${index + 1}. $name",
+                    text = "${episode.episodeNumber}. $name",
                     style = TitleStrongStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Text(
-                    text = overview,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = spacing.xs)
-                )
+                overview?.let { text ->
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = spacing.xs)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(spacing.sm))
 
@@ -103,11 +104,13 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Dedicated colour role — AA in both modes (was a hardcoded grey)
-                        Text(
-                            text = runtime,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        runtime?.let { text ->
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Text(
                             text = airDate,
                             style = MaterialTheme.typography.bodySmall,

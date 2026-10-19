@@ -2,6 +2,7 @@ package tech.unrealistic.cineflix.feature.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +27,11 @@ sealed interface DetailsSheetState {
     data class TvSuccess(
         val tv: Tv,
         val similarShows: List<MediaItem>,
-
-        ) : DetailsSheetState
+        /** True while a newly selected season is being fetched. */
+        val episodesLoading: Boolean = false,
+        /** Human-readable season failure, null when the list is valid. */
+        val episodesError: String? = null,
+    ) : DetailsSheetState
 
     data class Error(
         val message: String
@@ -41,7 +45,10 @@ class DetailsSheetViewModel : ViewModel() {
     private val _currentSeasonEpisode = MutableStateFlow<List<Episode>>(emptyList())
     val currentSeasonEpisode: StateFlow<List<Episode>> = _currentSeasonEpisode.asStateFlow()
 
+    private var episodesJob: Job? = null
+
     fun fetchSheetDetails(mediaType: String, mediaId: Int) {
+        episodesJob?.cancel()
         viewModelScope.launch {
             _uiState.value = DetailsSheetState.Loading
             try {
@@ -68,42 +75,56 @@ class DetailsSheetViewModel : ViewModel() {
                         }
                         _currentSeasonEpisode.value = initialSeasonDeferred.await().episodes
                         _uiState.value = DetailsSheetState.TvSuccess(
-                            TvDetailsDeferred.await(),
-                            similarDeferredTv.await().results,
-
-
-                            )
+                            tv = TvDetailsDeferred.await(),
+                            similarShows = similarDeferredTv.await().results,
+                        )
                     }
 
                 }
             } catch (e: Exception) {
-                // Never surface raw exception class names/messages to the user.
-                _uiState.value = DetailsSheetState.Error(
-                    when (e) {
-                        is UnknownHostException ->
-                            "No internet connection. Please turn on mobile data or Wi-Fi."
-                        is SocketTimeoutException ->
-                            "The server took too long to respond. Please try again."
-                        else -> "Couldn't load these details. Please try again."
-                    }
-                )
+                _uiState.value = DetailsSheetState.Error(humanMessage(e))
             }
         }
 
     }
 
     fun fetchEpisodesOnly(seasonNumber: Int, seriesId: Int) {
-        viewModelScope.launch {
+        episodesJob?.cancel()
+        episodesJob = viewModelScope.launch {
+            val current = _uiState.value as? DetailsSheetState.TvSuccess ?: return@launch
+            // Keep the show details on screen and show skeleton rows in place
+            // of the episode list while the new season loads.
+            _uiState.value = current.copy(episodesLoading = true, episodesError = null)
             try {
                 val fetchedSeasonEpisodes = RetrofitClient.tmdbService.getSeason(
                     seriesId = seriesId, seasonNumber = seasonNumber
                 )
+                // Ignore a stale response if the sheet moved to another show.
+                val latest = _uiState.value as? DetailsSheetState.TvSuccess ?: return@launch
+                if (latest.tv.id != seriesId) return@launch
+
                 _currentSeasonEpisode.value = fetchedSeasonEpisodes.episodes
-
+                _uiState.value = latest.copy(episodesLoading = false)
             } catch (e: Exception) {
-
+                val latest = _uiState.value as? DetailsSheetState.TvSuccess ?: return@launch
+                if (latest.tv.id != seriesId) return@launch
+                _uiState.value = latest.copy(
+                    episodesLoading = false,
+                    episodesError = humanMessage(e)
+                )
             }
         }
 
+    }
+
+    /**
+     * Never surface raw exception class names/messages to the user.
+     */
+    private fun humanMessage(e: Exception): String = when (e) {
+        is UnknownHostException ->
+            "No internet connection. Please turn on mobile data or Wi-Fi."
+        is SocketTimeoutException ->
+            "The server took too long to respond. Please try again."
+        else -> "Something went wrong. Please try again."
     }
 }

@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,9 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
 import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
+import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
 import tech.unrealistic.cineflix.ui.theme.AppTheme
@@ -163,23 +167,49 @@ fun MediaDetailsBottomSheet(
                                 )
                             }
 
-                            itemsIndexed(
-                                items = currentEpisodes,
-                                key = { _, episode -> episode.id }
-                            ) { index, episode ->
-                                TvEpisodeItem(
-                                    episode = episode,
-                                    index = index,
-                                    isLast = index == currentEpisodes.lastIndex,
-                                    isLiked = likedEpisodeIds.contains(episode.id),
-                                    onLike = {
-                                        onEpisodeLike?.invoke(
-                                            tvItem.id,
-                                            selectedSeason,
-                                            episode.id
-                                        )
-                                    }
-                                )
+                            when {
+                                state.episodesLoading -> item {
+                                    EpisodeShimmerList()
+                                }
+
+                                state.episodesError != null -> item {
+                                    ErrorState(
+                                        title = "Couldn't load episodes",
+                                        message = state.episodesError,
+                                        onRetry = {
+                                            sheetViewModel.fetchEpisodesOnly(
+                                                selectedSeason,
+                                                tvItem.id
+                                            )
+                                        }
+                                    )
+                                }
+
+                                currentEpisodes.isEmpty() -> item {
+                                    EmptyState(
+                                        icon = Icons.Outlined.VideoLibrary,
+                                        title = "No episodes available",
+                                        subtitle = "This season has no episode data yet."
+                                    )
+                                }
+
+                                else -> itemsIndexed(
+                                    items = currentEpisodes,
+                                    key = { _, episode -> episode.id }
+                                ) { index, episode ->
+                                    TvEpisodeItem(
+                                        episode = episode,
+                                        isLast = index == currentEpisodes.lastIndex,
+                                        isLiked = likedEpisodeIds.contains(episode.id),
+                                        onLike = {
+                                            onEpisodeLike?.invoke(
+                                                tvItem.id,
+                                                selectedSeason,
+                                                episode.id
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
 

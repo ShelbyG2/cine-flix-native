@@ -92,3 +92,57 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
         }
     }
 }
+
+/**
+ * Three episode-row placeholders shown while a season is switching.
+ */
+@Composable
+fun EpisodeShimmerList(
+    modifier: Modifier = Modifier,
+    rowCount: Int = 3,
+) {
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "Loading episodes…" }
+    ) {
+        repeat(rowCount) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = spacing.md, vertical = spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(spacing.gap12)
+            ) {
+                ShimmerBox(
+                    modifier = Modifier
+                        .width(sizes.episodeStillW)
+                        .aspectRatio(16f / 9f),
+                    shape = MaterialTheme.shapes.small
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(spacing.sm)
+                ) {
+                    ShimmerBox(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .height(spacing.gap12)
+                    )
+                    ShimmerBox(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(spacing.gap12)
+                    )
+                    ShimmerBox(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .height(spacing.gap12)
+                    )
+                }
+            }
+        }
+    }
+}
