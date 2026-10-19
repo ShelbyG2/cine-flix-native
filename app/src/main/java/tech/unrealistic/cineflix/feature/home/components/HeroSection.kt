@@ -260,7 +260,9 @@ fun GlassHeroBackground(
                     )
                     onDrawBehind {
                         drawRect(streak)
-                        val random = Random(42)   // stable grain across recompositions
+                        // Fixed seed inside the draw scope keeps the grain pattern
+                        // identical on every redraw.
+                        val random = Random(42)
                         repeat(colors.glassNoiseDensity) {
                             drawCircle(
                                 color = colors.glassNoise.withAlpha(
