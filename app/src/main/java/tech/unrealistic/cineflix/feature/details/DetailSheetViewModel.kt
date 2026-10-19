@@ -25,6 +25,8 @@ sealed interface DetailsSheetState {
         val similarShows: List<MediaItem>,
         /** Comes from the local favourites repository, never a literal. */
         val isFavourite: Boolean = false,
+        /** Comes from the local saved repository, never a literal. */
+        val isSaved: Boolean = false,
     ) : DetailsSheetState
 
     data class TvSuccess(
@@ -36,6 +38,8 @@ sealed interface DetailsSheetState {
         val episodesError: String? = null,
         /** Comes from the local favourites repository, never a literal. */
         val isFavourite: Boolean = false,
+        /** Comes from the local saved repository, never a literal. */
+        val isSaved: Boolean = false,
     ) : DetailsSheetState
 
     data class Error(
@@ -80,6 +84,31 @@ class DetailsSheetViewModel : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch {
+            LibraryRepository.savedKeys.collect { keys ->
+                when (val current = _uiState.value) {
+                    is DetailsSheetState.MovieSuccess -> {
+                        val saved = keys.contains(
+                            LibraryRepository.savedKey(current.movie.id, current.movie.mediaType)
+                        )
+                        if (saved != current.isSaved) {
+                            _uiState.value = current.copy(isSaved = saved)
+                        }
+                    }
+
+                    is DetailsSheetState.TvSuccess -> {
+                        val saved = keys.contains(
+                            LibraryRepository.savedKey(current.tv.id, current.tv.mediaType)
+                        )
+                        if (saved != current.isSaved) {
+                            _uiState.value = current.copy(isSaved = saved)
+                        }
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
     }
 
     fun fetchSheetDetails(mediaType: String, mediaId: Int) {
@@ -97,7 +126,8 @@ class DetailsSheetViewModel : ViewModel() {
                         _uiState.value = DetailsSheetState.MovieSuccess(
                             movie = MovieDetailsDeferred.await(),
                             similarShows = similarDeferredMovie.await().results,
-                            isFavourite = favouriteSnapshot(mediaId, "movie")
+                            isFavourite = favouriteSnapshot(mediaId, "movie"),
+                            isSaved = savedSnapshot(mediaId, "movie")
                         )
                     } else {
                         val TvDetailsDeferred = async {
@@ -114,7 +144,8 @@ class DetailsSheetViewModel : ViewModel() {
                         _uiState.value = DetailsSheetState.TvSuccess(
                             tv = TvDetailsDeferred.await(),
                             similarShows = similarDeferredTv.await().results,
-                            isFavourite = favouriteSnapshot(mediaId, "tv")
+                            isFavourite = favouriteSnapshot(mediaId, "tv"),
+                            isSaved = savedSnapshot(mediaId, "tv")
                         )
                     }
 
@@ -158,6 +189,11 @@ class DetailsSheetViewModel : ViewModel() {
     private fun favouriteSnapshot(mediaId: Int, mediaType: String): Boolean =
         LibraryRepository.favouriteKeys.value.contains(
             LibraryRepository.favouriteKey(mediaId, mediaType)
+        )
+
+    private fun savedSnapshot(mediaId: Int, mediaType: String): Boolean =
+        LibraryRepository.savedKeys.value.contains(
+            LibraryRepository.savedKey(mediaId, mediaType)
         )
 
     /**

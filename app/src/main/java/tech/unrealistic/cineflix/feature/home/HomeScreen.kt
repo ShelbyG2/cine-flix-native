@@ -177,7 +177,6 @@ fun HomeScreen(
                         onFavourite = { item ->
                             LibraryRepository.toggleFavourite(item.id, item.mediaType)
                         },
-                        isSaved = (selectedMediaId ?: 0) in savedIds,
                         onSave = { item ->
                             LibraryRepository.toggleSaved(item.id, item.mediaType)
                         },

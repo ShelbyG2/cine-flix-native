@@ -61,7 +61,6 @@ fun MediaDetailsBottomSheet(
     onPlayClick: (MediaItem) -> Unit = {},
     onFavourite: (MediaItem) -> Unit = {},
     onMediaShare: (MediaItem) -> Unit = {},
-    isSaved: Boolean = false,
     onSave: (MediaItem) -> Unit = {},
     likedEpisodeIds: Set<Int> = emptySet(),
     onEpisodeLike: ((seriesId: Int, seasonNumber: Int, episodeId: Int) -> Unit)? = null
@@ -141,6 +140,11 @@ fun MediaDetailsBottomSheet(
                         val isFavourite = when (state) {
                             is DetailsSheetState.MovieSuccess -> state.isFavourite
                             is DetailsSheetState.TvSuccess -> state.isFavourite
+                            else -> false
+                        }
+                        val isSaved = when (state) {
+                            is DetailsSheetState.MovieSuccess -> state.isSaved
+                            is DetailsSheetState.TvSuccess -> state.isSaved
                             else -> false
                         }
 

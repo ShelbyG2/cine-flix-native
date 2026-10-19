@@ -370,7 +370,6 @@ fun DiscoverScreen(
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
         onFavourite = { item -> LibraryRepository.toggleFavourite(item.id, item.mediaType) },
-        isSaved = selectedMediaId in savedIds,
         onSave = { item -> LibraryRepository.toggleSaved(item.id, item.mediaType) },
         likedEpisodeIds = likedEpisodeIds,
         onEpisodeLike = { seriesId, seasonNumber, episodeId ->

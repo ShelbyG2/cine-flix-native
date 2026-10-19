@@ -84,11 +84,7 @@ fun FavouriteScreen(
     val mediaDetailsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     // Real library state for the details sheet buttons (no hardcoded flags)
-    val savedKeys by LibraryRepository.savedKeys.collectAsStateWithLifecycle()
     val likedEpisodeKeys by LibraryRepository.likedEpisodeKeys.collectAsStateWithLifecycle()
-    val isSheetSaved = remember(savedKeys, selectedMediaId, selectedMediaType) {
-        savedKeys.contains("saved:$selectedMediaType:$selectedMediaId")
-    }
     val sheetLikedEpisodes = remember(likedEpisodeKeys) {
         likedEpisodeKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
     }
@@ -242,9 +238,8 @@ fun FavouriteScreen(
         onFavourite = { item ->
             LibraryRepository.toggleFavourite(item.id, item.mediaType)
         },
-        isSaved = isSheetSaved,
-        onSave = {
-            LibraryRepository.toggleSaved(selectedMediaId, selectedMediaType)
+        onSave = { item ->
+            LibraryRepository.toggleSaved(item.id, item.mediaType)
         },
         likedEpisodeIds = sheetLikedEpisodes,
         onEpisodeLike = { seriesId, seasonNumber, episodeId ->
