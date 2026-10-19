@@ -270,7 +270,8 @@ fun VideoPlayerScreen(
         if (isPlaying && player != null) {
             MediaController(
                 player = player!!,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                context = LocalContext.current
             )
         }
     }

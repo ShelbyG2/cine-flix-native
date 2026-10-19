@@ -1,5 +1,6 @@
 package tech.unrealistic.cineflix.feature.player
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.media3.exoplayer.ExoPlayer
@@ -13,10 +14,10 @@ import androidx.media3.ui.PlayerView
 @Composable
 fun MediaController(
     player: ExoPlayer,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    context: Context
 ) {
-    PlayerView(
-        player = player,
-        modifier = modifier
-    )
+    PlayerView(context).also { view ->
+        view.setPlayer(player)
+    }
 }

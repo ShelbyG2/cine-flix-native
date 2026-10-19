@@ -1,9 +1,7 @@
 package tech.unrealistic.cineflix.feature.player
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlayerViewModelTest {
@@ -16,7 +14,7 @@ class PlayerViewModelTest {
             onPlayReady = {},
             onPlayError = {}
         )
-        assertEquals(PlayerUiState.Loading, viewModel.uiState.value)
+        org.junit.Assert.assertEquals(PlayerUiState.Loading, viewModel.uiState.value)
     }
 
     @Test
@@ -27,7 +25,7 @@ class PlayerViewModelTest {
             onPlayReady = {},
             onPlayError = {}
         )
-        assertTrue(viewModel.player.value == null)
+        org.junit.Assert.assertTrue(viewModel.player.value == null)
     }
 
     @Test
@@ -38,7 +36,7 @@ class PlayerViewModelTest {
             onPlayReady = {},
             onPlayError = {}
         )
-        assertFalse(viewModel.playbackState.value)
+        org.junit.Assert.assertFalse(viewModel.playbackState.value)
     }
 
     @Test
@@ -49,6 +47,6 @@ class PlayerViewModelTest {
             onPlayReady = {},
             onPlayError = {}
         )
-        assertFalse(viewModel.isPlaying())
+        org.junit.Assert.assertFalse(viewModel.isPlaying())
     }
 }
