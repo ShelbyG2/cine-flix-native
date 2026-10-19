@@ -15,9 +15,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 
@@ -30,11 +32,15 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 fun ErrorState(
     message: String,
     modifier: Modifier = Modifier,
+    title: String = "Something went wrong",
+    icon: ImageVector? = null,
     onRetry: (() -> Unit)? = null,
 ) {
     val spacing = AppTheme.spacing
     val isOffline = message.contains("internet", ignoreCase = true) ||
             message.contains("Wi-Fi", ignoreCase = true)
+    val resolvedIcon = icon ?: if (isOffline) Icons.TwoTone.WifiOff
+    else Icons.Outlined.ErrorOutline
 
     Column(
         modifier = modifier
@@ -44,16 +50,23 @@ fun ErrorState(
         verticalArrangement = Arrangement.spacedBy(spacing.md)
     ) {
         Icon(
-            imageVector = if (isOffline) Icons.TwoTone.WifiOff else Icons.Outlined.ErrorOutline,
+            imageVector = resolvedIcon,
             contentDescription = if (isOffline) "Offline" else "Error",
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(AppTheme.sizes.stateIcon)
         )
 
         Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
             text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
@@ -71,20 +84,22 @@ fun ErrorState(
                 ),
                 modifier = Modifier.defaultMinSize(minHeight = AppTheme.sizes.touchTarget)
             ) {
-                Text(text = "Try Again", style = MaterialTheme.typography.labelLarge)
+                Text(text = "Retry", style = MaterialTheme.typography.labelLarge)
             }
         }
     }
 }
 
 /**
- * Centred empty state — icon, title, supporting message.
+ * Centred empty state — icon, title, optional supporting message and action.
  */
 @Composable
 fun EmptyState(
+    icon: ImageVector,
     title: String,
-    message: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    action: Pair<String, () -> Unit>? = null,
 ) {
     val spacing = AppTheme.spacing
 
@@ -95,17 +110,36 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.sm)
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(AppTheme.sizes.stateIconLg)
+        )
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+
+        subtitle?.takeIf { it.isNotBlank() }?.let { text ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        action?.let { (label, onClick) ->
+            TextButton(
+                onClick = onClick,
+                modifier = Modifier.defaultMinSize(minHeight = AppTheme.sizes.touchTarget)
+            ) {
+                Text(text = label, style = MaterialTheme.typography.labelLarge)
+            }
+        }
     }
 }
