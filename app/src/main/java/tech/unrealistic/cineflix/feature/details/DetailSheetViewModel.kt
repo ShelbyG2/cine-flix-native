@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
@@ -22,6 +23,8 @@ sealed interface DetailsSheetState {
     data class MovieSuccess(
         val movie: Movie,
         val similarShows: List<MediaItem>,
+        /** Comes from the local favourites repository, never a literal. */
+        val isFavourite: Boolean = false,
     ) : DetailsSheetState
 
     data class TvSuccess(
@@ -31,6 +34,8 @@ sealed interface DetailsSheetState {
         val episodesLoading: Boolean = false,
         /** Human-readable season failure, null when the list is valid. */
         val episodesError: String? = null,
+        /** Comes from the local favourites repository, never a literal. */
+        val isFavourite: Boolean = false,
     ) : DetailsSheetState
 
     data class Error(
@@ -47,6 +52,36 @@ class DetailsSheetViewModel : ViewModel() {
 
     private var episodesJob: Job? = null
 
+    init {
+        // Keep the sheet's favourite flag in sync with the local library so
+        // toggles (including on "More Like This" items) reflect real state.
+        viewModelScope.launch {
+            LibraryRepository.favouriteKeys.collect { keys ->
+                when (val current = _uiState.value) {
+                    is DetailsSheetState.MovieSuccess -> {
+                        val favourite = keys.contains(
+                            LibraryRepository.favouriteKey(current.movie.id, current.movie.mediaType)
+                        )
+                        if (favourite != current.isFavourite) {
+                            _uiState.value = current.copy(isFavourite = favourite)
+                        }
+                    }
+
+                    is DetailsSheetState.TvSuccess -> {
+                        val favourite = keys.contains(
+                            LibraryRepository.favouriteKey(current.tv.id, current.tv.mediaType)
+                        )
+                        if (favourite != current.isFavourite) {
+                            _uiState.value = current.copy(isFavourite = favourite)
+                        }
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+    }
+
     fun fetchSheetDetails(mediaType: String, mediaId: Int) {
         episodesJob?.cancel()
         viewModelScope.launch {
@@ -60,7 +95,9 @@ class DetailsSheetViewModel : ViewModel() {
                         val similarDeferredMovie =
                             async { RetrofitClient.tmdbService.getSimilarMovie(mediaId) }
                         _uiState.value = DetailsSheetState.MovieSuccess(
-                            MovieDetailsDeferred.await(), similarDeferredMovie.await().results
+                            movie = MovieDetailsDeferred.await(),
+                            similarShows = similarDeferredMovie.await().results,
+                            isFavourite = favouriteSnapshot(mediaId, "movie")
                         )
                     } else {
                         val TvDetailsDeferred = async {
@@ -77,6 +114,7 @@ class DetailsSheetViewModel : ViewModel() {
                         _uiState.value = DetailsSheetState.TvSuccess(
                             tv = TvDetailsDeferred.await(),
                             similarShows = similarDeferredTv.await().results,
+                            isFavourite = favouriteSnapshot(mediaId, "tv")
                         )
                     }
 
@@ -116,6 +154,11 @@ class DetailsSheetViewModel : ViewModel() {
         }
 
     }
+
+    private fun favouriteSnapshot(mediaId: Int, mediaType: String): Boolean =
+        LibraryRepository.favouriteKeys.value.contains(
+            LibraryRepository.favouriteKey(mediaId, mediaType)
+        )
 
     /**
      * Never surface raw exception class names/messages to the user.

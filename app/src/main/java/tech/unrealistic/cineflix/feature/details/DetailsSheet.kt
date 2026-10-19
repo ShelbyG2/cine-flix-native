@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
 import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
 import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
@@ -57,12 +58,11 @@ fun MediaDetailsBottomSheet(
     mediaId: Int,
     mediaType: String,
     sheetState: SheetState,
-    onPlayClick: (Any) -> Unit = {},
-    onFavourite: (Any) -> Unit = {},
-    onMediaShare: (Any) -> Unit = {},
-    isFavourite: Boolean = false,
+    onPlayClick: (MediaItem) -> Unit = {},
+    onFavourite: (MediaItem) -> Unit = {},
+    onMediaShare: (MediaItem) -> Unit = {},
     isSaved: Boolean = false,
-    onSave: (Any) -> Unit = {},
+    onSave: (MediaItem) -> Unit = {},
     likedEpisodeIds: Set<Int> = emptySet(),
     onEpisodeLike: ((seriesId: Int, seasonNumber: Int, episodeId: Int) -> Unit)? = null
 ) {
@@ -135,6 +135,13 @@ fun MediaDetailsBottomSheet(
                             is DetailsSheetState.MovieSuccess -> state.movie to state.similarShows
                             is DetailsSheetState.TvSuccess -> state.tv to state.similarShows
                             else -> throw IllegalStateException("Invalid state context")
+                        }
+                        // Favourite state lives in the sheet state so it stays
+                        // correct when "More Like This" swaps the displayed item.
+                        val isFavourite = when (state) {
+                            is DetailsSheetState.MovieSuccess -> state.isFavourite
+                            is DetailsSheetState.TvSuccess -> state.isFavourite
+                            else -> false
                         }
 
                         // 1. HERO SECTION & METADATA

@@ -53,12 +53,12 @@ fun DetailSheetHeroSection(
     mediaItem: MediaItem,
     isTvShow: Boolean,
     onDismissRequest: () -> Unit,
-    onPlayClick: (Any) -> Unit,
-    onFavourite: (Any) -> Unit,
-    onMediaShare: (Any) -> Unit,
+    onPlayClick: (MediaItem) -> Unit,
+    onFavourite: (MediaItem) -> Unit,
+    onMediaShare: (MediaItem) -> Unit,
     isFavourite: Boolean = false,
     isSaved: Boolean = false,
-    onSave: (Any) -> Unit = {}
+    onSave: (MediaItem) -> Unit = {}
 ) {
 
     val backdropUrl = mediaItem.backdropPath

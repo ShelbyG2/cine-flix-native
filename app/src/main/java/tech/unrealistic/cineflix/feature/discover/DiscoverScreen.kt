@@ -97,13 +97,8 @@ fun DiscoverScreen(
     val availableGenres by viewModel.availableGenres.collectAsStateWithLifecycle()
 
     // ── Library (favourites / saved) state ─────────────────────────────────
-    val favouriteKeys by LibraryRepository.favouriteKeys.collectAsStateWithLifecycle()
     val savedKeys by LibraryRepository.savedKeys.collectAsStateWithLifecycle()
     val likedEpisodeKeys by LibraryRepository.likedEpisodeKeys.collectAsStateWithLifecycle()
-    val favouriteIds = remember(favouriteKeys) {
-        favouriteKeys.filter { !it.endsWith(":${LibraryItemEntity.TYPE_EPISODE}") }
-            .mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
-    }
     val savedIds = remember(savedKeys) {
         savedKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
     }
@@ -374,10 +369,9 @@ fun DiscoverScreen(
         mediaId = selectedMediaId,
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
-        isFavourite = selectedMediaId in favouriteIds,
-        onFavourite = { LibraryRepository.toggleFavourite(selectedMediaId, selectedMediaType) },
+        onFavourite = { item -> LibraryRepository.toggleFavourite(item.id, item.mediaType) },
         isSaved = selectedMediaId in savedIds,
-        onSave = { LibraryRepository.toggleSaved(selectedMediaId, selectedMediaType) },
+        onSave = { item -> LibraryRepository.toggleSaved(item.id, item.mediaType) },
         likedEpisodeIds = likedEpisodeIds,
         onEpisodeLike = { seriesId, seasonNumber, episodeId ->
             LibraryRepository.toggleEpisodeLike(seriesId, seasonNumber, episodeId)

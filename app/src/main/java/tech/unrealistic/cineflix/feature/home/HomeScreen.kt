@@ -174,13 +174,12 @@ fun HomeScreen(
                         mediaId = selectedMediaId ?: 0,
                         mediaType = selectedMediaType ?: "na",
                         sheetState = mediaDetailsSheetState,
-                        isFavourite = (selectedMediaId ?: 0) in favouriteIds,
-                        onFavourite = {
-                            LibraryRepository.toggleFavourite(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        onFavourite = { item ->
+                            LibraryRepository.toggleFavourite(item.id, item.mediaType)
                         },
                         isSaved = (selectedMediaId ?: 0) in savedIds,
-                        onSave = {
-                            LibraryRepository.toggleSaved(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        onSave = { item ->
+                            LibraryRepository.toggleSaved(item.id, item.mediaType)
                         },
                         likedEpisodeIds = likedEpisodeIds,
                         onEpisodeLike = { seriesId, seasonNumber, episodeId ->
