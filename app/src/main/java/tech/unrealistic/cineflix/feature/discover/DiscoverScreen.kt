@@ -28,9 +28,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.twotone.WifiOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -57,14 +54,17 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.R
+import tech.unrealistic.cineflix.core.components.EmptyState
+import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.MediaCard
-import tech.unrealistic.cineflix.core.components.shimmerEffect
+import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Genre
@@ -190,7 +190,10 @@ fun DiscoverScreen(
             shape = ShapePill,
             textStyle = MaterialTheme.typography.bodyLarge,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() }),
+            keyboardActions = KeyboardActions(onSearch = {
+                viewModel.onSearchSubmitted()
+                keyboardController?.hide()
+            }),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
@@ -287,70 +290,31 @@ fun DiscoverScreen(
                 }
 
                 is DiscoverUiState.Error -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(AppTheme.spacing.lg),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.TwoTone.WifiOff,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(AppTheme.sizes.stateIconLg)
+                        ErrorState(
+                            message = state.message,
+                            onRetry = viewModel::onRetry
                         )
-                        Spacer(modifier = Modifier.height(AppTheme.spacing.md))
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
-                        Button(
-                            onClick = viewModel::onRetry,
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Text(
-                                text = "Try Again",
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
                     }
                 }
 
                 is DiscoverUiState.Success -> {
                     if (state.items.isEmpty()) {
                         // ── Empty state (no results for query/filter) ──────
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(AppTheme.spacing.lg),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(AppTheme.sizes.stateIconLg)
-                            )
-                            Spacer(modifier = Modifier.height(AppTheme.spacing.md))
-                            Text(
-                                text = if (searchQuery.isBlank()) "Nothing here yet" else "No results found",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
-                            Text(
-                                text = if (searchQuery.isBlank())
+                            EmptyState(
+                                icon = Icons.Default.Search,
+                                title = if (searchQuery.isBlank()) "Nothing here yet"
+                                else "No results found",
+                                subtitle = if (searchQuery.isBlank())
                                     "Try a different category, sort order or genre."
-                                else "Check the spelling or try another keyword.",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
+                                else "Check the spelling or try another keyword."
                             )
                         }
                     } else {
@@ -475,24 +439,24 @@ private fun DiscoverGridSkeleton(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
         userScrollEnabled = false,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "Loading…" }
     ) {
         items(12) {
             Column {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(2f / 3f)
-                        .clip(MaterialTheme.shapes.medium)
-                        .shimmerEffect()
+                        .aspectRatio(2f / 3f),
+                    shape = MaterialTheme.shapes.medium
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(AppTheme.spacing.gap12)
-                        .clip(MaterialTheme.shapes.small)
-                        .shimmerEffect()
+                        .height(AppTheme.spacing.gap12),
+                    shape = MaterialTheme.shapes.small
                 )
             }
         }
