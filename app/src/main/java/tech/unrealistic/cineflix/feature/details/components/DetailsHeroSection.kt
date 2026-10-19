@@ -6,16 +6,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.core.components.ActionButtons
 import tech.unrealistic.cineflix.core.components.ExpandableText
@@ -42,8 +44,12 @@ import tech.unrealistic.cineflix.ui.theme.HeadlineStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 
+/** Visible diameter of the close control inside its 48dp touch target. */
+private val CloseButtonVisualSize = 32.dp
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
- fun DetailSheetHeroSection(
+fun DetailSheetHeroSection(
     mediaItem: MediaItem,
     isTvShow: Boolean,
     onDismissRequest: () -> Unit,
@@ -55,13 +61,15 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
     onSave: (Any) -> Unit = {}
 ) {
 
-    val backdropPath = mediaItem.backdropPath
+    val backdropUrl = mediaItem.backdropPath
+        ?.let { path -> "https://image.tmdb.org/t/p/w500$path" }
     val title = mediaItem.displayTitle
     val genres = mediaItem.genreNames
     val releaseYear = mediaItem.releaseDate?.substringBefore("-")
     val runtimeOrSeasons = if (isTvShow) "Seasons" else "Runtime"
     val country = mediaItem.originCountry?.firstOrNull()
     val overview = mediaItem.overview
+    val metadata = listOfNotNull(releaseYear, runtimeOrSeasons, country)
     val spacing = AppTheme.spacing
     val sizes = AppTheme.sizes
     val colors = AppTheme.colors
@@ -70,12 +78,12 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(sizes.detailsHeroHeight)
+                // Backdrops are 16:9 — let the width decide the height instead
+                // of fixing a pixel height that crops on tall/short screens.
+                .aspectRatio(16f / 9f)
         ) {
-            val posterUrl = "https://image.tmdb.org/t/p/w500$backdropPath"
-
             AsyncImage(
-                model = posterUrl,
+                model = backdropUrl,
                 contentDescription = title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -107,7 +115,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
             ) {
                 Box(
                     modifier = Modifier
-                        .size(sizes.likeButton)
+                        .size(CloseButtonVisualSize)   // visual size only
                         .clip(ShapeCircle)
                         .background(colors.scrimStrong)
                         .border(
@@ -119,9 +127,9 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = "Close details",
                         tint = colors.onImage,   // light in BOTH modes over dark disc
-                        modifier = Modifier.size(sizes.iconCompact)
+                        modifier = Modifier.size(sizes.iconSm)
                     )
                 }
             }
@@ -133,11 +141,12 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
                 .padding(horizontal = spacing.md)
                 .offset(y = -spacing.titleOverlap)
         ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.gap6),
+                verticalArrangement = Arrangement.spacedBy(spacing.gap6),
                 modifier = Modifier.padding(bottom = spacing.sm)
             ) {
-                items(genres) { genre ->
+                genres.take(4).forEach { genre ->
                     Surface(
                         shape = ShapePill,
                         // Solid role — solid chip keeps text AA over the backdrop fade
@@ -151,6 +160,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
                             text = genre,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
                             modifier = Modifier.padding(
                                 horizontal = spacing.chipPaddingH,
                                 vertical = spacing.chipPaddingV
@@ -172,21 +182,13 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
                 horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = releaseYear!!,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    text = runtimeOrSeasons,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (country!!.isNotEmpty()) {
-                    Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Only render fields TMDB actually returned — never "null".
+                metadata.forEachIndexed { index, value ->
+                    if (index > 0) {
+                        Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     Text(
-                        text = country,
+                        text = value,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -203,10 +205,10 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
                 onPlay = { onPlayClick(mediaItem) }
             )
 
-            if (overview!!.isNotEmpty()) {
+            overview?.takeIf { it.isNotBlank() }?.let { text ->
                 Spacer(modifier = Modifier.height(spacing.md))
                 ExpandableText(
-                    text = overview,
+                    text = text,
                     collapsedMaxLines = 3
                 )
             }

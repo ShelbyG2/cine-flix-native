@@ -172,7 +172,7 @@ fun MediaCard(
                         ) {
                             // Star rating chip
                             RatingChip(
-                                score = media.voteAverage ?: 0.0,
+                                score = media.voteAverage,
                                 accentColor = accentColor,
                                 contentColor = contentColor
                             )
@@ -193,7 +193,7 @@ fun MediaCard(
 
         if (!isHero)
             Text(
-                text = displayTitle ?: "Title ",
+                text = displayTitle,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -241,13 +241,15 @@ private fun RatingChip(
 ) {
     // Scale 0–10 → display as X.X
     val display = String.format("%.1f", score.coerceIn(0.0, 10.0))
+    // Palette extraction can return null — fall back to the theme primary.
+    val chipColor = accentColor ?: MaterialTheme.colorScheme.primary
 
     Surface(
         shape = MaterialTheme.shapes.small,
-        color = accentColor!!.withAlpha(AppTheme.colors.ratingChipFillAlpha),
+        color = chipColor.withAlpha(AppTheme.colors.ratingChipFillAlpha),
         modifier = Modifier.border(
             AppTheme.sizes.borderWidth,
-            accentColor.withAlpha(AppTheme.colors.ratingChipBorderAlpha),
+            chipColor.withAlpha(AppTheme.colors.ratingChipBorderAlpha),
             MaterialTheme.shapes.small
         )
     ) {

@@ -13,6 +13,8 @@ import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 sealed interface DetailsSheetState {
     object Loading : DetailsSheetState
@@ -75,7 +77,16 @@ class DetailsSheetViewModel : ViewModel() {
 
                 }
             } catch (e: Exception) {
-                _uiState.value = DetailsSheetState.Error("An error occurred ${e.message}")
+                // Never surface raw exception class names/messages to the user.
+                _uiState.value = DetailsSheetState.Error(
+                    when (e) {
+                        is UnknownHostException ->
+                            "No internet connection. Please turn on mobile data or Wi-Fi."
+                        is SocketTimeoutException ->
+                            "The server took too long to respond. Please try again."
+                        else -> "Couldn't load these details. Please try again."
+                    }
+                )
             }
         }
 

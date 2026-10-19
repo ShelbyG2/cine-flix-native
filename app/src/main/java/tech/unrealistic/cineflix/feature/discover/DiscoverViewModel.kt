@@ -209,7 +209,7 @@ class DiscoverViewModel : ViewModel() {
                             "No internet connection. Please turn on mobile data or Wi-Fi."
                         is SocketTimeoutException ->
                             "The server took too long to respond. Please try again."
-                        else -> "An ${e.localizedMessage} error occurred"
+                        else -> "Something went wrong. Please try again."
                     }
                 )
             } else {

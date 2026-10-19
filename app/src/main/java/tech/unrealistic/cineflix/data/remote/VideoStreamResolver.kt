@@ -61,7 +61,9 @@ class VideoStreamResolver (private val context: Context){
 
                     //Ad protection - force webview to stay locked in the domain
 
-                    return !url?.all { embedUrl.contains(it) }!!
+                    // Keep the WebView locked to the gateway domain.
+                    val candidate = url ?: return true
+                    return !candidate.all { embedUrl.contains(it) }
                 }
             }
             //fire headless gateway routine

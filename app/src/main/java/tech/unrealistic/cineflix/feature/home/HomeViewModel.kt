@@ -90,7 +90,7 @@ class HomeViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.value =
                     HomeUiState.Error(
-                        message = "An ${e.localizedMessage} error occurred"
+                        message = "Something went wrong. Please try again."
                     )
 
             }
