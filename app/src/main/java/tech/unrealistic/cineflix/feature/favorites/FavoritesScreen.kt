@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -323,7 +325,8 @@ private fun LikedEpisodeCard(
     Column(modifier = Modifier.width(AppTheme.sizes.libraryCardW)) {
         Box {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500${episode.stillPath}",
+                model = episode.stillPath
+                    ?.let { path -> "https://image.tmdb.org/t/p/w300$path" },
                 contentDescription = episode.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -416,7 +419,11 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
 /** Skeleton matching the production row metrics (shimmer). */
 @Composable
 private fun LibrarySkeleton(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "Loading…" }
+    ) {
         repeat(2) {
             Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
                 // title placeholder — mirrors titleLarge spatial height

@@ -59,7 +59,7 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
             verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
-                model = "https://image.tmdb.org/t/p/w300$stillPath",
+                model = stillPath?.let { path -> "https://image.tmdb.org/t/p/w300$path" },
                 contentDescription = "Episode ${episode.episodeNumber}: $name",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

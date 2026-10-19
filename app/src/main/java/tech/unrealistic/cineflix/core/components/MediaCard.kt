@@ -77,7 +77,8 @@ fun MediaCard(
         ) {
 
 
-            val posterUrl = "https://image.tmdb.org/t/p/w500${media.posterPath}"
+            val posterUrl = media.posterPath
+                ?.let { path -> "https://image.tmdb.org/t/p/w500$path" }
             Box() {
                 AsyncImage(
                     model = posterUrl,
@@ -85,7 +86,8 @@ fun MediaCard(
 
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(2f / 3f),
+                        .aspectRatio(2f / 3f)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentScale = ContentScale.Fit
                 )
                 Box(
