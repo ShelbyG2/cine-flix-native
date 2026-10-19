@@ -264,8 +264,7 @@ fun GlassHeroBackground(
                         repeat(colors.glassNoiseDensity) {
                             drawCircle(
                                 color = colors.glassNoise.withAlpha(
-                                    colors.glassNoise.alpha * colors.glassNoiseAlpha *
-                                            random.nextFloat()
+                                    colors.glassNoiseAlpha * random.nextFloat()
                                 ),
                                 radius = random.nextFloat() * 1.2f,
                                 center = Offset(
