@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.core.components.MediaCard
-import tech.unrealistic.cineflix.core.components.shimmerEffect
+import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
@@ -422,16 +422,15 @@ private fun LibrarySkeleton(modifier: Modifier = Modifier) {
         repeat(2) {
             Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
                 // title placeholder — mirrors titleLarge spatial height
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .padding(
                             horizontal = AppTheme.spacing.md,
                             vertical = AppTheme.spacing.sm
                         )
                         .width(AppTheme.sizes.skeletonTitleW)
-                        .height(AppTheme.sizes.skeletonTitleH)
-                        .clip(MaterialTheme.shapes.small)
-                        .shimmerEffect()
+                        .height(AppTheme.sizes.skeletonTitleH),
+                    shape = MaterialTheme.shapes.small
                 )
                 LazyRow(
                     contentPadding = PaddingValues(
@@ -442,15 +441,14 @@ private fun LibrarySkeleton(modifier: Modifier = Modifier) {
                     userScrollEnabled = false
                 ) {
                     items(5) {
-                        Box(
+                        ShimmerBox(
                             modifier = Modifier
                                 .width(AppTheme.sizes.mediaCardWidth)
                                 .height(
                                     AppTheme.sizes.mediaCardWidth *
                                             AppTheme.sizes.mediaCardPosterRatio
-                                )
-                                .clip(MaterialTheme.shapes.medium)
-                                .shimmerEffect()
+                                ),
+                            shape = MaterialTheme.shapes.medium
                         )
                     }
                 }

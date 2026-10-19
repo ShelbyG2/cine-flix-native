@@ -33,7 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
-import tech.unrealistic.cineflix.core.components.shimmerEffect
+import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.feature.home.components.GlassHeroBackground
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
@@ -116,16 +116,15 @@ fun HeroSectionSkeleton(
                     .height(AppTheme.sizes.skeletonHeroTrackH),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(0.65f)
                         .padding(
                             horizontal = AppTheme.spacing.md,
                             vertical = AppTheme.spacing.gap12
-                        )
-                        .clip(MaterialTheme.shapes.large)
-                        .shimmerEffect()
+                        ),
+                    shape = MaterialTheme.shapes.large
                 )
             }
 
@@ -145,24 +144,20 @@ fun HeroSectionSkeleton(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(
-                                width = AppTheme.sizes.skeletonChipW,
-                                height = AppTheme.sizes.skeletonChipH
-                            )
-                            .clip(MaterialTheme.shapes.small)
-                            .shimmerEffect()
+                    ShimmerBox(
+                        modifier = Modifier.size(
+                            width = AppTheme.sizes.skeletonChipW,
+                            height = AppTheme.sizes.skeletonChipH
+                        ),
+                        shape = MaterialTheme.shapes.small
                     )
                     repeat(2) {
-                        Box(
-                            modifier = Modifier
-                                .size(
-                                    width = AppTheme.sizes.skeletonGenreW,
-                                    height = AppTheme.sizes.skeletonChipH
-                                )
-                                .clip(ShapePill)
-                                .shimmerEffect()
+                        ShimmerBox(
+                            modifier = Modifier.size(
+                                width = AppTheme.sizes.skeletonGenreW,
+                                height = AppTheme.sizes.skeletonChipH
+                            ),
+                            shape = ShapePill
                         )
                     }
                 }
@@ -175,18 +170,15 @@ fun HeroSectionSkeleton(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
+                    ShimmerBox(
                         modifier = Modifier
                             .weight(1f)
-                            .height(AppTheme.sizes.touchTarget)
-                            .clip(MaterialTheme.shapes.medium)
-                            .shimmerEffect()
+                            .height(AppTheme.sizes.touchTarget),
+                        shape = MaterialTheme.shapes.medium
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(AppTheme.sizes.skeletonAction)
-                            .clip(ShapeCircle)
-                            .shimmerEffect()
+                    ShimmerBox(
+                        modifier = Modifier.size(AppTheme.sizes.skeletonAction),
+                        shape = ShapeCircle
                     )
                 }
             }
@@ -203,16 +195,15 @@ fun MediaSectionSkeleton(
 
         // ── 1. Mock Section Title Header ─────────────────────────────────────
         // Replicates the padding bounds of the text title line
-        Box(
+        ShimmerBox(
             modifier = Modifier
                 .padding(
                     horizontal = AppTheme.spacing.md,
                     vertical = AppTheme.spacing.sm
                 )
                 .width(AppTheme.sizes.skeletonTitleW) // Fixed width block representing a text title row
-                .height(AppTheme.sizes.skeletonTitleH) // Matches the typographic spatial height of titleLarge
-                .clip(MaterialTheme.shapes.small)
-                .shimmerEffect()
+                .height(AppTheme.sizes.skeletonTitleH), // Matches the typographic spatial height of titleLarge
+            shape = MaterialTheme.shapes.small
         )
 
         // ── 2. Mock Media Item Row Track ──────────────────────────────────────
@@ -225,12 +216,11 @@ fun MediaSectionSkeleton(
             items(itemCount) {
                 // Mock Card Item
                 // Mirrors the MediaCard poster dimensions from AppSizes
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .width(AppTheme.sizes.skeletonPosterW)
-                        .height(AppTheme.sizes.skeletonPosterH)
-                        .clip(MaterialTheme.shapes.medium)
-                        .shimmerEffect()
+                        .height(AppTheme.sizes.skeletonPosterH),
+                    shape = MaterialTheme.shapes.medium
                 )
             }
         }
