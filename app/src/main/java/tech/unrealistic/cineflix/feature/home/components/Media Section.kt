@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.ui.theme.AppTheme
@@ -30,7 +32,8 @@ fun MediaSection(
 
         Text(
             text     = title,
-            style    = MaterialTheme.typography.titleLarge,
+            style    = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
             color    = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
                 horizontal = AppTheme.spacing.md,
@@ -41,6 +44,7 @@ fun MediaSection(
         // LazyRow instead of LazyHorizontalGrid(Fixed(1)) —
         // Grid for a single row adds unnecessary overhead
         LazyRow(
+            state = rememberLazyListState(),
             contentPadding      = PaddingValues(horizontal = AppTheme.spacing.md),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
         ) {

@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
@@ -44,7 +46,11 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
     var topBarHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "Loading…" }
+    ) {
         val calculatedHeroHeight = maxHeight * 0.5f
 
         // 2. ROOT LAYER Stacking Box

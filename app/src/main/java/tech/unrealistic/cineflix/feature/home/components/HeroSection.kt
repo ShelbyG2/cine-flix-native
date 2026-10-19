@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,8 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -43,6 +48,7 @@ import tech.unrealistic.cineflix.helpers.PaletteHelper
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 import kotlin.collections.getOrNull
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,27 +205,78 @@ fun GlassHeroBackground(
     mutedColor: Color,
     content: @Composable () -> Unit
 ) {
+    val colors = AppTheme.colors
+    val sizes = AppTheme.sizes
+
     Box(
-        modifier.fillMaxSize()
+        modifier
+            .fillMaxSize()
+            // Rim light — a hairline edge catches light on the glass hero.
+            .border(
+                width = sizes.glassBorderWidth,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        colors.glassBorder,
+                        Color.Transparent,
+                        colors.glassBorder.withAlpha(colors.glassBorder.alpha * 0.1f)
+                    )
+                ),
+                shape = RectangleShape
+            )
 
     ) {
 
+        // ── Layer 1: brand gradient ───────────────────────────────────────
         Box(
             modifier
                 .matchParentSize()
                 .background(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0.00f to vibrantColor.withAlpha(AppTheme.colors.heroTopAlpha),
-                            0.40f to vibrantColor.withAlpha(AppTheme.colors.heroMidAlpha),
-                            0.75f to mutedColor.withAlpha(AppTheme.colors.heroMutedAlpha),
+                            0.00f to vibrantColor.withAlpha(colors.heroTopAlpha),
+                            0.40f to vibrantColor.withAlpha(colors.heroMidAlpha),
+                            0.75f to mutedColor.withAlpha(colors.heroMutedAlpha),
                             1.00f to MaterialTheme.colorScheme.background
-                                .withAlpha(AppTheme.colors.posterFadeAlpha)
+                                .withAlpha(colors.posterFadeAlpha)
                         )
                     )
                 )
         )
 
+        // ── Layer 2: specular streak + grain ──────────────────────────────
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .drawWithCache {
+                    val streak = Brush.linearGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            colors.glassGloss.withAlpha(colors.glassGloss.alpha * 0.6f),
+                            Color.Transparent
+                        ),
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width * 0.65f, size.height * 0.45f),
+                        tileMode = TileMode.Clamp
+                    )
+                    onDrawBehind {
+                        drawRect(streak)
+                        val random = Random(42)   // stable grain across recompositions
+                        repeat(colors.glassNoiseDensity) {
+                            drawCircle(
+                                color = colors.glassNoise.withAlpha(
+                                    colors.glassNoise.alpha * colors.glassNoiseAlpha *
+                                            random.nextFloat()
+                                ),
+                                radius = random.nextFloat() * 1.2f,
+                                center = Offset(
+                                    random.nextFloat() * size.width,
+                                    random.nextFloat() * size.height
+                                )
+                            )
+                        }
+                    }
+                }
+        )
 
         content()
     }
