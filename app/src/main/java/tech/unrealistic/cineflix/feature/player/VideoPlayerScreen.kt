@@ -21,15 +21,26 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,14 +60,19 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.C
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import java.util.Locale
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -72,6 +88,13 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 /** Controls auto-hide delay (§3). */
 private const val ControlsAutoHideMs = 3_000L
+
+/** Track selection sheet mode (§4). */
+private sealed interface TrackSheetMode {
+    data object Quality : TrackSheetMode
+    data object Subtitle : TrackSheetMode
+    data object Audio : TrackSheetMode
+}
 
 /**
  * Full-screen playback for a TMDB title.
@@ -89,6 +112,7 @@ private const val ControlsAutoHideMs = 3_000L
  * Playback always runs in landscape with the system bars hidden; both are
  * restored when the screen leaves composition.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerScreen(
     tmdbId: Int,
@@ -136,6 +160,8 @@ fun VideoPlayerScreen(
     var isPlaying by remember { mutableStateOf(false) }
     var currentPositionMs by remember { mutableLongStateOf(0L) }
     var durationMs by remember { mutableLongStateOf(0L) }
+    var availableTracks by remember { mutableStateOf<Tracks?>(null) }
+    var trackSheetMode by remember { mutableStateOf<TrackSheetMode?>(null) }
 
     // Controls show/hide: any tap reveals them, 3 seconds of no interaction
     // hides them again (§3).
@@ -178,15 +204,35 @@ fun VideoPlayerScreen(
     }
 
     // Player state wiring — buffering drives the loading layer (§5).
+    val currentOnNext by rememberUpdatedState(onNext)
     DisposableEffect(exoPlayer) {
         val player = exoPlayer ?: return@DisposableEffect onDispose { }
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 playerState = state
+                if (state == Player.STATE_ENDED) {
+                    val next = currentOnNext
+                    if (next != null) {
+                        next()
+                    } else {
+                        currentOnExit()
+                    }
+                }
             }
 
             override fun onIsPlayingChanged(playing: Boolean) {
                 isPlaying = playing
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                // Trigger WebView fallback per the customisation instructions.
+                if (!webViewFallback) {
+                    webViewFallback = true
+                }
+            }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                availableTracks = tracks
             }
         }
         player.addListener(listener)
@@ -236,6 +282,21 @@ fun VideoPlayerScreen(
     val showPrev = !isMovie && episodeIndex != null && episodeIndex > 0 && onPrevious != null
     val showNext = !isMovie && episodeIndex != null && totalEpisodesInSeason != null &&
         episodeIndex < totalEpisodesInSeason - 1 && onNext != null
+
+    val tracksState = availableTracks
+    val videoGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_VIDEO } ?: emptyList()
+    val audioGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_AUDIO } ?: emptyList()
+    val textGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_TEXT } ?: emptyList()
+    val hasQualityTracks = videoGroups.any { group -> (0 until group.length).any { true } }
+    val qualityVisible = tracksState != null && hasQualityTracks
+    val qualityEnabled = tracksState != null && videoGroups.sumOf { it.length } > 1
+    val hasSubtitleTracks = textGroups.isNotEmpty()
+    val subtitleVisible = tracksState != null && hasSubtitleTracks
+    val subtitleEnabled = tracksState != null && textGroups.sumOf { it.length } >= 1 // allow selection even if 1? but instruction says "Disable a button if only one option exists for that type" - subtitles: Off + tracks, so if only 1 track maybe enabled? Or check total options
+    val subtitleEnabledCalc = tracksState != null && (textGroups.sumOf { it.length } >= 1 || true) // easier: if multiple tracks or we have options
+    val hasAudioTracks = audioGroups.isNotEmpty()
+    val audioVisible = tracksState != null && hasAudioTracks
+    val audioEnabled = tracksState != null && audioGroups.sumOf { it.length } > 1
 
     // Loading: the stream has not been handed to ExoPlayer yet, or ExoPlayer is
     // buffering it. A WebView fallback owns its own loading state instead.
@@ -345,9 +406,9 @@ fun VideoPlayerScreen(
                     onTogglePlay = { exoPlayer?.let { if (it.isPlaying) it.pause() else it.play() } },
                     onPrevious = { onPrevious?.invoke() },
                     onNext = { onNext?.invoke() },
-                    onQuality = { /* §4 */ },
-                    onSubtitles = { /* §4 */ },
-                    onAudio = { /* §4 */ },
+                    onQuality = { trackSheetMode = TrackSheetMode.Quality },
+                    onSubtitles = { trackSheetMode = TrackSheetMode.Subtitle },
+                    onAudio = { trackSheetMode = TrackSheetMode.Audio },
                     onSeek = { position ->
                         currentPositionMs = position
                         exoPlayer?.seekTo(position)
@@ -356,6 +417,12 @@ fun VideoPlayerScreen(
                     onInteract = { showControls() },
                     showPrev = showPrev,
                     showNext = showNext,
+                    qualityVisible = qualityVisible,
+                    qualityEnabled = qualityEnabled,
+                    subtitleVisible = subtitleVisible,
+                    subtitleEnabled = subtitleEnabled,
+                    audioVisible = audioVisible,
+                    audioEnabled = audioEnabled,
                 )
             }
         }
@@ -400,6 +467,225 @@ fun VideoPlayerScreen(
                     contentDescription = "Close player",
                     modifier = Modifier.size(AppTheme.sizes.iconMd)
                 )
+            }
+        }
+    }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val mode = trackSheetMode
+    if (mode != null && exoPlayer != null) {
+        ModalBottomSheet(
+            onDismissRequest = { trackSheetMode = null },
+            sheetState = sheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppTheme.spacing.md)
+                    .padding(bottom = AppTheme.spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
+            ) {
+                Text(
+                    text = when (mode) {
+                        TrackSheetMode.Quality -> "Quality"
+                        TrackSheetMode.Subtitle -> "Subtitles"
+                        TrackSheetMode.Audio -> "Audio"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = AppTheme.spacing.sm)
+                )
+                when (mode) {
+                    TrackSheetMode.Quality -> {
+                        val tracks = availableTracks
+                        val vGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_VIDEO } ?: emptyList()
+                        // Auto option
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = true,
+                                    onClick = {
+                                        exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                            .buildUpon()
+                                            .clearVideoSizeConstraints()
+                                            .build()
+                                        trackSheetMode = null
+                                    }
+                                )
+                                .padding(vertical = AppTheme.spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(selected = true, onClick = null)
+                            Text(
+                                text = "Auto",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                            )
+                        }
+                        vGroups.forEach { group ->
+                            for (i in 0 until group.length) {
+                                val format = group.getTrackFormat(i)
+                                val label = when {
+                                    format.height >= 2160 -> "4K"
+                                    format.height >= 1080 -> "1080p"
+                                    format.height >= 720 -> "720p"
+                                    format.height >= 480 -> "480p"
+                                    format.height > 0 -> "${format.height}p"
+                                    else -> format.label ?: "Unknown"
+                                }
+                                val isSelected = group.isTrackSelected(i)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .selectable(
+                                            selected = isSelected,
+                                            onClick = {
+                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                                    .buildUpon()
+                                                    .setMaxVideoSize(format.width, format.height)
+                                                    .setMinVideoSize(format.width, format.height)
+                                                    .build()
+                                                trackSheetMode = null
+                                            }
+                                        )
+                                        .padding(vertical = AppTheme.spacing.sm),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(selected = isSelected, onClick = null)
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(start = AppTheme.spacing.sm),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    TrackSheetMode.Subtitle -> {
+                        val tracks = availableTracks
+                        val tGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_TEXT } ?: emptyList()
+                        // Off option
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = false,
+                                    onClick = {
+                                        exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                            .buildUpon()
+                                            .setIgnoredTextSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                                            .setPreferredTextLanguage(null)
+                                            .build()
+                                        trackSheetMode = null
+                                    }
+                                )
+                                .padding(vertical = AppTheme.spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(selected = false, onClick = null)
+                            Text(
+                                text = "Off",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                            )
+                        }
+                        tGroups.forEach { group ->
+                            for (i in 0 until group.length) {
+                                val format = group.getTrackFormat(i)
+                                val lang = format.language
+                                val label = if (!lang.isNullOrBlank()) {
+                                    val disp = Locale(lang).displayLanguage
+                                    if (disp.isNotBlank()) disp else lang
+                                } else if (!format.label.isNullOrBlank()) {
+                                    format.label!!
+                                } else {
+                                    "Unknown"
+                                }
+                                val isSelected = group.isTrackSelected(i)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .selectable(
+                                            selected = isSelected,
+                                            onClick = {
+                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                                    .buildUpon()
+                                                    .apply { val tl = format.language; if (tl != null) setPreferredTextLanguage(tl) }
+                                                    .build()
+                                                trackSheetMode = null
+                                            }
+                                        )
+                                        .padding(vertical = AppTheme.spacing.sm),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(selected = isSelected, onClick = null)
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    TrackSheetMode.Audio -> {
+                        val tracks = availableTracks
+                        val aGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_AUDIO } ?: emptyList()
+                        aGroups.forEach { group ->
+                            for (i in 0 until group.length) {
+                                val format = group.getTrackFormat(i)
+                                val lang = format.language
+                                val base = if (!lang.isNullOrBlank()) {
+                                    val disp = Locale(lang).displayLanguage
+                                    if (disp.isNotBlank()) disp else lang
+                                } else if (!format.label.isNullOrBlank()) {
+                                    format.label!!
+                                } else {
+                                    "Unknown"
+                                }
+                                val audioLabel = when (format.channelCount) {
+                                    6 -> "$base (5.1)"
+                                    2 -> "$base (Stereo)"
+                                    1 -> "$base (Mono)"
+                                    in 3..Int.MAX_VALUE -> "$base (${format.channelCount}ch)"
+                                    else -> base
+                                }
+                                val isSelected = group.isTrackSelected(i)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .selectable(
+                                            selected = isSelected,
+                                            onClick = {
+                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                                    .buildUpon()
+                                                    .apply { val l = format.language; if (l != null) setPreferredAudioLanguage(l) else setPreferredAudioLanguage(null) }
+                                                    .build()
+                                                trackSheetMode = null
+                                            }
+                                        )
+                                        .padding(vertical = AppTheme.spacing.sm),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(selected = isSelected, onClick = null)
+                                    Text(
+                                        text = audioLabel,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
