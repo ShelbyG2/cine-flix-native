@@ -228,6 +228,15 @@ fun VideoPlayerScreen(
         else -> mediaTitle
     }
 
+    // Next / previous visibility (§3.2). Movies never show them; a season's
+    // first episode has no previous and its last has no next. A hidden button
+    // also means the caller gave us no callback, so the control never exists
+    // without an action behind it.
+    val isMovie = mediaType == "movie"
+    val showPrev = !isMovie && episodeIndex != null && episodeIndex > 0 && onPrevious != null
+    val showNext = !isMovie && episodeIndex != null && totalEpisodesInSeason != null &&
+        episodeIndex < totalEpisodesInSeason - 1 && onNext != null
+
     // Loading: the stream has not been handed to ExoPlayer yet, or ExoPlayer is
     // buffering it. A WebView fallback owns its own loading state instead.
     val showLoadingLayer = when {
@@ -345,8 +354,8 @@ fun VideoPlayerScreen(
                     },
                     onExit = { currentOnExit() },
                     onInteract = { showControls() },
-                    showPrev = false,   // §3.2 wiring comes with the next commit
-                    showNext = false,
+                    showPrev = showPrev,
+                    showNext = showNext,
                 )
             }
         }
