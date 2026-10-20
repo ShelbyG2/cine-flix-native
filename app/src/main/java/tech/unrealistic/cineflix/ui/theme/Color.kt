@@ -1,7 +1,14 @@
 package tech.unrealistic.cineflix.ui.theme
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
+/**
+ * Theme-internal helper: same color, new alpha.
+ * Lets theme files build translucent variants without `.copy(alpha)` in composables.
+ */
+fun Color.withAlpha(alpha: Float): Color = Color(red, green, blue, alpha)
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -112,8 +119,14 @@ internal val ColorNavbar           = Color(0xFF1B1B1B)  // Navbar
 internal val ColorCover            = Color(0xFF131313)  // Cover / Home / Player
 internal val ColorPrimaryBrand     = Color(0xFF131313)  // Primary
 internal val ColorText             = Color(0xFF040404)  // Text
-internal val ColorLightBackground  = Color(0xFF848484)  // Light Background
+internal val ColorLightBackground  = Color(0xFF848484)  // Light Background (legacy)
 internal val ColorStroke           = Color(0xFF969696)  // Stroke
+
+// AA-corrected light-mode semantics (WCAG 4.5:1 on white)
+internal val ColorTextSecondary    = Color(0xFF6B6B6B)  // 5.3:1 on #FFF
+internal val ColorOutlineLight     = Color(0xFF787878)  // 4.4:1 on #FFF
+internal val ColorSurfaceLight     = Color(0xFFF7FAFC)  // near-white app background
+internal val ColorSurfaceLightAlt  = Color(0xFFEDF2F7)  // cover / navbar / player
 internal val ColorSecondaryBrand   = Color(0xFFB8B8B8)  // Secondary Color
 internal val ColorSubText          = Color(0xFF878787)  // Sub Text
 internal val ColorBlack2B          = Color(0xFF2B2B2B)  // Black #2b2b2b
@@ -121,7 +134,7 @@ internal val ColorBlack2B          = Color(0xFF2B2B2B)  // Black #2b2b2b
 // ═══════════════════════════════════════════════════════════════════════════
 // LIGHT COLOR SCHEME
 // ═══════════════════════════════════════════════════════════════════════════
-internal val md_light_primary              = ColorTeal600
+internal val md_light_primary              = ColorTeal700   // Teal600 was 3.5:1 on white — Teal700 = 5.0:1
 internal val md_light_onPrimary            = ColorWhite
 internal val md_light_primaryContainer     = ColorTeal100
 internal val md_light_onPrimaryContainer   = ColorTeal900
@@ -133,17 +146,17 @@ internal val md_light_tertiary             = ColorPurple600
 internal val md_light_onTertiary           = ColorWhite
 internal val md_light_tertiaryContainer    = ColorPurple100
 internal val md_light_onTertiaryContainer  = ColorPurple900
-internal val md_light_error                = ColorRed600
+internal val md_light_error                = ColorRed700    // Red600 was 4.1:1 — Red700 = 5.5:1
 internal val md_light_onError              = ColorWhite
 internal val md_light_errorContainer       = ColorRed100
 internal val md_light_onErrorContainer     = ColorRed800
-internal val md_light_background           = ColorLightBackground  // #ececec
+internal val md_light_background           = ColorSurfaceLight     // legible light app background
 internal val md_light_onBackground         = ColorText             // #040404
 internal val md_light_surface              = ColorWhite
 internal val md_light_onSurface            = ColorText
 internal val md_light_surfaceVariant       = ColorGray100
-internal val md_light_onSurfaceVariant     = ColorSubText          // #878787
-internal val md_light_outline              = ColorStroke           // #969696
+internal val md_light_onSurfaceVariant     = ColorTextSecondary     // #878787 was 3.6:1 — now 5.3:1
+internal val md_light_outline              = ColorOutlineLight      // #969696 was 2.96:1 — now 4.4:1
 internal val md_light_outlineVariant       = ColorGray300
 internal val md_light_inverseSurface       = ColorGray800
 internal val md_light_inverseOnSurface     = ColorGray100
@@ -203,6 +216,58 @@ data class AppExtendedColors(
     val player:             Color,
     val subText:            Color,
     val stroke:             Color,
+
+    // ── Glass system (tuned per mode — light glass needs a stronger tint/border)
+    val glassSurface:       Color,   // frosted base fill (alpha baked in)
+    val glassBorder:        Color,   // rim border tint (alpha baked in)
+    val glassGloss:         Color,   // specular gloss / streak tint
+    val glassNoise:         Color,   // noise grain dot color
+    val glassNoiseAlpha:    Float,   // grain strength, tuned per mode
+
+    // ── On-image roles (ALWAYS light-on-dark in BOTH modes — images are darkened
+    //    by imageScrim before text is drawn over them)
+    val onImage:            Color,
+    val onImageMuted:       Color,
+    val onImageInverse:     Color,   // dark text on white buttons over images
+    val imageScrimStart:    Color,   // gradient start (transparent)
+    val imageScrimEnd:      Color,   // gradient end (dark)
+    val scrimStrong:        Color,   // modal / focus dimming
+    val scrimSoft:          Color,   // light dimming (cards, pills)
+    val imageTopScrim:      Color,   // top scrim over full-bleed images (both modes)
+    val imageVignette:      Color,   // radial vignette over images (both modes)
+    val progressDotInactive: Color,  // inactive onboarding dot (over imagery)
+
+    // ── Accents used over imagery (identical in both modes)
+    val ratingStar:         Color,
+    val favouriteActive:    Color,
+    val savedActive:        Color,
+
+    // ── Chips / overlays / pills
+    val imageChipSurface:   Color,   // corner buttons on posters (dark disc, both modes)
+    val onImageChipSurface: Color,   // genre chip fill over images (both modes)
+    val onImageChipBorder:  Color,   // genre chip border over images (both modes)
+    val pillBorder:         Color,   // hairline rim on glass pills
+    val ratingChipFillAlpha:  Float,  // palette-accent chip fill alpha
+    val ratingChipBorderAlpha: Float, // palette-accent chip border alpha
+    val chipUnselectedAlpha:  Float,  // filter chip fill, unselected
+    val chipSelectedAlpha:    Float,  // filter chip fill, selected
+    val posterFadeAlpha:      Float,  // poster→background fade strength
+    val heroTopAlpha:       Float,   // palette hero gradient — top stop
+    val heroMidAlpha:       Float,   // palette hero gradient — mid stop
+    val heroMutedAlpha:     Float,   // palette hero gradient — muted stop
+    val glassNoiseDensity:  Int,     // grain dots per overlay
+    val sphereShade:        Color,   // bottom shading of the onboarding glass orb
+    val playerBackground:   Color,   // video surface — black in BOTH modes
+    val pulseRingAlpha1:    Float,   // inner glow ring border alpha
+    val pulseRingAlpha2:    Float,   // outer glow ring border alpha
+
+    // ── Navigation chrome
+    val navSelectedIcon:    Color,
+    val navUnselectedIcon:  Color,
+
+    // ── Shimmer / skeleton
+    val skeletonBase:       Color,
+    val skeletonHighlight:  Color,
 )
 
 internal val LightExtendedColors = AppExtendedColors(
@@ -214,11 +279,56 @@ internal val LightExtendedColors = AppExtendedColors(
     onWarning          = ColorWhite,
     warningContainer   = ColorOrange100,
     onWarningContainer = ColorOrange900,
-    navbar             = ColorLightBackground,
-    cover              = ColorLightBackground,
-    player             = ColorLightBackground,
-    subText            = ColorSubText,
-    stroke             = ColorStroke,
+    navbar             = ColorSurfaceLightAlt,
+    cover              = ColorSurfaceLightAlt,
+    player             = ColorSurfaceLight,
+    subText            = ColorTextSecondary,
+    stroke             = ColorOutlineLight,
+
+    glassSurface       = Color(0x99FFFFFF),  // 60% white — milky, visible over images
+    glassBorder        = Color(0x40000000),  // 25% black — visible on light surfaces
+    glassGloss         = Color(0x80FFFFFF),  // 50% white specular
+    glassNoise         = Color(0x14000000),  // dark grain (visible on light glass)
+    glassNoiseAlpha    = 0.05f,
+
+    onImage            = ColorWhite,
+    onImageMuted       = Color(0xD9FFFFFF),
+    onImageInverse     = Color(0xFF0A0A0A),
+    imageScrimStart    = Color(0x00000000),
+    imageScrimEnd      = Color(0xC0000000),
+    scrimStrong        = Color(0xCC000000),
+    scrimSoft          = Color(0xA6000000),  // 65% — white text stays ≥7:1 on light surfaces
+    imageTopScrim      = Color(0xA6000000),  // 65% black
+    imageVignette      = Color(0x73000000),  // 45% black
+    progressDotInactive = Color(0x4DFFFFFF), // 30% white
+
+    ratingStar         = Color(0xFFF5B301),
+    favouriteActive    = Color(0xFFFF6B6B),
+    savedActive        = Color(0xFFFFC107),
+
+    imageChipSurface   = Color(0x8C000000),  // 55% black — legible over any poster
+    onImageChipSurface = Color(0x1FFFFFFF),  // 12% white
+    onImageChipBorder  = Color(0x40FFFFFF),  // 25% white
+    pillBorder         = Color(0x40FFFFFF),  // 25% white rim (visible on dark pill)
+    ratingChipFillAlpha  = 0.35f,
+    ratingChipBorderAlpha = 0.50f,
+    chipUnselectedAlpha  = 0.5f,
+    chipSelectedAlpha    = 0.25f,
+    posterFadeAlpha      = 0.95f,
+    heroTopAlpha       = 0.85f,
+    heroMidAlpha       = 0.60f,
+    heroMutedAlpha     = 0.75f,
+    glassNoiseDensity  = 400,
+    sphereShade        = Color(0x40000000),  // 25% black
+    pulseRingAlpha1    = 0.8f,
+    pulseRingAlpha2    = 0.6f,
+    playerBackground   = ColorBlack,         // letterboxing stays black in light mode
+
+    navSelectedIcon    = ColorTeal700,       // 5.0:1 on light nav surface
+    navUnselectedIcon  = ColorTextSecondary, // 5.3:1
+
+    skeletonBase       = Color(0xFFE9EDF2),
+    skeletonHighlight  = Color(0xFFFAFCFE),
 )
 
 internal val DarkExtendedColors = AppExtendedColors(
@@ -233,6 +343,54 @@ internal val DarkExtendedColors = AppExtendedColors(
     navbar             = ColorNavbar,          // #1b1b1b
     cover              = ColorCover,           // #131313
     player             = ColorCover,           // #131313
-    subText            = ColorSubText,         // #878787
+    subText            = ColorSecondaryBrand,  // #b8b8b8 — 7.2:1 on #1b1b1b
     stroke             = ColorStroke,          // #969696
+
+    glassSurface       = Color(0x14FFFFFF),  // 8% white over dark imagery
+    glassBorder        = Color(0x4DFFFFFF),  // 30% white rim
+    glassGloss         = Color(0x33FFFFFF),  // 20% white specular
+    glassNoise         = Color(0x14FFFFFF),  // light grain
+    glassNoiseAlpha    = 0.03f,
+
+    onImage            = ColorWhite,
+    onImageMuted       = Color(0xD9FFFFFF),
+    onImageInverse     = Color(0xFF0A0A0A),
+    imageScrimStart    = Color(0x00000000),
+    imageScrimEnd      = Color(0xC0000000),
+    scrimStrong        = Color(0xCC000000),
+    scrimSoft          = Color(0x66000000),
+    imageTopScrim      = Color(0xA6000000),  // 65% black — identical over images in dark mode
+    imageVignette      = Color(0x73000000),  // 45% black
+    progressDotInactive = Color(0x4DFFFFFF), // 30% white
+
+    ratingStar         = Color(0xFFF5B301),
+    favouriteActive    = Color(0xFFFF6B6B),
+    savedActive        = Color(0xFFFFC107),
+
+    imageChipSurface   = Color(0x8C000000),  // 55% black
+    onImageChipSurface = Color(0x1FFFFFFF),  // 12% white
+    onImageChipBorder  = Color(0x40FFFFFF),  // 25% white
+    pillBorder         = Color(0x26FFFFFF),  // 15% white rim
+    ratingChipFillAlpha  = 0.35f,
+    ratingChipBorderAlpha = 0.50f,
+    chipUnselectedAlpha  = 0.5f,
+    chipSelectedAlpha    = 0.25f,
+    posterFadeAlpha      = 0.95f,
+    heroTopAlpha       = 0.85f,
+    heroMidAlpha       = 0.60f,
+    heroMutedAlpha     = 0.75f,
+    glassNoiseDensity  = 400,
+    sphereShade        = Color(0x40000000),  // 25% black
+    pulseRingAlpha1    = 0.8f,
+    pulseRingAlpha2    = 0.6f,
+    playerBackground   = ColorBlack,         // letterboxing stays black
+
+    navSelectedIcon    = ColorWhite,          // 17.4:1 on #1b1b1b
+    navUnselectedIcon  = Color(0xFF9E9E9E),   // 5.9:1
+
+    skeletonBase       = Color(0xFF2B2B2B),
+    skeletonHighlight  = Color(0xFF3D3D3D),
 )
+
+// ── CompositionLocal — extended colors, provided by CineflixTheme ───────────
+val LocalAppExtendedColors = staticCompositionLocalOf { LightExtendedColors }

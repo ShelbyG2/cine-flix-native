@@ -4,10 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -18,19 +20,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.data.remote.models.Movie
+import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.feature.discover.DiscoverScreen
 import tech.unrealistic.cineflix.feature.favorites.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
 import tech.unrealistic.cineflix.feature.home.ProfileScreen
 import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
+import tech.unrealistic.cineflix.feature.player.VideoPlayerScreen
 import tech.unrealistic.cineflix.feature.splash.SplashScreen
+import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 
 /**
@@ -53,7 +59,7 @@ fun CineflixApp(
 
     Crossfade(
         targetState = appStage,
-        animationSpec = tween(500),
+        animationSpec = tween(AppTheme.motion.longMs),
         label = "app_stage"
     ) { stage ->
         when (stage) {
@@ -92,6 +98,48 @@ private fun MainAppContent() {
 
     val  mediaRepository = RetrofitClient.tmdbService
 
+    // Playback is an overlay rather than a nav destination: the library tab
+    // and its scroll position stay alive underneath the landscape player.
+    var playback by remember { mutableStateOf<Player?>(null) }
+    val playItem: (MediaItem) -> Unit = { item ->
+        val title = when (item) {
+            is Movie -> item.title
+            is Tv -> item.name
+            else -> null
+        }
+        playback = if (item.mediaType == "tv") {
+            Player(
+                id = item.id,
+                type = "tv",
+                season = 1,
+                episode = 1,
+                title = title,
+                backdropPath = item.backdropPath,
+            )
+        } else {
+            Player(
+                id = item.id,
+                type = "movie",
+                title = title,
+                backdropPath = item.backdropPath,
+            )
+        }
+    }
+    val playEpisode: (EpisodePlayRequest) -> Unit = { request ->
+        playback = Player(
+            id = request.seriesId,
+            type = "tv",
+            season = request.season,
+            episode = request.episode,
+            title = request.seriesTitle,
+            backdropPath = request.backdropPath,
+            episodeTitle = request.episodeTitle,
+            episodeIndex = request.episodeIndex,
+            totalEpisodesInSeason = request.totalEpisodesInSeason,
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -100,11 +148,20 @@ private fun MainAppContent() {
                         Icon(
                             painterResource(it.icon),
                             contentDescription = it.label,
-                            tint = if (it == currentTab) Color.White else Color.Gray
-
+                            // Theme roles: AA in BOTH modes (white/grey hardcoded
+                            // failed in light mode where the nav surface is light)
+                            tint = if (it == currentTab) AppTheme.colors.navSelectedIcon
+                            else AppTheme.colors.navUnselectedIcon
                         )
                     },
-                    label = { Text(it.label) },
+                    label = {
+                        Text(
+                            text = it.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (it == currentTab) AppTheme.colors.navSelectedIcon
+                            else AppTheme.colors.navUnselectedIcon
+                        )
+                    },
                     selected = it == currentTab,
                     onClick = {
                         backStack.clear()
@@ -126,14 +183,18 @@ private fun MainAppContent() {
                             onNavigate = {
                                 backStack.clear()
                                 backStack.add(Discover)
-                            }
+                            },
+                            onPlay = playItem,
+                            onPlayEpisode = playEpisode
                         ) }
                         is Favourites -> NavEntry(key) {
                             FavouriteScreen(
                                 onNavigate = {
                                     backStack.clear()
                                     backStack.add(Discover)
-                                }
+                                },
+                                onPlay = playItem,
+                                onPlayEpisode = playEpisode
                             )
                         }
                         is Discover -> NavEntry(key) {
@@ -141,7 +202,9 @@ private fun MainAppContent() {
                                 onNavigate = {
                                     backStack.clear()
                                     backStack.add(Home)
-                                }
+                                },
+                                onPlay = playItem,
+                                onPlayEpisode = playEpisode
                             )
                         }
                         is Profile -> NavEntry(key){ProfileScreen () }
@@ -150,6 +213,39 @@ private fun MainAppContent() {
                     }
 
                 }
+            )
+        }
+    }
+
+        playback?.let { request ->
+            // Next / previous are derived here — the graph owns the request —
+            // so the screen never needs to know about episode lists.
+            val isTv = request.type == "tv"
+            val currentEpisode = request.episode
+            val nextTarget = if (isTv && currentEpisode != null) {
+                { playback = request.copy(episode = currentEpisode + 1, episodeTitle = null, episodeIndex = request.episodeIndex?.plus(1)) }
+            } else {
+                null
+            }
+            val previousTarget = if (isTv && currentEpisode != null && currentEpisode > 1) {
+                { playback = request.copy(episode = currentEpisode - 1, episodeTitle = null, episodeIndex = request.episodeIndex?.minus(1)) }
+            } else {
+                null
+            }
+
+            VideoPlayerScreen(
+                tmdbId = request.id,
+                mediaType = request.type,
+                mediaTitle = request.title.orEmpty(),
+                backdropPath = request.backdropPath,
+                season = request.season,
+                episode = request.episode,
+                episodeTitle = request.episodeTitle,
+                episodeIndex = request.episodeIndex,
+                totalEpisodesInSeason = request.totalEpisodesInSeason,
+                onNext = nextTarget,
+                onPrevious = previousTarget,
+                onExit = { playback = null }
             )
         }
     }

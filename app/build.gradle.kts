@@ -94,6 +94,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.5")    //exoplayer
     implementation("androidx.media3:media3-exoplayer:1.10.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.10.1")
     implementation("androidx.media3:media3-ui:1.10.1")
     implementation("androidx.media3:media3-ui-compose-material3:1.10.1")
     implementation("androidx.media3:media3-datasource-okhttp:1.10.1")

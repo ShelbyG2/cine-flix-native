@@ -23,15 +23,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.twotone.WifiOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -52,25 +48,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.R
+import tech.unrealistic.cineflix.core.components.EmptyState
+import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.MediaCard
-import tech.unrealistic.cineflix.core.components.shimmerEffect
+import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Genre
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 /**
  * Discover — browse, filter and search the TMDB catalogue.
@@ -85,6 +87,9 @@ import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 @Composable
 fun DiscoverScreen(
     onNavigate: (() -> Unit)? = null,
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
     viewModel: DiscoverViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,13 +100,8 @@ fun DiscoverScreen(
     val availableGenres by viewModel.availableGenres.collectAsStateWithLifecycle()
 
     // ── Library (favourites / saved) state ─────────────────────────────────
-    val favouriteKeys by LibraryRepository.favouriteKeys.collectAsStateWithLifecycle()
     val savedKeys by LibraryRepository.savedKeys.collectAsStateWithLifecycle()
     val likedEpisodeKeys by LibraryRepository.likedEpisodeKeys.collectAsStateWithLifecycle()
-    val favouriteIds = remember(favouriteKeys) {
-        favouriteKeys.filter { !it.endsWith(":${LibraryItemEntity.TYPE_EPISODE}") }
-            .mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
-    }
     val savedIds = remember(savedKeys) {
         savedKeys.mapNotNull { it.split(":").getOrNull(2)?.toIntOrNull() }.toSet()
     }
@@ -147,7 +147,12 @@ fun DiscoverScreen(
             text = "Discover",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 12.dp)
+            modifier = Modifier.padding(
+                start = AppTheme.spacing.md,
+                top = AppTheme.spacing.md,
+                end = AppTheme.spacing.md,
+                bottom = AppTheme.spacing.gap12
+            )
         )
 
         // ── Search bar ────────────────────────────────────────────────────
@@ -180,25 +185,28 @@ fun DiscoverScreen(
                 }
             },
             singleLine = true,
-            shape = RoundedCornerShape(50),
+            shape = ShapePill,
             textStyle = MaterialTheme.typography.bodyLarge,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { keyboardController?.hide() }),
+            keyboardActions = KeyboardActions(onSearch = {
+                viewModel.onSearchSubmitted()
+                keyboardController?.hide()
+            }),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = AppTheme.spacing.md)
                 .focusRequester(focusRequester)
         )
 
         // ── Category tabs (Movies / TV Shows) ─────────────────────────────
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(top = 12.dp)
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
+            modifier = Modifier.padding(top = AppTheme.spacing.gap12)
         ) {
             items(DiscoverCategory.entries) { category ->
                 DiscoverChip(
@@ -213,7 +221,11 @@ fun DiscoverScreen(
         if (searchQuery.isBlank()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 16.dp, top = 14.dp, end = 16.dp)
+                modifier = Modifier.padding(
+                    start = AppTheme.spacing.md,
+                    top = AppTheme.spacing.gap14,
+                    end = AppTheme.spacing.md
+                )
             ) {
                 Text(
                     text = "Sort",
@@ -222,9 +234,9 @@ fun DiscoverScreen(
                 )
             }
             LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = 6.dp)
+                contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
+                modifier = Modifier.padding(top = AppTheme.spacing.gap6)
             ) {
                 items(DiscoverSort.entries) { sort ->
                     DiscoverChip(
@@ -238,7 +250,11 @@ fun DiscoverScreen(
             // ── Genre filter ──────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(start = 16.dp, top = 14.dp, end = 16.dp)
+                modifier = Modifier.padding(
+                    start = AppTheme.spacing.md,
+                    top = AppTheme.spacing.gap14,
+                    end = AppTheme.spacing.md
+                )
             ) {
                 Text(
                     text = "Genre",
@@ -247,9 +263,12 @@ fun DiscoverScreen(
                 )
             }
             LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
+                contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
+                modifier = Modifier.padding(
+                    top = AppTheme.spacing.gap6,
+                    bottom = AppTheme.spacing.xs
+                )
             ) {
                 items(availableGenres) { genre ->
                     DiscoverChip(
@@ -269,81 +288,45 @@ fun DiscoverScreen(
                 }
 
                 is DiscoverUiState.Error -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.TwoTone.WifiOff,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(56.dp)
+                        ErrorState(
+                            message = state.message,
+                            onRetry = viewModel::onRetry
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Button(
-                            onClick = viewModel::onRetry,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "Try Again",
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
                     }
                 }
 
                 is DiscoverUiState.Success -> {
                     if (state.items.isEmpty()) {
                         // ── Empty state (no results for query/filter) ──────
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(56.dp)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = if (searchQuery.isBlank()) "Nothing here yet" else "No results found",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (searchQuery.isBlank())
+                            EmptyState(
+                                icon = Icons.Default.Search,
+                                title = if (searchQuery.isBlank()) "Nothing here yet"
+                                else "No results found",
+                                subtitle = if (searchQuery.isBlank())
                                     "Try a different category, sort order or genre."
-                                else "Check the spelling or try another keyword.",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
+                                else "Check the spelling or try another keyword."
                             )
                         }
                     } else {
                         LazyVerticalGrid(
                             state = gridState,
-                            columns = GridCells.Adaptive(minSize = 110.dp),
+                            columns = GridCells.Adaptive(minSize = AppTheme.sizes.gridCellMin),
                             contentPadding = PaddingValues(
-                                start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp
+                                start = AppTheme.spacing.md,
+                                end = AppTheme.spacing.md,
+                                top = AppTheme.spacing.gap12,
+                                bottom = AppTheme.spacing.gap24
                             ),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+                            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(
@@ -363,15 +346,14 @@ fun DiscoverScreen(
                             }
 
                             if (state.isLoadingMore) {
-                                item(span = { GridItemSpan(maxLineSpan) }) {
-                                    Box(
+                                item(span = { GridItemSpan(maxLineSpan) }) {                                        Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 16.dp),
+                                            .padding(vertical = AppTheme.spacing.md),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator(
-                                            modifier = Modifier.size(28.dp),
+                                            modifier = Modifier.size(AppTheme.sizes.spinner),
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
@@ -390,10 +372,16 @@ fun DiscoverScreen(
         mediaId = selectedMediaId,
         mediaType = selectedMediaType,
         sheetState = mediaDetailsSheetState,
-        isFavourite = selectedMediaId in favouriteIds,
-        onFavourite = { LibraryRepository.toggleFavourite(selectedMediaId, selectedMediaType) },
-        isSaved = selectedMediaId in savedIds,
-        onSave = { LibraryRepository.toggleSaved(selectedMediaId, selectedMediaType) },
+        onPlay = { item ->
+            isMediaDetailsSheetOpen = false
+            onPlay(item)
+        },
+        onPlayEpisode = { request ->
+            isMediaDetailsSheetOpen = false
+            onPlayEpisode(request)
+        },
+        onFavourite = { item -> LibraryRepository.toggleFavourite(item.id, item.mediaType) },
+        onSave = { item -> LibraryRepository.toggleSaved(item.id, item.mediaType) },
         likedEpisodeIds = likedEpisodeIds,
         onEpisodeLike = { seriesId, seasonNumber, episodeId ->
             LibraryRepository.toggleEpisodeLike(seriesId, seasonNumber, episodeId)
@@ -423,11 +411,13 @@ private fun DiscoverChip(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        shape = RoundedCornerShape(50),
+        shape = ShapePill,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                .withAlpha(AppTheme.colors.chipUnselectedAlpha),
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+            selectedContainerColor = MaterialTheme.colorScheme.primary
+                .withAlpha(AppTheme.colors.chipSelectedAlpha),
             selectedLabelColor = MaterialTheme.colorScheme.onBackground
         ),
         border = FilterChipDefaults.filterChipBorder(
@@ -443,31 +433,34 @@ private fun DiscoverChip(
 @Composable
 private fun DiscoverGridSkeleton(modifier: Modifier = Modifier) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 110.dp),
+        columns = GridCells.Adaptive(minSize = AppTheme.sizes.gridCellMin),
         contentPadding = PaddingValues(
-            start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp
+            start = AppTheme.spacing.md,
+            end = AppTheme.spacing.md,
+            top = AppTheme.spacing.gap12,
+            bottom = AppTheme.spacing.gap24
         ),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
         userScrollEnabled = false,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "Loading…" }
     ) {
         items(12) {
             Column {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(2f / 3f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .shimmerEffect()
+                        .aspectRatio(2f / 3f),
+                    shape = MaterialTheme.shapes.medium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
+                Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(12.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .shimmerEffect()
+                        .height(AppTheme.spacing.gap12),
+                    shape = MaterialTheme.shapes.small
                 )
             }
         }

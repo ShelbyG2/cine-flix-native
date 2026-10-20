@@ -7,15 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
@@ -35,14 +33,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.helpers.genreNames
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.CaptionStrongStyle
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 
 @Composable
@@ -67,7 +68,7 @@ fun MediaCard(
     }
     Box(
         contentAlignment = Alignment.BottomCenter,
-        modifier = if (isHero) modifier else if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(140.dp)
+        modifier = if (isHero) modifier else if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(AppTheme.sizes.mediaCardWidth)
 
     ) {
         Card(
@@ -76,7 +77,8 @@ fun MediaCard(
         ) {
 
 
-            val posterUrl = "https://image.tmdb.org/t/p/w500${media.posterPath}"
+            val posterUrl = media.posterPath
+                ?.let { path -> "https://image.tmdb.org/t/p/w500$path" }
             Box() {
                 AsyncImage(
                     model = posterUrl,
@@ -84,7 +86,8 @@ fun MediaCard(
 
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(2f / 3f),
+                        .aspectRatio(2f / 3f)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentScale = ContentScale.Fit
                 )
                 Box(
@@ -93,12 +96,9 @@ fun MediaCard(
                         .align(Alignment.BottomCenter)
                         .background(
                             brush = Brush.verticalGradient(
-
                                 0.5f to Color.Transparent,
-                                1.0f to MaterialTheme.colorScheme.background.copy(
-                                    0.95f
-
-                                )
+                                1.0f to MaterialTheme.colorScheme.background
+                                    .withAlpha(AppTheme.colors.posterFadeAlpha)
                             )
                         )
                 )
@@ -108,18 +108,19 @@ fun MediaCard(
                         onClick = onFavouriteToggle,
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(6.dp)
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(AppTheme.sizes.overlayButtonPad)
+                            .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
+                            .clip(ShapeCircle)
+                            .background(AppTheme.colors.imageChipSurface)
                     ) {
                         Icon(
                             imageVector = if (isFavourite) Icons.Filled.Favorite
                             else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (isFavourite) "Remove from favourites"
                             else "Add to favourites",
-                            tint = if (isFavourite) Color(0xFFFF6B6B) else Color.White,
-                            modifier = Modifier.size(16.dp)
+                            tint = if (isFavourite) AppTheme.colors.favouriteActive
+                            else AppTheme.colors.onImage,
+                            modifier = Modifier.size(AppTheme.sizes.iconSm)
                         )
                     }
                 }
@@ -130,18 +131,19 @@ fun MediaCard(
                         onClick = onSaveToggle,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(6.dp)
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(AppTheme.sizes.overlayButtonPad)
+                            .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
+                            .clip(ShapeCircle)
+                            .background(AppTheme.colors.imageChipSurface)
                     ) {
                         Icon(
                             imageVector = if (isSaved) Icons.Filled.Bookmark
                             else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isSaved) "Remove from saved"
                             else "Save for later",
-                            tint = if (isSaved) Color(0xFFFFC107) else Color.White,
-                            modifier = Modifier.size(16.dp)
+                            tint = if (isSaved) AppTheme.colors.savedActive
+                            else AppTheme.colors.onImage,
+                            modifier = Modifier.size(AppTheme.sizes.iconSm)
                         )
                     }
                 }
@@ -151,25 +153,28 @@ fun MediaCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomStart)
-                            .padding(16.dp)
+                            .padding(AppTheme.spacing.md)
                     ) {
-                        val contentColor = Color.White
+                        // Over imagery: always light, guaranteed by the card's gradient scrim
+                        val contentColor = AppTheme.colors.onImage
                         Text(
-                            text = displayTitle, style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold
-                            ), color = contentColor, maxLines = 1, overflow = TextOverflow.Ellipsis
+                            text = displayTitle,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = contentColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
 
                         // Rating + Genres row
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
                         ) {
                             // Star rating chip
                             RatingChip(
-                                score = media.voteAverage ?: 0.0,
+                                score = media.voteAverage,
                                 accentColor = accentColor,
                                 contentColor = contentColor
                             )
@@ -190,7 +195,7 @@ fun MediaCard(
 
         if (!isHero)
             Text(
-                text = displayTitle ?: "Title ",
+                text = displayTitle,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -209,16 +214,22 @@ private fun GenreChip(
     contentColor: Color,
 ) {
     Surface(
-        shape = RoundedCornerShape(50),    // pill
-        color = Color.White.copy(alpha = 0.12f), modifier = Modifier.border(
-            0.8.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50)
+        shape = ShapePill,
+        color = AppTheme.colors.onImageChipSurface,
+        modifier = Modifier.border(
+            AppTheme.sizes.glassBorderWidth,
+            AppTheme.colors.onImageChipBorder,
+            ShapePill
         )
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.chipPaddingH,
+                vertical = AppTheme.spacing.chipPaddingV
+            ),
             maxLines = 1
         )
     }
@@ -232,29 +243,36 @@ private fun RatingChip(
 ) {
     // Scale 0–10 → display as X.X
     val display = String.format("%.1f", score.coerceIn(0.0, 10.0))
+    // Palette extraction can return null — fall back to the theme primary.
+    val chipColor = accentColor ?: MaterialTheme.colorScheme.primary
 
     Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = accentColor!!.copy(alpha = 0.35f),
+        shape = MaterialTheme.shapes.small,
+        color = chipColor.withAlpha(AppTheme.colors.ratingChipFillAlpha),
         modifier = Modifier.border(
-            1.dp, accentColor.copy(alpha = 0.50f), RoundedCornerShape(8.dp)
+            AppTheme.sizes.borderWidth,
+            chipColor.withAlpha(AppTheme.colors.ratingChipBorderAlpha),
+            MaterialTheme.shapes.small
         )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.sm,
+                vertical = AppTheme.spacing.chipPaddingV
+            ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.chipRowGap)
         ) {
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
-                tint = Color(0xFFFFC107),   // amber star
-                modifier = Modifier.size(13.dp)
+                tint = AppTheme.colors.ratingStar,
+                modifier = Modifier.size(AppTheme.sizes.iconXs)
             )
             Text(
-                text = display, style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ), color = contentColor
+                text = display,
+                style = CaptionStrongStyle,
+                color = contentColor
             )
         }
     }

@@ -2,8 +2,9 @@ package tech.unrealistic.cineflix.core.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,10 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.BodyLineHeightBoost
+import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 
 @Composable
 fun ExpandableText(
@@ -33,9 +36,9 @@ fun ExpandableText(
             maxLines = if (isExpanded) Int.MAX_VALUE else collapsedMaxLines,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-            // Keeping your improved line height from the previous refactor
-            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f,
+            // Dedicated colour role (AA in both modes) instead of alpha-dimmed text
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * BodyLineHeightBoost,
             onTextLayout = { textLayoutResult ->
                 // Check if the text was clamped by the maxLines constraint.
                 // We only calculate this when it's NOT expanded so it doesn't glitch when closing.
@@ -47,15 +50,18 @@ fun ExpandableText(
 
         // Only show the toggle affordance if the text was actually too long
         if (hasVisualOverflow) {
-            Text(
-                text = if (isExpanded) "Show Less" else "Read More",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+            Box(
                 modifier = Modifier
-                    .padding(top = 4.dp, bottom = 4.dp)
-                    .clickable { isExpanded = !isExpanded }
-            )
+                    .height(AppTheme.sizes.touchTarget)
+                    .clickable { isExpanded = !isExpanded },
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = if (isExpanded) "Show Less" else "Read More",
+                    style = LabelStrongStyle,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

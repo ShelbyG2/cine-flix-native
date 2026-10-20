@@ -1,6 +1,7 @@
 package tech.unrealistic.cineflix.ui.theme
 
 
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
@@ -62,3 +63,34 @@ val BottomSheetShape = RoundedCornerShape(
 
 /** Player / cover full screen — no rounding */
 val FullScreenShape = RoundedCornerShape(0.dp)
+
+/** Pill — fully rounded ends (chips, glass pills). Use instead of RoundedCornerShape(50). */
+val ShapePill = RoundedCornerShape(50)
+
+/** Circle — round icon buttons, avatars. Use instead of raw CircleShape in composables. */
+val ShapeCircle = CircleShape
+
+/** 50dp radius — large glass orbs / spheres. */
+val ShapeRound = RoundedCornerShape(50.dp)
+
+/** 14dp radius — onboarding CTA buttons. */
+val ShapeButton = RoundedCornerShape(14.dp)
+
+/** 22dp radius — splash play button squircle. */
+val ShapePlay = RoundedCornerShape(22.dp)
+
+/** Folder tab — top 18dp, bottom 6dp (onboarding 3D folder artwork). */
+val ShapeTab = RoundedCornerShape(
+    topStart = 18.dp,
+    topEnd = 18.dp,
+    bottomStart = 6.dp,
+    bottomEnd = 6.dp
+)
+
+/** Folder body — top 8dp, bottom 18dp (onboarding 3D folder artwork). */
+val ShapeFolderBody = RoundedCornerShape(
+    topStart = 8.dp,
+    topEnd = 8.dp,
+    bottomStart = 18.dp,
+    bottomEnd = 18.dp
+)
