@@ -499,12 +499,13 @@ fun VideoPlayerScreen(
                     TrackSheetMode.Quality -> {
                         val tracks = availableTracks
                         val vGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_VIDEO } ?: emptyList()
-                        // Auto option
+                        val params = exoPlayer.trackSelectionParameters
+                        val isAuto = params.maxVideoWidth >= 2147483646 || params.maxVideoHeight >= 2147483646
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = true,
+                                    selected = isAuto,
                                     onClick = {
                                         exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
                                             .buildUpon()
@@ -516,7 +517,7 @@ fun VideoPlayerScreen(
                                 .padding(vertical = AppTheme.spacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RadioButton(selected = true, onClick = null)
+                            RadioButton(selected = isAuto, onClick = null)
                             Text(
                                 text = "Auto",
                                 style = MaterialTheme.typography.bodyMedium,
