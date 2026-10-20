@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Subtitles
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,6 +83,7 @@ fun PlayerControlsLayer(
     onQuality: () -> Unit,
     onSubtitles: () -> Unit,
     onAudio: () -> Unit,
+    onLayout: (() -> Unit)? = null,
     onSeek: (Long) -> Unit,
     onExit: () -> Unit,
     onInteract: () -> Unit,
@@ -157,6 +159,17 @@ fun PlayerControlsLayer(
                         onClick = {
                             onInteract()
                             onAudio()
+                        }
+                    )
+                }
+                onLayout?.let {
+                    PlayerLabelButton(
+                        label = "Layout",
+                        icon = Icons.Outlined.AspectRatio,
+                        enabled = true,
+                        onClick = {
+                            onInteract()
+                            it()
                         }
                     )
                 }

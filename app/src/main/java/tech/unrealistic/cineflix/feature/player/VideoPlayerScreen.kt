@@ -72,6 +72,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.media3.ui.AspectRatioFrameLayout
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Job
@@ -94,6 +95,7 @@ private sealed interface TrackSheetMode {
     data object Quality : TrackSheetMode
     data object Subtitle : TrackSheetMode
     data object Audio : TrackSheetMode
+    data object Layout : TrackSheetMode
 }
 
 /**
@@ -162,6 +164,8 @@ fun VideoPlayerScreen(
     var durationMs by remember { mutableLongStateOf(0L) }
     var availableTracks by remember { mutableStateOf<Tracks?>(null) }
     var trackSheetMode by remember { mutableStateOf<TrackSheetMode?>(null) }
+    var resizeMode by remember { mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
+    var playerViewRef by remember { mutableStateOf<PlayerView?>(null) }
 
     // Controls show/hide: any tap reveals them, 3 seconds of no interaction
     // hides them again (§3).
@@ -319,10 +323,16 @@ fun VideoPlayerScreen(
                     .fillMaxSize()
                     .semantics { contentDescription = "Video player" },
                 factory = { viewContext ->
-                    createPlayerView(viewContext, exoPlayer, playerBackground.toArgb())
+                    createPlayerView(viewContext, exoPlayer, playerBackground.toArgb()).also { playerViewRef = it }
                 },
-                update = { view -> view.player = exoPlayer },
-                onRelease = { view -> view.player = null },
+                update = { view -> 
+                    view.player = exoPlayer 
+                    view.resizeMode = resizeMode
+                },
+                onRelease = { view -> 
+                    view.player = null 
+                    if (playerViewRef == view) playerViewRef = null
+                },
             )
 
             webViewFallback || uiState is PlayerUiState.NoStream -> {
@@ -409,6 +419,7 @@ fun VideoPlayerScreen(
                     onQuality = { trackSheetMode = TrackSheetMode.Quality },
                     onSubtitles = { trackSheetMode = TrackSheetMode.Subtitle },
                     onAudio = { trackSheetMode = TrackSheetMode.Audio },
+                    onLayout = { trackSheetMode = TrackSheetMode.Layout },
                     onSeek = { position ->
                         currentPositionMs = position
                         exoPlayer?.seekTo(position)
@@ -490,6 +501,7 @@ fun VideoPlayerScreen(
                         TrackSheetMode.Quality -> "Quality"
                         TrackSheetMode.Subtitle -> "Subtitles"
                         TrackSheetMode.Audio -> "Audio"
+                        TrackSheetMode.Layout -> "Video Layout"
                     },
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -686,6 +698,38 @@ fun VideoPlayerScreen(
                             }
                         }
                     }
+                    TrackSheetMode.Layout -> {
+                        val options = listOf(
+                            "Fit" to AspectRatioFrameLayout.RESIZE_MODE_FIT,
+                            "Fill (Crop)" to AspectRatioFrameLayout.RESIZE_MODE_FILL,
+                            "Zoom" to AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        )
+                        options.forEach { (label, modeValue) ->
+                            val selected = resizeMode == modeValue
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .selectable(
+                                        selected = selected,
+                                        onClick = {
+                                            resizeMode = modeValue
+                                            playerViewRef?.resizeMode = modeValue
+                                            trackSheetMode = null
+                                        }
+                                    )
+                                    .padding(vertical = AppTheme.spacing.sm),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(selected = selected, onClick = null)
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -700,11 +744,14 @@ private fun createPlayerView(
     context: Context,
     player: ExoPlayer,
     backgroundColor: Int,
+    resizeMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
 ): PlayerView {
     val view = PlayerView(context)
     view.useController = false
     view.setBackgroundColor(backgroundColor)
     view.player = player
+    view.resizeMode = resizeMode
+    view.subtitleView?.visibility = android.view.View.VISIBLE
     return view
 }
 
