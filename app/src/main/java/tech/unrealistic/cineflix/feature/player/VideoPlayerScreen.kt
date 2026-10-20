@@ -15,7 +15,12 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -32,8 +37,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,14 +58,20 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import kotlin.coroutines.resume
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.data.remote.VideoStreamResolver
 import tech.unrealistic.cineflix.data.remote.embedUrl
 import tech.unrealistic.cineflix.data.remote.streamProviders
+import tech.unrealistic.cineflix.feature.player.components.PlayerControlsLayer
 import tech.unrealistic.cineflix.feature.player.components.PlayerLoadingLayer
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+
+/** Controls auto-hide delay (§3). */
+private const val ControlsAutoHideMs = 3_000L
 
 /**
  * Full-screen playback for a TMDB title.
@@ -120,6 +133,23 @@ fun VideoPlayerScreen(
     // ExoPlayer state surfaced for the Compose layers (§5).
     var playerState by remember { mutableIntStateOf(Player.STATE_IDLE) }
     var bufferedPercent by remember { mutableIntStateOf(0) }
+    var isPlaying by remember { mutableStateOf(false) }
+    var currentPositionMs by remember { mutableLongStateOf(0L) }
+    var durationMs by remember { mutableLongStateOf(0L) }
+
+    // Controls show/hide: any tap reveals them, 3 seconds of no interaction
+    // hides them again (§3).
+    var controlsVisible by remember { mutableStateOf(false) }
+    val controlsScope = rememberCoroutineScope()
+    var hideJob by remember { mutableStateOf<Job?>(null) }
+    fun showControls() {
+        controlsVisible = true
+        hideJob?.cancel()
+        hideJob = controlsScope.launch {
+            delay(ControlsAutoHideMs)
+            controlsVisible = false
+        }
+    }
 
     // WebView callbacks outlive composition, so they must not capture a stale lambda.
     val currentOnExit by rememberUpdatedState(onExit)
@@ -154,9 +184,33 @@ fun VideoPlayerScreen(
             override fun onPlaybackStateChanged(state: Int) {
                 playerState = state
             }
+
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
         }
         player.addListener(listener)
         onDispose { player.removeListener(listener) }
+    }
+
+    // Position/duration polling runs only while actually playing (§3.1).
+    LaunchedEffect(exoPlayer, playerState, isPlaying) {
+        if (exoPlayer != null && playerState == Player.STATE_READY && isPlaying) {
+            while (true) {
+                currentPositionMs = exoPlayer.currentPosition
+                exoPlayer.duration.takeIf { it > 0 }?.let { durationMs = it }
+                delay(500)
+            }
+        }
+    }
+
+    // Seed the scrubber from the player as soon as the controls appear, so a
+    // paused video still shows where it stopped.
+    LaunchedEffect(controlsVisible, exoPlayer) {
+        if (controlsVisible && exoPlayer != null) {
+            currentPositionMs = exoPlayer.currentPosition
+            exoPlayer.duration.takeIf { it > 0 }?.let { durationMs = it }
+        }
     }
 
     // Real buffered percentage, polled every 500 ms (§2.4).
@@ -258,6 +312,45 @@ fun VideoPlayerScreen(
             )
         }
 
+        // Tap anywhere to reveal the controls; they fade out after 3s (§3).
+        // Sits above the video and loading layers but below the error state, so
+        // its Retry button stays tappable.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { showControls() }
+        ) {
+            AnimatedVisibility(
+                visible = controlsVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                PlayerControlsLayer(
+                    isPlaying = isPlaying,
+                    currentPositionMs = currentPositionMs,
+                    durationMs = durationMs,
+                    onTogglePlay = { exoPlayer?.let { if (it.isPlaying) it.pause() else it.play() } },
+                    onPrevious = { onPrevious?.invoke() },
+                    onNext = { onNext?.invoke() },
+                    onQuality = { /* §4 */ },
+                    onSubtitles = { /* §4 */ },
+                    onAudio = { /* §4 */ },
+                    onSeek = { position ->
+                        currentPositionMs = position
+                        exoPlayer?.seekTo(position)
+                    },
+                    onExit = { currentOnExit() },
+                    onInteract = { showControls() },
+                    showPrev = false,   // §3.2 wiring comes with the next commit
+                    showNext = false,
+                )
+            }
+        }
+
         if ((webViewFallback || uiState is PlayerUiState.NoStream) && loadFailed) {
             Box(
                 modifier = Modifier
@@ -281,7 +374,7 @@ fun VideoPlayerScreen(
 
         // Exit affordance while nothing else is on screen — the controls layer
         // carries its own close button once it is composed (§3).
-        if (showLoadingLayer || loadFailed) {
+        if ((showLoadingLayer || loadFailed) && !controlsVisible) {
             FilledIconButton(
                 onClick = { currentOnExit() },
                 modifier = Modifier
