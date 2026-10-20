@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.core.components.EmptyState
+import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.Tv
@@ -59,8 +60,8 @@ fun MediaDetailsBottomSheet(
     mediaType: String,
     sheetState: SheetState,
     onPlay: (MediaItem) -> Unit = {},
-    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
-        { _, _, _ -> },
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
     onFavourite: (MediaItem) -> Unit = {},
     onMediaShare: (MediaItem) -> Unit = {},
     onSave: (MediaItem) -> Unit = {},
@@ -160,7 +161,23 @@ fun MediaDetailsBottomSheet(
                                 // the first episode of the season on screen.
                                 onPlayClick = { item ->
                                     if (item is Tv) {
-                                        onPlayEpisode(item.id, selectedSeason, 1)
+                                        // A series starts at the first episode of
+                                        // the season shown, with everything the
+                                        // player needs for next/previous.
+                                        onPlayEpisode(
+                                            EpisodePlayRequest(
+                                                seriesId = item.id,
+                                                season = selectedSeason,
+                                                episode = 1,
+                                                seriesTitle = item.name,
+                                                backdropPath = item.backdropPath,
+                                                episodeTitle = currentEpisodes.firstOrNull()?.name,
+                                                episodeIndex = 0,
+                                                totalEpisodesInSeason = currentEpisodes
+                                                    .size
+                                                    .takeIf { it > 0 },
+                                            )
+                                        )
                                     } else {
                                         onPlay(item)
                                     }
@@ -224,9 +241,16 @@ fun MediaDetailsBottomSheet(
                                         isLiked = likedEpisodeIds.contains(episode.id),
                                         onPlay = {
                                             onPlayEpisode(
-                                                tvItem.id,
-                                                selectedSeason,
-                                                episode.episodeNumber
+                                                EpisodePlayRequest(
+                                                    seriesId = tvItem.id,
+                                                    season = selectedSeason,
+                                                    episode = episode.episodeNumber,
+                                                    seriesTitle = tvItem.name,
+                                                    backdropPath = tvItem.backdropPath,
+                                                    episodeTitle = episode.name,
+                                                    episodeIndex = index,
+                                                    totalEpisodesInSeason = currentEpisodes.size,
+                                                )
                                             )
                                         },
                                         onLike = {

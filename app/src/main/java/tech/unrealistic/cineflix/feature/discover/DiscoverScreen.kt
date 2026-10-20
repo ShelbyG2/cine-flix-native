@@ -59,6 +59,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.R
 import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
@@ -87,8 +88,8 @@ import tech.unrealistic.cineflix.ui.theme.withAlpha
 fun DiscoverScreen(
     onNavigate: (() -> Unit)? = null,
     onPlay: (MediaItem) -> Unit = {},
-    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
-        { _, _, _ -> },
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
     viewModel: DiscoverViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -375,9 +376,9 @@ fun DiscoverScreen(
             isMediaDetailsSheetOpen = false
             onPlay(item)
         },
-        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+        onPlayEpisode = { request ->
             isMediaDetailsSheetOpen = false
-            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+            onPlayEpisode(request)
         },
         onFavourite = { item -> LibraryRepository.toggleFavourite(item.id, item.mediaType) },
         onSave = { item -> LibraryRepository.toggleSaved(item.id, item.mediaType) },

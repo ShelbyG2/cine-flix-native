@@ -27,6 +27,8 @@ import androidx.navigation3.ui.NavDisplay
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.data.remote.models.Movie
+import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.feature.discover.DiscoverScreen
 import tech.unrealistic.cineflix.feature.favorites.FavouriteScreen
 import tech.unrealistic.cineflix.feature.home.HomeScreen
@@ -100,14 +102,41 @@ private fun MainAppContent() {
     // and its scroll position stay alive underneath the landscape player.
     var playback by remember { mutableStateOf<Player?>(null) }
     val playItem: (MediaItem) -> Unit = { item ->
+        val title = when (item) {
+            is Movie -> item.title
+            is Tv -> item.name
+            else -> null
+        }
         playback = if (item.mediaType == "tv") {
-            Player(id = item.id, type = "tv", season = 1, episode = 1)
+            Player(
+                id = item.id,
+                type = "tv",
+                season = 1,
+                episode = 1,
+                title = title,
+                backdropPath = item.backdropPath,
+            )
         } else {
-            Player(id = item.id, type = "movie")
+            Player(
+                id = item.id,
+                type = "movie",
+                title = title,
+                backdropPath = item.backdropPath,
+            )
         }
     }
-    val playEpisode: (Int, Int, Int) -> Unit = { seriesId, season, episode ->
-        playback = Player(id = seriesId, type = "tv", season = season, episode = episode)
+    val playEpisode: (EpisodePlayRequest) -> Unit = { request ->
+        playback = Player(
+            id = request.seriesId,
+            type = "tv",
+            season = request.season,
+            episode = request.episode,
+            title = request.seriesTitle,
+            backdropPath = request.backdropPath,
+            episodeTitle = request.episodeTitle,
+            episodeIndex = request.episodeIndex,
+            totalEpisodesInSeason = request.totalEpisodesInSeason,
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -189,11 +218,33 @@ private fun MainAppContent() {
     }
 
         playback?.let { request ->
+            // Next / previous are derived here — the graph owns the request —
+            // so the screen never needs to know about episode lists.
+            val isTv = request.type == "tv"
+            val currentEpisode = request.episode
+            val nextTarget = if (isTv && currentEpisode != null) {
+                { playback = request.copy(episode = currentEpisode + 1, episodeTitle = null, episodeIndex = request.episodeIndex?.plus(1)) }
+            } else {
+                null
+            }
+            val previousTarget = if (isTv && currentEpisode != null && currentEpisode > 1) {
+                { playback = request.copy(episode = currentEpisode - 1, episodeTitle = null, episodeIndex = request.episodeIndex?.minus(1)) }
+            } else {
+                null
+            }
+
             VideoPlayerScreen(
                 tmdbId = request.id,
                 mediaType = request.type,
+                mediaTitle = request.title.orEmpty(),
+                backdropPath = request.backdropPath,
                 season = request.season,
                 episode = request.episode,
+                episodeTitle = request.episodeTitle,
+                episodeIndex = request.episodeIndex,
+                totalEpisodesInSeason = request.totalEpisodesInSeason,
+                onNext = nextTarget,
+                onPrevious = previousTarget,
                 onExit = { playback = null }
             )
         }

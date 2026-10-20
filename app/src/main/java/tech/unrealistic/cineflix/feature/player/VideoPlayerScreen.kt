@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
@@ -15,23 +16,19 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,7 +36,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -51,171 +47,218 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import kotlin.coroutines.resume
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import tech.unrealistic.cineflix.core.components.ErrorState
-import tech.unrealistic.cineflix.data.remote.EmbedWave
-import tech.unrealistic.cineflix.feature.player.MediaController
-import tech.unrealistic.cineflix.feature.player.PlayerViewModel
+import tech.unrealistic.cineflix.data.remote.VideoStreamResolver
+import tech.unrealistic.cineflix.data.remote.embedUrl
+import tech.unrealistic.cineflix.data.remote.streamProviders
+import tech.unrealistic.cineflix.feature.player.components.PlayerLoadingLayer
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 /**
- * Full-screen playback for a TMDB title through the EmbedWave embed player.
+ * Full-screen playback for a TMDB title.
  *
- * The provider ships a ready-made iframe player, so the app hosts it in a
- * WebView instead of scraping its (obfuscated, ad-gated) stream URLs — that is
- * the integration the EmbedWave docs describe and the only one that survives
- * their player changes.
+ * The screen asks each provider embed page for a playable manifest and plays
+ * the first one it finds with Media3 (native ExoPlayer, proper controls,
+ * seeking). Only when no provider exposes a manifest does it fall back to
+ * hosting the embed page itself in a WebView.
  *
- * The screen always plays in landscape and hides the system bars for the
- * duration of playback, restoring both when it leaves composition.
+ * `PlayerView` runs with `useController = false`: every piece of chrome —
+ * loading state, controls, track selection — is a Compose layer drawn on top so
+ * it can use `AppTheme` tokens and Compose animations (§0 of the player
+ * customisation instructions).
+ *
+ * Playback always runs in landscape with the system bars hidden; both are
+ * restored when the screen leaves composition.
  */
 @Composable
 fun VideoPlayerScreen(
     tmdbId: Int,
-    mediaType: String,
-    modifier: Modifier = Modifier,
+    mediaType: String,                  // "movie" or "tv"
+    mediaTitle: String,                 // movie title or show name
+    backdropPath: String?,              // TMDB backdrop for the loading screen
     season: Int? = null,
     episode: Int? = null,
+    episodeTitle: String? = null,       // e.g. "Pilot"
+    episodeIndex: Int? = null,          // 0-based position in the current season list
+    totalEpisodesInSeason: Int? = null, // total count for next/prev logic
+    onNext: (() -> Unit)? = null,
+    onPrevious: (() -> Unit)? = null,
     onExit: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val playerBackground = AppTheme.colors.playerBackground
 
-    val embedUrl = remember(tmdbId, mediaType, season, episode) {
-        EmbedWave.embedUrl(
-            tmdbId = tmdbId,
-            mediaType = mediaType,
-            season = season,
-            episode = episode,
-        )
+    // Provider order lives in one place; the first playable manifest wins.
+    val embedUrls = remember(tmdbId, mediaType, season, episode) {
+        streamProviders.map { provider ->
+            provider.embedUrl(
+                tmdbId = tmdbId,
+                mediaType = mediaType,
+                season = season,
+                episode = episode,
+            )
+        }
     }
+    val fallbackEmbedUrl = embedUrls.first()
 
+    val playerViewModel: PlayerViewModel = viewModel()
+    val uiState by playerViewModel.uiState.collectAsState()
+
+    var reloadKey by remember { mutableIntStateOf(0) }
     var progress by remember { mutableIntStateOf(0) }
     var loadFailed by remember { mutableStateOf(false) }
     var hasLoaded by remember { mutableStateOf(false) }
-    var reloadKey by remember { mutableIntStateOf(0) }
+    var webViewFallback by remember { mutableStateOf(false) }
 
+    // ExoPlayer state surfaced for the Compose layers (§5).
+    var playerState by remember { mutableIntStateOf(Player.STATE_IDLE) }
+    var bufferedPercent by remember { mutableIntStateOf(0) }
 
-    // Listen for stream URL resolution from the ViewModel
-    val playerViewModel: PlayerViewModel = viewModel()
-    LaunchedEffect(Unit) {
-        playerViewModel.uiState.collect { state ->
-            when (state) {
-                is PlayerUiState.Ready -> {
-                    // Stream URL resolved - Media3 will handle playback
-                    hasLoaded = true
-                }
-                is PlayerUiState.Error -> {
-                    loadFailed = true
-                    hasLoaded = true
-                }
-                is PlayerUiState.NoStream -> {
-                    // Fall back to embedded WebView
-                    hasLoaded = true
-                }
-                else -> { /* Loading */ }
-            }
-        }
-    }
-
-    // Keep the current onExit reference for the WebView callbacks (they are
-    // created once and must not capture a stale lambda).
+    // WebView callbacks outlive composition, so they must not capture a stale lambda.
     val currentOnExit by rememberUpdatedState(onExit)
 
-    // Player ViewModel that resolves a stream URL, falls back to the embedded
-    // WebView when none is available, and drives Media3 playback when possible.
+    ForceLandscapePlayback()
+    BackHandler { currentOnExit() }
 
-    LaunchedEffect(tmdbId, mediaType, season, episode) {
-        playerViewModel.preparePlayer(
-            tmdbId = tmdbId,
-            mediaType = mediaType,
-            season = season,
-            episode = episode,
-            onFail = {
-                loadFailed = true
-                hasLoaded = true
-            }
-        )
-    }        // Subscribe to player state changes
-    val player by playerViewModel.player.collectAsStateWithLifecycle()
-        val isPlaying by playerViewModel.playbackState.collectAsStateWithLifecycle()
-
-        ForceLandscapePlayback()
-
-        DisposableEffect(Unit) {
-            onDispose {
-                playerViewModel.releasePlayer()
-            }
-        }
-
-
-    DisposableEffect(Unit) {
-        onDispose {
-            playerViewModel.releasePlayer()
+    LaunchedEffect(embedUrls, reloadKey) {
+        playerViewModel.preparePlayer(embedUrls) { url ->
+            resolveStreamUrl(context, url)
         }
     }
 
-    BackHandler(onBack = { currentOnExit() })
+    val resolved = (uiState as? PlayerUiState.Ready)?.stream
+    val exoPlayer = remember(resolved) {
+        resolved?.let {
+            createStreamingPlayer(
+                context = context.applicationContext,
+                streamUrl = it.url,
+                referrer = it.referrer,
+            )
+        }
+    }
+    DisposableEffect(exoPlayer) {
+        onDispose { exoPlayer?.release() }
+    }
+
+    // Player state wiring — buffering drives the loading layer (§5).
+    DisposableEffect(exoPlayer) {
+        val player = exoPlayer ?: return@DisposableEffect onDispose { }
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                playerState = state
+            }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
+
+    // Real buffered percentage, polled every 500 ms (§2.4).
+    LaunchedEffect(exoPlayer) {
+        while (true) {
+            bufferedPercent = exoPlayer?.bufferedPercentage ?: 0
+            delay(500)
+        }
+    }
+
+    val displayTitle = when {
+        mediaType == "movie" -> mediaTitle
+        episode != null && episodeTitle != null -> "S${season}E${episode} · $episodeTitle"
+        episode != null -> "S${season}E${episode}"
+        else -> mediaTitle
+    }
+
+    // Loading: the stream has not been handed to ExoPlayer yet, or ExoPlayer is
+    // buffering it. A WebView fallback owns its own loading state instead.
+    val showLoadingLayer = when {
+        webViewFallback -> false
+        exoPlayer != null ->
+            playerState == Player.STATE_BUFFERING || playerState == Player.STATE_IDLE
+        uiState is PlayerUiState.NoStream -> false
+        else -> true
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(playerBackground)
     ) {
-        // Re-keying rebuilds the WebView from scratch, which is what a retry
-        // needs after a failed page load.
-        key(reloadKey) {
-            AndroidView(
+        when {
+            exoPlayer != null -> AndroidView(
                 modifier = Modifier
                     .fillMaxSize()
                     .semantics { contentDescription = "Video player" },
                 factory = { viewContext ->
-                    createPlayerWebView(
-                        context = viewContext,
-                        embedUrl = embedUrl,
-                        backgroundColor = playerBackground.toArgb(),
-                        onProgress = { newProgress ->
-                            progress = newProgress
-                            if (newProgress >= 100) {
-                                hasLoaded = true
-                                loadFailed = false
-                            }
+                    createPlayerView(viewContext, exoPlayer, playerBackground.toArgb())
+                },
+                update = { view -> view.player = exoPlayer },
+                onRelease = { view -> view.player = null },
+            )
+
+            webViewFallback || uiState is PlayerUiState.NoStream -> {
+                // Re-keying rebuilds the WebView from scratch, which is what a
+                // retry needs after a failed page load.
+                key(reloadKey) {
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics { contentDescription = "Video player" },
+                        factory = { viewContext ->
+                            createPlayerWebView(
+                                context = viewContext,
+                                embedUrl = fallbackEmbedUrl,
+                                backgroundColor = playerBackground.toArgb(),
+                                onProgress = { newProgress ->
+                                    progress = newProgress
+                                    if (newProgress >= 100) {
+                                        hasLoaded = true
+                                        loadFailed = false
+                                    }
+                                },
+                                onPageFailed = {
+                                    loadFailed = true
+                                    hasLoaded = true
+                                }
+                            )
                         },
-                        onPageFailed = {
-                            loadFailed = true
-                            hasLoaded = true
+                        onRelease = { view ->
+                            view.stopLoading()
+                            view.destroy()
                         }
                     )
-                },
-                onRelease = { view ->
-                    view.stopLoading()
-                    view.destroy()
                 }
+            }
+
+            else -> Unit
+        }
+
+        // Custom loading state (backdrop + wavy bars + buffered %) replaces any
+        // spinner — there is no CircularProgressIndicator on this screen.
+        if (showLoadingLayer) {
+            PlayerLoadingLayer(
+                displayTitle = displayTitle,
+                bufferedPercent = bufferedPercent,
+                backdropPath = backdropPath,
             )
         }
 
-        if (!hasLoaded && !loadFailed) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(AppTheme.spacing.md),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(AppTheme.sizes.spinner),
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Starting playback…",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.colors.onImageMuted
-                )
-            }
+        if ((webViewFallback || uiState is PlayerUiState.NoStream) &&
+            !hasLoaded && !loadFailed
+        ) {
+            PlayerLoadingLayer(
+                displayTitle = displayTitle,
+                bufferedPercent = bufferedPercent,
+                backdropPath = backdropPath,
+            )
         }
 
-        if (loadFailed) {
+        if ((webViewFallback || uiState is PlayerUiState.NoStream) && loadFailed) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -229,58 +272,84 @@ fun VideoPlayerScreen(
                         loadFailed = false
                         hasLoaded = false
                         progress = 0
+                        webViewFallback = false
                         reloadKey++
                     }
                 )
             }
         }
 
-        // Visible close affordance — the player chrome lives inside the
-        // WebView, so the app owns the way back out.
-        FilledIconButton(
-            onClick = { currentOnExit() },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(AppTheme.spacing.md)
-                .size(AppTheme.sizes.touchTarget),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = AppTheme.colors.scrimStrong,
-                contentColor = AppTheme.colors.onImage
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close player",
-                modifier = Modifier.size(AppTheme.sizes.iconMd)
-            )
-        }
-
-        // Keep the loading progress visible for slow networks until playback begins.
-        if (!hasLoaded && !loadFailed && progress in 1..99) {
-            Text(
-                text = "$progress%",
-                style = MaterialTheme.typography.labelSmall,
-                color = AppTheme.colors.onImageMuted,
+        // Exit affordance while nothing else is on screen — the controls layer
+        // carries its own close button once it is composed (§3).
+        if (showLoadingLayer || loadFailed) {
+            FilledIconButton(
+                onClick = { currentOnExit() },
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.TopStart)
                     .padding(AppTheme.spacing.md)
-            )
-        }
-
-        if (isPlaying && player != null) {
-            MediaController(
-                player = player!!,
-                modifier = Modifier.fillMaxSize(),
-                context = LocalContext.current
-            )
+                    .size(AppTheme.sizes.touchTarget),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = AppTheme.colors.scrimStrong,
+                    contentColor = AppTheme.colors.onImage
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close player",
+                    modifier = Modifier.size(AppTheme.sizes.iconMd)
+                )
+            }
         }
     }
 }
 
 /**
+ * `PlayerView` with its own controller disabled — every control is drawn by the
+ * Compose layers above it (§0).
+ */
+private fun createPlayerView(
+    context: Context,
+    player: ExoPlayer,
+    backgroundColor: Int,
+): PlayerView {
+    val view = PlayerView(context)
+    view.useController = false
+    view.setBackgroundColor(backgroundColor)
+    view.player = player
+    return view
+}
+
+/**
+ * Resolves a playable manifest URL from the embed page via an off-screen
+ * WebView. Cancelling the coroutine (timeout or leaving the screen) tears the
+ * headless WebView down.
+ */
+@SuppressLint("SetJavaScriptEnabled")
+private suspend fun resolveStreamUrl(context: Context, embedUrl: String): ResolvedStream? =
+    suspendCancellableCoroutine { continuation ->
+        val resolver = VideoStreamResolver(context)
+        val headless = resolver.resolvedEmbedUrl(
+            embedUrl,
+            object : VideoStreamResolver.StreamResolutionListener {
+                override fun onStreamResolved(streamUrl: String, referrer: String) {
+                    if (continuation.isActive) continuation.resume(ResolvedStream(streamUrl, referrer))
+                }
+
+                override fun onError(message: String) {
+                    if (continuation.isActive) continuation.resume(null)
+                }
+            }
+        )
+        continuation.invokeOnCancellation {
+            Log.d("VideoPlayerScreen", "stream lookup cancelled")
+            headless.destroy()
+        }
+    }
+
+/**
  * Locks the hosting activity to landscape (both sensor directions) and hides
- * the system bars while the player is composed. Everything is restored on
- * dispose so the rest of the app stays portrait-aware.
+ * the system bars while the player is composed. Both are restored on dispose,
+ * which returns the activity to its portrait manifest orientation.
  */
 @Composable
 private fun ForceLandscapePlayback() {
@@ -302,7 +371,15 @@ private fun ForceLandscapePlayback() {
 
         onDispose {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            activity.requestedOrientation = previousOrientation
+            // "Unspecified" hands the decision back to the sensor, and with
+            // rotation lock on the system keeps the landscape we just forced.
+            // The app itself is portrait, so restore that explicitly.
+            activity.requestedOrientation =
+                if (previousOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                    ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                } else {
+                    previousOrientation
+                }
             controller.show(WindowInsetsCompat.Type.systemBars())
         }
     }
@@ -341,17 +418,28 @@ private fun createPlayerWebView(
     }
 
     webViewClient = object : WebViewClient() {
+        // Providers move domains (vidsrc.me -> vidsrc.sh): follow one hop, then
+        // pin the player to that origin. Ads and "open in browser" links are
+        // swallowed instead of navigating away from the player.
+        var allowedHost: String? = runCatching { java.net.URI(embedUrl).host }.getOrNull()
+        var followedRedirect = false
+
         override fun shouldOverrideUrlLoading(
             view: WebView,
             request: WebResourceRequest
         ): Boolean {
-            // The player must stay on the embed origin. Anything else (ad
-            // redirects, "open in browser" links) is swallowed rather than
-            // navigated to.
+            if (!request.isForMainFrame) return false
             val url = request.url
-            val isEmbedOrigin = url.host == "embedwave.cc" ||
-                    url.host?.endsWith(".embedwave.cc") == true
-            return request.isForMainFrame && (url.scheme != "https" || !isEmbedOrigin)
+            if (url.scheme != "https") return true
+
+            val host = url.host ?: return true
+            if (host == allowedHost) return false
+            if (!followedRedirect) {
+                followedRedirect = true
+                allowedHost = host
+                return false
+            }
+            return true
         }
 
         override fun onReceivedError(
@@ -364,25 +452,6 @@ private fun createPlayerWebView(
     }
 
     loadUrl(embedUrl)
-}
-
-/**
- * Extracts a playable stream URL from the EmbedWave embed page.
- *
- * This is a placeholder that currently returns null, meaning the embedded
- * WebView will be used for playback. In the future, this could be implemented
- * by intercepting the media requests from the WebView and parsing the HLS/DASH
- * manifest URLs.
- */
-private fun extractStreamUrl(
-    embedUrl: String,
-    tmdbId: Int,
-    mediaType: String,
-    season: Int?,
-    episode: Int?
-): String? {
-    // TODO: Implement stream URL extraction from the embed page
-    return null
 }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {

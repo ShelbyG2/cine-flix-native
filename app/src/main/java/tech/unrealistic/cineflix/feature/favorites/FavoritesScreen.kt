@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.data.local.LibraryRepository
@@ -74,8 +75,8 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 fun FavouriteScreen(
     onNavigate: (() -> Unit)? = null,
     onPlay: (MediaItem) -> Unit = {},
-    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
-        { _, _, _ -> },
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
     viewModel: FavouritesViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -242,9 +243,9 @@ fun FavouriteScreen(
             isMediaDetailsSheetOpen = false
             onPlay(item)
         },
-        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+        onPlayEpisode = { request ->
             isMediaDetailsSheetOpen = false
-            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+            onPlayEpisode(request)
         },
         onFavourite = { item ->
             LibraryRepository.toggleFavourite(item.id, item.mediaType)

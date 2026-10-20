@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
 import tech.unrealistic.cineflix.data.local.LibraryRepository
@@ -45,8 +46,8 @@ import tech.unrealistic.cineflix.feature.home.components.MediaSection
 fun HomeScreen(
     onNavigate: (() -> Unit)? = null,
     onPlay: (MediaItem) -> Unit = {},
-    onPlayEpisode: (seriesId: Int, seasonNumber: Int, episodeNumber: Int) -> Unit =
-        { _, _, _ -> },
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
     viewModel: HomeViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
@@ -184,9 +185,9 @@ fun HomeScreen(
                             isMediaDetailsSheetOpen = false
                             onPlay(item)
                         },
-                        onPlayEpisode = { seriesId, seasonNumber, episodeNumber ->
+                        onPlayEpisode = { request ->
                             isMediaDetailsSheetOpen = false
-                            onPlayEpisode(seriesId, seasonNumber, episodeNumber)
+                            onPlayEpisode(request)
                         },
                         onFavourite = { item ->
                             LibraryRepository.toggleFavourite(item.id, item.mediaType)
