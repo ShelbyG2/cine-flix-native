@@ -40,11 +40,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
-import tech.unrealistic.cineflix.ui.theme.ShapeTab
-import tech.unrealistic.cineflix.ui.theme.ShapeFolderBody
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 /**
@@ -118,7 +115,7 @@ fun FileAccessScreen(
         // ── Actions ────────────────────────────────────────────────────────
         Button(
             onClick = onContinue,
-            shape = ShapeButton,
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -137,7 +134,7 @@ fun FileAccessScreen(
         // Ghost border button — also advances the flow
         Button(
             onClick = onContinue,
-            shape = ShapeButton,
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -214,12 +211,12 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                             modifier = Modifier
                                 .width(sizes.folderTabW)
                                 .height(sizes.folderTabH)
-                                .clip(ShapeTab)
+                                .clip(OnboardingArt.folderTabShape)
                                 .background(colors.glass.surface)
                                 .border(
                                     width = sizes.borderWidth,
                                     color = colors.glass.border,
-                                    shape = ShapeTab
+                                    shape = OnboardingArt.folderTabShape
                                 )
                         )
 
@@ -228,12 +225,12 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                             modifier = Modifier
                                 .width(sizes.folderBodyW)
                                 .height(sizes.folderBodyH)
-                                .clip(ShapeFolderBody)
+                                .clip(OnboardingArt.folderBodyShape)
                                 .background(colors.glass.surface)
                                 .border(
                                     width = sizes.borderWidth,
                                     color = colors.glass.border,
-                                    shape = ShapeFolderBody
+                                    shape = OnboardingArt.folderBodyShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {

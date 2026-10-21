@@ -48,9 +48,7 @@ import androidx.compose.ui.res.painterResource
 import tech.unrealistic.cineflix.R
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapePill
-import tech.unrealistic.cineflix.ui.theme.ShapeRound
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 private const val GITHUB_REPO_URL = "https://github.com/ShelbyG2/cine-flix-native"
@@ -109,7 +107,7 @@ fun GitHubStarScreen(
         Box {
             GlassMorphOverlay(
                 modifier = Modifier.matchParentSize(),
-                shape = ShapeRound
+                shape = ShapePill
             )
             Row(
                 modifier = Modifier.padding(
@@ -146,7 +144,7 @@ fun GitHubStarScreen(
                 }
                 onComplete()
             },
-            shape = ShapeButton,
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

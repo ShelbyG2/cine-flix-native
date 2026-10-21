@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.delay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapePill
-import tech.unrealistic.cineflix.ui.theme.ShapePlay
 import tech.unrealistic.cineflix.ui.theme.SplashWordmarkStyle
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 import kotlin.math.sin
@@ -119,12 +118,12 @@ fun SplashScreen(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .size(sizes.playButton)
-                        .clip(ShapePlay)
+                        .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.primary)
                         .border(
                             width = sizes.borderWidth,
                             color = MaterialTheme.colorScheme.outline,
-                            shape = ShapePlay
+                            shape = MaterialTheme.shapes.large
                         )
                 ) {
                     val glyphColor = MaterialTheme.colorScheme.onPrimary

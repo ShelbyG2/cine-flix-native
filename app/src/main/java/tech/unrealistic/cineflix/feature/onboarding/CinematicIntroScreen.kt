@@ -51,7 +51,6 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.WordmarkStyle
 import tech.unrealistic.cineflix.ui.theme.withAlpha
@@ -348,7 +347,7 @@ fun CinematicIntroScreen(
                 onClick = {
                     if (isLastSlide) onNext() else page++
                 },
-                shape = ShapeButton,
+                shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colors.image.onImage,
                     contentColor = colors.image.onImageInverse
