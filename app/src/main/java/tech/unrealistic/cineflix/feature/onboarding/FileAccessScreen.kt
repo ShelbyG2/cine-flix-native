@@ -3,7 +3,6 @@ package tech.unrealistic.cineflix.feature.onboarding
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -38,11 +37,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.withAlpha
+
+/** Decorative folder tilt loop length. */
+private const val FOLDER_TILT_MS = 2_600
 
 /**
  * Screen 2 — File Access Permission.
@@ -73,13 +74,18 @@ fun FileAccessScreen(
         // ── 3D folder icon ─────────────────────────────────────────────────
         FolderIcon3D(modifier = Modifier.weight(1f))
 
-        // ── System-style permission card ───────────────────────────────────
-        Box {
-            GlassMorphOverlay(
-                modifier = Modifier.matchParentSize(),
-                shape = MaterialTheme.shapes.extraLarge
-            )
-
+        // ── Permission card — solid raised surface with a hairline rim ──────
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.extraLarge)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                    width = sizes.hairline,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = MaterialTheme.shapes.extraLarge
+                )
+        ) {
             Column(modifier = Modifier.padding(spacing.xl)) {
                 Text(
                     text = "Allow access to your files?",
@@ -177,8 +183,9 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
     val animatedTiltX by tilt.animateFloat(
         initialValue = 14f,
         targetValue = 22f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_600, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = FOLDER_TILT_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "folder_tilt_x"
@@ -241,7 +248,7 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                     .background(
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                colors.glass.gloss,
+                                                colors.glass.surface,
                                                 Color.Transparent
                                             )
                                         )

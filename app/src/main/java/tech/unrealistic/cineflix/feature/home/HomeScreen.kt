@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +30,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.core.components.ErrorState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.rememberHazeState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
@@ -53,6 +57,9 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
+    // The top bar has its own blur source so it can sample the scrolling hero
+    // directly. The nav bar samples the app-level source.
+    val topBarHaze = rememberHazeState()
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -136,7 +143,9 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
-
+                        // Last item can scroll clear of the translucent bar.
+                        .padding(bottom = LocalBottomBarInset.current)
+                        .haze(topBarHaze)
                 ) {
 
                     HeroSection(
@@ -207,13 +216,13 @@ fun HomeScreen(
                     )
                 }
                 FloatingTopBar(
+                    hazeState = topBarHaze,
+                    onSearchClick = { onNavigate?.invoke() },
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .onGloballyPositioned { coordinates ->
                             topBarHeight = with(density) { coordinates.size.height.toDp() }
                         },
-                    { onNavigate?.invoke() },
-                    isScrolled = isScrolledPastHero
                 )
             }
         }

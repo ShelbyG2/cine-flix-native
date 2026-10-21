@@ -53,6 +53,7 @@ import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.EpisodePlayRequest
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.core.components.ShimmerBox
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
@@ -105,6 +106,8 @@ fun FavouriteScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
+            // Content still passes under the glass bar, but can clear it.
+            .padding(bottom = LocalBottomBarInset.current)
     ) {
         // ── Screen title ──────────────────────────────────────────────────
         Text(

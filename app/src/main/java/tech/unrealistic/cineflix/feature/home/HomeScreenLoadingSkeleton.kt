@@ -31,9 +31,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.rememberHazeState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.core.components.ShimmerBox
-import tech.unrealistic.cineflix.feature.home.components.GlassHeroBackground
+import tech.unrealistic.cineflix.feature.home.components.HeroBackdrop
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
@@ -44,6 +47,7 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
     // 1. Setup density and top bar tracking state to match production exactly
     var topBarHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
+    val topBarHaze = rememberHazeState()
 
     BoxWithConstraints(
         modifier = modifier
@@ -60,6 +64,8 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(bottom = LocalBottomBarInset.current)
+                    .haze(topBarHaze)
             ) {
                 // ── 1. Hero Section Skeleton ──
                 HeroSectionSkeleton(
@@ -80,13 +86,13 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
             // ── 3. FLOATING APP BAR SKELETON LAYER ──
             // Stays static, matches the transparent layout footprint of production perfectly
             FloatingTopBar(
+                hazeState = topBarHaze,
+                onSearchClick = {},
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .onGloballyPositioned { coordinates ->
                         topBarHeight = with(density) { coordinates.size.height.toDp() }
                     },
-                onSearchClick = {},
-                isScrolled = false // Keep it false so it stays transparent while loading
             )
         }
     }
@@ -97,19 +103,13 @@ fun HeroSectionSkeleton(
     modifier: Modifier = Modifier,
     topPadding: Dp,
 ) {
-    val skeletonVibrant = AppTheme.colors.skeleton.base
-    val skeletonMuted = AppTheme.colors.skeleton.highlight
     // Heights derive from the production type scale, not separate literals.
     val density = LocalDensity.current
     val chipHeight = with(density) {
         MaterialTheme.typography.labelLarge.lineHeight.toDp()
     } + AppTheme.spacing.chipPaddingV * 2
 
-    GlassHeroBackground(
-        vibrantColor = skeletonVibrant,
-        mutedColor = skeletonMuted,
-        modifier = modifier.fillMaxWidth()
-    ) {
+    HeroBackdrop(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
             // ── 1. Carousel Skeleton Track Block ────────────────────────────

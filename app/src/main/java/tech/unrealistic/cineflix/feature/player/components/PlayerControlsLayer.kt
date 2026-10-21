@@ -55,12 +55,6 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 /** Scrim behind the controls — the instruction's 45% black over themed surface. */
 private val ControlsScrimAlpha = 0.45f
 
-/** Play/pause size from the customisation instructions (§3.1). */
-private val PlayButtonSize = 64.dp
-
-/** Scrubber thumb size (§3.1: 16 dp thumb). */
-private val ThumbSize = 16.dp
-
 /** Ignore sub-pixel drift when mirroring playback into the scrubber. */
 private const val POSITION_SYNC_EPSILON = 0.001f
 
@@ -204,7 +198,7 @@ fun PlayerControlsLayer(
                         onInteract()
                         onTogglePlay()
                     },
-                    modifier = Modifier.size(PlayButtonSize),
+                    modifier = Modifier.size(AppTheme.sizes.playerPlayButton),
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -304,7 +298,7 @@ private fun Scrubber(
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colorScheme.primary
                 ),
-                thumbSize = DpSize(ThumbSize, ThumbSize),
+                thumbSize = DpSize(AppTheme.sizes.playerThumb, AppTheme.sizes.playerThumb),
             )
         },
         track = { state ->

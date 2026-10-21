@@ -1,12 +1,9 @@
 package tech.unrealistic.cineflix.feature.splash
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -40,6 +38,10 @@ import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.SplashWordmarkStyle
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 import kotlin.math.sin
+
+/** Decorative splash timings, kept local to the screen. */
+private const val SPLASH_RING_MS = 1_800
+private const val SPLASH_DOT_MS = 900
 
 /**
  * Splash shown on every cold start.
@@ -81,8 +83,9 @@ fun SplashScreen(
                 val animRingProgress by ringTransition.animateFloat(
                     initialValue = 0f,
                     targetValue = 1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1_800, easing = FastOutSlowInEasing),
+                    animationSpec = motion.infinite(
+                        durationMs = SPLASH_RING_MS,
+                        easing = motion.standard,
                         repeatMode = RepeatMode.Restart
                     ),
                     label = "splash_ring_progress"
@@ -91,8 +94,9 @@ fun SplashScreen(
                 val animRing2Progress by ringTransition.animateFloat(
                     initialValue = 0.35f,
                     targetValue = 1.35f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1_800, easing = FastOutSlowInEasing),
+                    animationSpec = motion.infinite(
+                        durationMs = SPLASH_RING_MS,
+                        easing = motion.standard,
                         repeatMode = RepeatMode.Restart
                     ),
                     label = "splash_ring_progress_2"
@@ -169,8 +173,9 @@ fun SplashScreen(
                     val animPhase by dotsTransition.animateFloat(
                         initialValue = 0f,
                         targetValue = (2f * Math.PI).toFloat(),
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(900, easing = FastOutSlowInEasing),
+                        animationSpec = motion.infinite(
+                            durationMs = SPLASH_DOT_MS,
+                            easing = motion.standard,
                             repeatMode = RepeatMode.Restart
                         ),
                         label = "splash_dot_$index"
@@ -201,13 +206,15 @@ fun SplashScreen(
 @Composable
 private fun LetterFadeIn(letter: String, startDelayMillis: Long, immediate: Boolean = false) {
     val animated = remember { Animatable(if (immediate) 1f else 0f) }
+    val motion = AppTheme.motion
+    val risePx = with(LocalDensity.current) { AppTheme.spacing.lg.toPx() }
 
     if (!immediate) {
         LaunchedEffect(Unit) {
             delay(startDelayMillis)
             animated.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                animationSpec = motion.spec(motion.longMs)
             )
         }
     }
@@ -218,7 +225,7 @@ private fun LetterFadeIn(letter: String, startDelayMillis: Long, immediate: Bool
         color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.graphicsLayer {
             alpha = animated.value
-            translationY = (1f - animated.value) * 24f
+            translationY = (1f - animated.value) * risePx
         }
     )
 }

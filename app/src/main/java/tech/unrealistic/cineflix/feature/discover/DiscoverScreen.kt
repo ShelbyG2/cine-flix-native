@@ -65,6 +65,7 @@ import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.MediaCard
 import tech.unrealistic.cineflix.core.components.ShimmerBox
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.remote.models.Genre
@@ -323,7 +324,7 @@ fun DiscoverScreen(
                                 start = AppTheme.spacing.lg,
                                 end = AppTheme.spacing.lg,
                                 top = AppTheme.spacing.md,
-                                bottom = AppTheme.spacing.xl
+                                bottom = AppTheme.spacing.xl + LocalBottomBarInset.current
                             ),
                             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
                             verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg),
@@ -438,7 +439,7 @@ private fun DiscoverGridSkeleton(modifier: Modifier = Modifier) {
             start = AppTheme.spacing.lg,
             end = AppTheme.spacing.lg,
             top = AppTheme.spacing.md,
-            bottom = AppTheme.spacing.xl
+            bottom = AppTheme.spacing.xl + LocalBottomBarInset.current
         ),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg),

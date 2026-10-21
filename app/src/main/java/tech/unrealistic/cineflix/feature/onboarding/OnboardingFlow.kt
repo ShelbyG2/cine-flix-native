@@ -1,7 +1,6 @@
 package tech.unrealistic.cineflix.feature.onboarding
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -18,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import tech.unrealistic.cineflix.ui.theme.AppTheme
 
 /**
  * First-launch onboarding host.
@@ -30,6 +30,7 @@ fun OnboardingFlow(
     modifier: Modifier = Modifier
 ) {
     var step by remember { mutableIntStateOf(1) }
+    val motion = AppTheme.motion
 
     Box(
         modifier = modifier
@@ -40,12 +41,14 @@ fun OnboardingFlow(
         AnimatedContent(
             targetState = step,
             transitionSpec = {
+                val enter = motion.spec<Float>(motion.mediumMs, motion.emphasized)
+                val exit = motion.spec<Float>(motion.shortMs, motion.standard)
                 if (targetState > initialState) {
-                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                            (slideOutHorizontally { -it / 3 } + fadeOut(tween(300)))
+                    (slideInHorizontally { it } + fadeIn(enter)) togetherWith
+                            (slideOutHorizontally { -it / 3 } + fadeOut(exit))
                 } else {
-                    (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
-                            (slideOutHorizontally { it / 3 } + fadeOut(tween(300)))
+                    (slideInHorizontally { -it } + fadeIn(enter)) togetherWith
+                            (slideOutHorizontally { it / 3 } + fadeOut(exit))
                 }
             },
             label = "onboarding_step"

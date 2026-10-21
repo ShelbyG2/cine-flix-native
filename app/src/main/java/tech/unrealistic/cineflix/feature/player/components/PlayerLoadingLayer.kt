@@ -1,11 +1,8 @@
 package tech.unrealistic.cineflix.feature.player.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +38,9 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 /** Scrim end stop: themed background at 85% over the backdrop (§2.1). */
 private const val SCRIM_BOTTOM_ALPHA = 0.85f
 
-/** Wavy bars canvas — dimensions from the customisation instructions (§2.3). */
-private val WavyBarsWidth: Dp = 40.dp
-private val WavyBarsHeight: Dp = 28.dp
+/** Wavy-bar loop timing — decorative, player-local. */
+private const val BAR_CYCLE_MS = 600
+private const val BAR_STAGGER_MS = 80
 
 /**
  * Full-screen playback loading state: TMDB backdrop, gradient scrim, the title
@@ -140,6 +137,7 @@ fun PlayerLoadingLayer(
  */
 @Composable
 fun WavyBarsAnimation(modifier: Modifier = Modifier) {
+    val motion = AppTheme.motion
     val transition = rememberInfiniteTransition(label = "wavy")
     val barCount = 5
     val phases = remember { List(barCount) { it * 72f } }   // 72° apart
@@ -148,13 +146,11 @@ fun WavyBarsAnimation(modifier: Modifier = Modifier) {
         transition.animateFloat(
             initialValue = 0.2f,
             targetValue = 1.0f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(
-                    durationMillis = 600,
-                    easing = FastOutSlowInEasing,
-                    delayMillis = (i * 80)       // stagger each bar
-                ),
-                repeatMode = RepeatMode.Reverse
+            animationSpec = motion.infinite(
+                durationMs = BAR_CYCLE_MS,
+                easing = motion.standard,
+                repeatMode = RepeatMode.Reverse,
+                delayMs = i * BAR_STAGGER_MS
             ),
             label = "bar_$i"
         )
@@ -164,13 +160,15 @@ fun WavyBarsAnimation(modifier: Modifier = Modifier) {
 
     Canvas(
         modifier = modifier
-            .width(WavyBarsWidth)
-            .height(WavyBarsHeight)
+            .width(AppTheme.sizes.wavyBarsWidth)
+            .height(AppTheme.sizes.wavyBarsHeight)
     ) {
         val barWidth = size.width / (barCount * 2f - 1f)
         val gap = barWidth
         animatedFractions.forEachIndexed { i, fraction ->
-            val barHeight = size.height * fraction.value
+            // Static mid-height bars under reduce motion — no decorative loop.
+            val value = if (motion.reduceMotion) 0.6f else fraction.value
+            val barHeight = size.height * value
             val left = i * (barWidth + gap)
             val top = (size.height - barHeight) / 2f
             drawRoundRect(

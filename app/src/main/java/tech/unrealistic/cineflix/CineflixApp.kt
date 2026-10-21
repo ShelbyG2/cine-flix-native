@@ -3,27 +3,29 @@ package tech.unrealistic.cineflix
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import tech.unrealistic.cineflix.core.components.CineflixBottomBar
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.core.preferences.OnboardingPreferences
 import tech.unrealistic.cineflix.data.remote.RetrofitClient
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
@@ -37,6 +39,8 @@ import tech.unrealistic.cineflix.feature.onboarding.OnboardingFlow
 import tech.unrealistic.cineflix.feature.player.VideoPlayerScreen
 import tech.unrealistic.cineflix.feature.splash.SplashScreen
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.rememberHazeState
 
 
 /**
@@ -47,7 +51,6 @@ enum class AppStage { SPLASH, ONBOARDING, MAIN }
 
 
 @RequiresApi(Build.VERSION_CODES.P)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CineflixApp(
 
@@ -59,7 +62,7 @@ fun CineflixApp(
 
     Crossfade(
         targetState = appStage,
-        animationSpec = tween(AppTheme.motion.longMs),
+        animationSpec = AppTheme.motion.spec(AppTheme.motion.mediumMs),
         label = "app_stage"
     ) { stage ->
         when (stage) {
@@ -86,8 +89,8 @@ fun CineflixApp(
 }
 
 @RequiresApi(Build.VERSION_CODES.P)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun MainAppContent() {
     //Home is our default tab
     val backStack = remember { mutableStateListOf<Any>(Home) }
@@ -139,54 +142,34 @@ private fun MainAppContent() {
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            painterResource(it.icon),
-                            contentDescription = it.label,
-                            // Theme roles: AA in BOTH modes (white/grey hardcoded
-                            // failed in light mode where the nav surface is light)
-                            tint = if (it == currentTab) AppTheme.colors.nav.selectedIcon
-                            else AppTheme.colors.nav.unselectedIcon
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = it.label,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (it == currentTab) AppTheme.colors.nav.selectedIcon
-                            else AppTheme.colors.nav.unselectedIcon
-                        )
-                    },
-                    selected = it == currentTab,
-                    onClick = {
-                        backStack.clear()
-                        backStack.add(it.route)
-                    }
-                )
-            }
-        }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize() ) { innerPadding ->
+    // One Haze source for the whole nav surface: both glass bars sample it.
+    val hazeState = rememberHazeState()
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottomBarHeight = AppTheme.sizes.navBarHeight + navBarInset
 
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        CompositionLocalProvider(LocalBottomBarInset provides bottomBarHeight) {
             NavDisplay(
-                backStack= backStack,
-                onBack = {backStack.removeLastOrNull()},
-                modifier= Modifier.padding(innerPadding),
-                entryProvider = {key ->
-                    when(key){
-                        is Home -> NavEntry(key){ HomeScreen (
-                            onNavigate = {
-                                backStack.clear()
-                                backStack.add(Discover)
-                            },
-                            onPlay = playItem,
-                            onPlayEpisode = playEpisode
-                        ) }
+                backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
+                // Content draws behind the translucent bar (edge-to-edge).
+                modifier = Modifier
+                    .fillMaxSize()
+                    .haze(hazeState),
+                entryProvider = { key ->
+                    when (key) {
+                        is Home -> NavEntry(key) {
+                            HomeScreen(
+                                onNavigate = {
+                                    backStack.clear()
+                                    backStack.add(Discover)
+                                },
+                                onPlay = playItem,
+                                onPlayEpisode = playEpisode
+                            )
+                        }
+
                         is Favourites -> NavEntry(key) {
                             FavouriteScreen(
                                 onNavigate = {
@@ -197,6 +180,7 @@ private fun MainAppContent() {
                                 onPlayEpisode = playEpisode
                             )
                         }
+
                         is Discover -> NavEntry(key) {
                             DiscoverScreen(
                                 onNavigate = {
@@ -207,15 +191,24 @@ private fun MainAppContent() {
                                 onPlayEpisode = playEpisode
                             )
                         }
-                        is Profile -> NavEntry(key){ProfileScreen () }
 
-                        else -> NavEntry(key){Text("Not found")}
+                        is Profile -> NavEntry(key) { ProfileScreen() }
+
+                        else -> NavEntry(key) { Text("Not found") }
                     }
-
                 }
             )
+
+            CineflixBottomBar(
+                selected = currentTab,
+                onSelect = { destination ->
+                    backStack.clear()
+                    backStack.add(destination.route)
+                },
+                hazeState = hazeState,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
-    }
 
         playback?.let { request ->
             // Next / previous are derived here — the graph owns the request —

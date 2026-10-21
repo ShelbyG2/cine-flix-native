@@ -1,7 +1,6 @@
 package tech.unrealistic.cineflix.core.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,11 +91,6 @@ fun ActionButtons(
                 Text(text = "Play", style = MaterialTheme.typography.labelLarge)
             }
             if (onMediaClick != null) {  // Info button glass icon button
-                val detailScale by animateFloatAsState(
-                    targetValue = 1.0f,
-                    animationSpec = tween(motion.shortMs),
-                    label = "fav_scale"
-                )
                 IconButton(
                     onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
                     colors = IconButtonDefaults.iconButtonColors(
@@ -113,12 +107,8 @@ fun ActionButtons(
                     Icon(
                         imageVector = Icons.Filled.Info,
                         contentDescription = "Show details",
-                        modifier = Modifier
-                            .size(sizes.iconLg)
-                            .graphicsLayer {
-                                scaleX = detailScale
-                                scaleY = detailScale
-                            })
+                        modifier = Modifier.size(sizes.iconLg)
+                    )
                 }
             }
 
@@ -130,7 +120,7 @@ fun ActionButtons(
                     isFavourite -> 1.25f
                     else -> 1.0f
                 },
-                animationSpec = tween(motion.shortMs),
+                animationSpec = motion.spec(motion.shortMs, motion.emphasized),
                 label = "fav_scale"
             )
 
@@ -141,7 +131,7 @@ fun ActionButtons(
                     isSaved -> 1.25f
                     else -> 1.0f
                 },
-                animationSpec = tween(motion.shortMs),
+                animationSpec = motion.spec(motion.shortMs, motion.emphasized),
                 label = "save_scale"
             )
 

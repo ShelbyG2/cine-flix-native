@@ -43,9 +43,6 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 
-/** Visible diameter of the close control inside its 48dp touch target. */
-private val CloseButtonVisualSize = 32.dp
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DetailSheetHeroSection(
@@ -114,7 +111,7 @@ fun DetailSheetHeroSection(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(CloseButtonVisualSize)   // visual size only
+                        .size(sizes.closeButtonVisual)   // visual size only
                         .clip(ShapeCircle)
                         .background(colors.image.scrimStrong)
                         .border(

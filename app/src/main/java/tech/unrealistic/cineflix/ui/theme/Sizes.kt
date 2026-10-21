@@ -33,6 +33,20 @@ data class AppSizes(
 
     // ── Component sizes ─────────────────────────────────────────────────────
     val actionButton:    Dp = 52.dp,  // play / favourite / share round buttons
+    /** Blur radius for the single glass material (top bar / nav bar). */
+    val glassBlurRadius:  Dp = 28.dp,
+    /** Content height of the iOS-style bottom tab bar (before nav-bar inset). */
+    val navBarHeight:     Dp = 56.dp,
+    /** Content height of the floating top bar (before status-bar inset). */
+    val topBarHeight:     Dp = 56.dp,
+    /** Visible disc of a close button inside its 48dp target. */
+    val closeButtonVisual: Dp = 32.dp,
+    /** Player: centre transport button and scrubber thumb. */
+    val playerPlayButton: Dp = 64.dp,
+    val playerThumb:      Dp = 16.dp,
+    /** Player: wavy-bars artwork box. */
+    val wavyBarsWidth:    Dp = 40.dp,
+    val wavyBarsHeight:   Dp = 28.dp,
     val dragHandleWidth:  Dp = 36.dp,
     val dragHandleHeight: Dp = 4.dp,
 

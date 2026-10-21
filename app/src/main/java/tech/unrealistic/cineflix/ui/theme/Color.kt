@@ -149,10 +149,12 @@ data class StatusColors(
 
 /** The single translucent material used by the top bar and the nav bar. */
 data class GlassColors(
+    /** Translucent tint drawn over the blurred backdrop. */
     val surface: Color,
+    /** Hairline on the bar's own edge. */
     val border:  Color,
-    val gloss:   Color,
-    val noise:   Color,
+    /** Solid, slightly more opaque material for API < 31 (no blur). */
+    val fallback: Color,
 )
 
 /** Scrims, text and chip fills that sit over poster/backdrop imagery. */
@@ -161,7 +163,6 @@ data class ImageOverlayColors(
     val onImageMuted:   Color,
     val onImageInverse: Color,
     val scrimStart:     Color,
-    val scrimEnd:       Color,
     val scrimStrong:    Color,
     val scrimSoft:      Color,
     val topScrim:       Color,
@@ -193,7 +194,7 @@ data class SkeletonColors(
 
 /**
  * Non-color numeric specs that used to live inside the colour bag:
- * overlay alphas and the noise density of the glass grain.
+ * the alphas of image overlays and the details hero gradient.
  */
 data class EffectSpec(
     val ratingChipFillAlpha:   Float = 0.35f,
@@ -201,11 +202,8 @@ data class EffectSpec(
     val chipUnselectedAlpha:   Float = 0.5f,
     val chipSelectedAlpha:     Float = 0.25f,
     val posterFadeAlpha:       Float = 0.95f,
-    val heroTopAlpha:          Float = 0.85f,
     val heroMidAlpha:          Float = 0.60f,
     val heroMutedAlpha:        Float = 0.75f,
-    val glassNoiseAlpha:       Float = 0.03f,
-    val glassNoiseDensity:     Int   = 400,
 )
 
 data class AppExtendedColors(
@@ -232,17 +230,15 @@ internal val LightExtendedColors = AppExtendedColors(
     ),
     // Apple-style thin material: white, hairline rim
     glass = GlassColors(
-        surface = Color(0xB3FFFFFF),
-        border  = Color(0x1F000000),
-        gloss   = Color(0xB3FFFFFF),
-        noise   = Color(0x0F000000),
+        surface  = Color(0xB3FFFFFF),   // white at ~70%
+        border   = Color(0x1F000000),   // 12% ink hairline
+        fallback = Color(0xF0F2F2F7),   // surfaceContainer at ~94%
     ),
     image = ImageOverlayColors(
         onImage        = ColorWhite,
         onImageMuted   = Color(0xD9FFFFFF),
         onImageInverse = ColorInk,
         scrimStart     = Color(0x00000000),
-        scrimEnd       = Color(0xCC000000),
         scrimStrong    = Color(0xCC000000),
         scrimSoft      = Color(0xA6000000),
         topScrim       = Color(0xA6000000),
@@ -281,17 +277,15 @@ internal val DarkExtendedColors = AppExtendedColors(
         onWarningContainer = Color(0xFFFFE2B8),
     ),
     glass = GlassColors(
-        surface = Color(0x1FFFFFFF),
-        border  = Color(0x33FFFFFF),
-        gloss   = Color(0x26FFFFFF),
-        noise   = Color(0x14FFFFFF),
+        surface  = Color(0xB31C1C1E),   // #1C1C1E at ~70%
+        border   = Color(0x33FFFFFF),   // 20% white hairline
+        fallback = Color(0xF0111113),   // #111113 at ~94%
     ),
     image = ImageOverlayColors(
         onImage        = ColorWhite,
         onImageMuted   = Color(0xD9FFFFFF),
         onImageInverse = ColorInk,
         scrimStart     = Color(0x00000000),
-        scrimEnd       = Color(0xCC000000),
         scrimStrong    = Color(0xCC000000),
         scrimSoft      = Color(0x66000000),
         topScrim       = Color(0xA6000000),

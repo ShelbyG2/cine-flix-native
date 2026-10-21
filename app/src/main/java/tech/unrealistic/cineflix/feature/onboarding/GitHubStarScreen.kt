@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -46,10 +45,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.res.painterResource
 import tech.unrealistic.cineflix.R
-import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.withAlpha
+
+/** Decorative glow-ring loop length. */
+private const val PULSE_MS = 2_200
 
 private const val GITHUB_REPO_URL = "https://github.com/ShelbyG2/cine-flix-native"
 
@@ -103,12 +104,17 @@ fun GitHubStarScreen(
 
         Spacer(modifier = Modifier.height(spacing.lg))
 
-        // ── Social proof pill (liquid glass) ───────────────────────────────
-        Box {
-            GlassMorphOverlay(
-                modifier = Modifier.matchParentSize(),
-                shape = ShapePill
-            )
+        // ── Social proof pill — solid raised surface with a hairline rim ────
+        Box(
+            modifier = Modifier
+                .clip(ShapePill)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                    width = sizes.hairline,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = ShapePill
+                )
+        ) {
             Row(
                 modifier = Modifier.padding(
                     horizontal = spacing.lg,
@@ -204,8 +210,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
     val animRing1Scale by pulse.animateFloat(
         initialValue = 0.9f,
         targetValue = 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "ring1_scale"
@@ -213,8 +220,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
     val animRing1Alpha by pulse.animateFloat(
         initialValue = 0.45f,
         targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "ring1_alpha"
@@ -223,18 +231,22 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
     val animRing2Scale by pulse.animateFloat(
         initialValue = 1.05f,
         targetValue = 1.45f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, delayMillis = 1_100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
+            repeatMode = RepeatMode.Reverse,
+            delayMs = PULSE_MS / 2
         ),
         label = "ring2_scale"
     )
     val animRing2Alpha by pulse.animateFloat(
         initialValue = 0.3f,
         targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, delayMillis = 1_100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
+            repeatMode = RepeatMode.Reverse,
+            delayMs = PULSE_MS / 2
         ),
         label = "ring2_alpha"
     )
@@ -298,7 +310,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    colors.glass.gloss,
+                                    colors.glass.surface,
                                     colors.glass.surface,
                                     OnboardingArt.sphereShade
                                 ),
@@ -324,9 +336,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        colors.glass.gloss,
-                                        colors.glass.gloss.withAlpha(
-                                            colors.glass.gloss.alpha * 0.1f
+                                        colors.glass.surface,
+                                        colors.glass.surface.withAlpha(
+                                            colors.glass.surface.alpha * 0.1f
                                         )
                                     )
                                 )

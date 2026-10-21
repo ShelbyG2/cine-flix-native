@@ -1,11 +1,9 @@
 package tech.unrealistic.cineflix.feature.onboarding
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -46,16 +44,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
-import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.WordmarkStyle
 import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 // ── Slide content ────────────────────────────────────────────────────────────
+
+/** Ken Burns loop length for the intro imagery (decorative). */
+private const val KEN_BURNS_MS = 7_000
 
 private data class IntroSlide(
     val imageUrl: String,
@@ -113,8 +114,9 @@ fun CinematicIntroScreen(
     val animatedKenBurns by kenBurns.animateFloat(
         initialValue = 1f,
         targetValue = 1.12f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 7_000, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = KEN_BURNS_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "ken_burns_scale"
@@ -127,8 +129,9 @@ fun CinematicIntroScreen(
         AnimatedContent(
             targetState = page,
             transitionSpec = {
-                (fadeIn(tween(700)) + slideInVertically { it / 8 }) togetherWith
-                        (fadeOut(tween(700)) + slideOutVertically { -it / 8 })
+                val spec = motion.spec<Float>(motion.longFadeMs, motion.standard)
+                (fadeIn(spec) + slideInVertically { it / 8 }) togetherWith
+                        (fadeOut(spec) + slideOutVertically { -it / 8 })
             },
             label = "intro_slide"
         ) { currentPage ->
@@ -245,10 +248,12 @@ fun CinematicIntroScreen(
             AnimatedContent(
                 targetState = page,
                 transitionSpec = {
-                    (fadeIn(tween(450, easing = FastOutSlowInEasing)) +
-                            slideInVertically(tween(450, easing = FastOutSlowInEasing)) { it }) togetherWith
-                            (fadeOut(tween(250)) +
-                                    slideOutVertically(tween(250)) { -it / 2 })
+                    val enter = motion.spec<Float>(motion.longFadeMs, motion.emphasized)
+                    val exit = motion.spec<Float>(motion.shortMs, motion.standard)
+                    val slideEnter = motion.spec<IntOffset>(motion.longFadeMs, motion.emphasized)
+                    val slideExit = motion.spec<IntOffset>(motion.shortMs, motion.standard)
+                    (fadeIn(enter) + slideInVertically(slideEnter) { it }) togetherWith
+                            (fadeOut(exit) + slideOutVertically(slideExit) { -it / 2 })
                 },
                 label = "intro_card"
             ) { currentPage ->
@@ -285,10 +290,18 @@ fun CinematicIntroScreen(
 
                     // Floating liquid glass feature card
                     Box {
-                        // Glass layers (frosted base, gloss, rim light, noise)
-                        GlassMorphOverlay(
-                            modifier = Modifier.matchParentSize(),
-                            shape = MaterialTheme.shapes.extraLarge
+                        // Solid raised surface + hairline rim (glass is reserved
+                        // for the two bars and the hero action pill).
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clip(MaterialTheme.shapes.extraLarge)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .border(
+                                    width = sizes.hairline,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = MaterialTheme.shapes.extraLarge
+                                )
                         )
 
                         Column(modifier = Modifier.padding(spacing.xl)) {
@@ -320,10 +333,7 @@ fun CinematicIntroScreen(
                     val isActive = index == page
                     val dotWidth by animateDpAsState(
                         targetValue = if (isActive) OnboardingArt.dotActiveW else OnboardingArt.dotInactiveW,
-                        animationSpec = tween(
-                            if (motion.reduceMotion) 0 else 350,
-                            easing = FastOutSlowInEasing
-                        ),
+                        animationSpec = motion.spec(motion.mediumMs, motion.standard),
                         label = "dot_width"
                     )
                     Box(

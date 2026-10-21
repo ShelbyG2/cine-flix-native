@@ -1,11 +1,8 @@
 package tech.unrealistic.cineflix.core.components
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -61,11 +58,9 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     val translateAnimation by transition.animateFloat(
         initialValue = -2f * size.width.toFloat(),
         targetValue = 2f * size.width.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = motion.shimmerMs,
-                easing = LinearEasing
-            ),
+        animationSpec = motion.infinite(
+            durationMs = motion.shimmerMs,
+            easing = motion.standard,
             repeatMode = RepeatMode.Restart
         ), label = "shimmer_translation"
     )
