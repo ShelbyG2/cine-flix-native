@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.twotone.WifiOff
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 /**
  * Centred error state with an optional retry affordance.
@@ -39,7 +40,7 @@ fun ErrorState(
     val spacing = AppTheme.spacing
     val isOffline = message.contains("internet", ignoreCase = true) ||
             message.contains("Wi-Fi", ignoreCase = true)
-    val resolvedIcon = icon ?: if (isOffline) Icons.TwoTone.WifiOff
+    val resolvedIcon = icon ?: if (isOffline) Icons.Outlined.WifiOff
     else Icons.Outlined.ErrorOutline
 
     Column(
@@ -59,7 +60,7 @@ fun ErrorState(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.error,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
 
@@ -73,7 +74,7 @@ fun ErrorState(
         if (onRetry != null) {
             Button(
                 onClick = onRetry,
-                shape = MaterialTheme.shapes.medium,
+                shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary

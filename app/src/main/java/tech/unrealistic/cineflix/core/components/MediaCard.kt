@@ -7,22 +7,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,225 +41,194 @@ import tech.unrealistic.cineflix.helpers.genreNames
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
-import tech.unrealistic.cineflix.ui.theme.withAlpha
+import tech.unrealistic.cineflix.ui.theme.ShapeSmall
 
-
+/**
+ * Poster card.
+ *
+ * - Grid / row card: 2:3 poster with an 8dp radius, no border, title below in
+ *   `titleMedium`. Favourite and save keep their corners on a subtle dark disc.
+ * - Hero card: poster fills the carousel cell, a bottom scrim carries the title,
+ *   rating and genre chips.
+ */
 @Composable
 fun MediaCard(
     modifier: Modifier = Modifier,
     media: MediaItem,
     hero: Boolean? = null,
     isFocused: Boolean? = null,
-    accentColor: Color? = null,
-    fillWidth: Boolean = false,   // true → poster stretches to the parent width (grid cells)
+    fillWidth: Boolean = false,
     isSaved: Boolean = false,
     onSaveToggle: (() -> Unit)? = null,
     isFavourite: Boolean = false,
     onFavouriteToggle: (() -> Unit)? = null,
 ) {
     val isHero = hero ?: false
-    val mediaType = media.mediaType
+    val sizes = AppTheme.sizes
+    val spacing = AppTheme.spacing
 
     val displayTitle = when (media) {
         is Movie -> media.title
         is Tv -> media.name
     }
-    Box(
-        contentAlignment = Alignment.BottomCenter,
-        modifier = if (isHero) modifier else if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(AppTheme.sizes.mediaCardWidth)
+    val posterUrl = media.posterPath?.let { path -> "https://image.tmdb.org/t/p/w500$path" }
 
-    ) {
-        Card(
-            modifier = modifier.fillMaxSize(),
-//            shape = if (isHero) RectangleShape else CardDefaults.shape
+    if (isHero) {
+        Box(
+            modifier = modifier
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
+            AsyncImage(
+                model = posterUrl,
+                contentDescription = displayTitle,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
 
+            // Bottom scrim so the title and chips stay AA over any poster.
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0.55f to Color.Transparent,
+                                1.00f to AppTheme.colors.image.scrimStrong,
+                            )
+                        )
+                    )
+            )
 
-            val posterUrl = media.posterPath
-                ?.let { path -> "https://image.tmdb.org/t/p/w500$path" }
-            Box() {
-                AsyncImage(
-                    model = posterUrl,
-                    contentDescription = displayTitle,
-
+            if (isFocused == true) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(2f / 3f)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentScale = ContentScale.Fit
-                )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                0.5f to Color.Transparent,
-                                1.0f to MaterialTheme.colorScheme.background
-                                    .withAlpha(AppTheme.effects.posterFadeAlpha)
-                            )
-                        )
-                )
-                // ── Favourite (heart) overlay — top-start corner, quick-remove ──
-                if (onFavouriteToggle != null && !isHero) {
-                    IconButton(
-                        onClick = onFavouriteToggle,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(AppTheme.sizes.overlayButtonPad)
-                            .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
-                            .clip(ShapeCircle)
-                            .background(AppTheme.colors.image.chipSurface)
+                        .align(Alignment.BottomStart)
+                        .padding(spacing.lg)
+                ) {
+                    Text(
+                        text = displayTitle,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = AppTheme.colors.image.onImage,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    Spacer(modifier = Modifier.height(spacing.sm))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(spacing.sm)
                     ) {
-                        Icon(
-                            imageVector = if (isFavourite) Icons.Filled.Favorite
-                            else Icons.Outlined.FavoriteBorder,
-                            contentDescription = if (isFavourite) "Remove from favourites"
-                            else "Add to favourites",
-                            tint = if (isFavourite) AppTheme.colors.accent.favourite
-                            else AppTheme.colors.image.onImage,
-                            modifier = Modifier.size(AppTheme.sizes.iconSm)
-                        )
-                    }
-                }
-
-                // ── Save (bookmark) overlay — top-end corner, one-tap watchlist ──
-                if (onSaveToggle != null && !isHero) {
-                    IconButton(
-                        onClick = onSaveToggle,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(AppTheme.sizes.overlayButtonPad)
-                            .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
-                            .clip(ShapeCircle)
-                            .background(AppTheme.colors.image.chipSurface)
-                    ) {
-                        Icon(
-                            imageVector = if (isSaved) Icons.Filled.Bookmark
-                            else Icons.Outlined.BookmarkBorder,
-                            contentDescription = if (isSaved) "Remove from saved"
-                            else "Save for later",
-                            tint = if (isSaved) AppTheme.colors.accent.saved
-                            else AppTheme.colors.image.onImage,
-                            modifier = Modifier.size(AppTheme.sizes.iconSm)
-                        )
-                    }
-                }
-
-                if (isHero && isFocused == true) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomStart)
-                            .padding(AppTheme.spacing.lg)
-                    ) {
-                        // Over imagery: always light, guaranteed by the card's gradient scrim
-                        val contentColor = AppTheme.colors.image.onImage
-                        Text(
-                            text = displayTitle,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = contentColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
-
-                        // Rating + Genres row
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
-                        ) {
-                            // Star rating chip
-                            RatingChip(
-                                score = media.voteAverage,
-                                accentColor = accentColor,
-                                contentColor = contentColor
-                            )
-
-                            // Genre chips — max 3
-
-                            media.genreNames.take(3).forEach { genreName ->
-                                GenreChip(
-                                    label = genreName, contentColor = contentColor
-                                )
-                            }
+                        RatingPill(score = media.voteAverage)
+                        media.genreNames.take(3).forEach { genreName ->
+                            OverlayChip(label = genreName)
                         }
                     }
                 }
+            }
+        }
+        return
+    }
 
+    Column(
+        modifier = if (fillWidth) modifier.fillMaxWidth() else modifier.width(sizes.mediaCardWidth)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(ratio = 2f / 3f)
+                .clip(ShapeSmall)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+        ) {
+            AsyncImage(
+                model = posterUrl,
+                contentDescription = displayTitle,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+
+            // Favourite (heart) — top-start, 48dp target on a subtle dark disc.
+            if (onFavouriteToggle != null) {
+                IconButton(
+                    onClick = onFavouriteToggle,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(sizes.overlayButtonPad)
+                        .size(sizes.touchTarget)
+                        .clip(ShapeCircle)
+                        .background(AppTheme.colors.image.chipSurface)
+                ) {
+                    Icon(
+                        imageVector = if (isFavourite) Icons.Filled.Favorite
+                        else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isFavourite) "Remove from favourites"
+                        else "Add to favourites",
+                        tint = if (isFavourite) AppTheme.colors.accent.favourite
+                        else AppTheme.colors.image.onImage,
+                        modifier = Modifier.size(sizes.iconSm)
+                    )
+                }
+            }
+
+            // Save (bookmark) — top-end, one-tap watchlist.
+            if (onSaveToggle != null) {
+                IconButton(
+                    onClick = onSaveToggle,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(sizes.overlayButtonPad)
+                        .size(sizes.touchTarget)
+                        .clip(ShapeCircle)
+                        .background(AppTheme.colors.image.chipSurface)
+                ) {
+                    Icon(
+                        imageVector = if (isSaved) Icons.Filled.Bookmark
+                        else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isSaved) "Remove from saved"
+                        else "Save for later",
+                        tint = if (isSaved) AppTheme.colors.accent.saved
+                        else AppTheme.colors.image.onImage,
+                        modifier = Modifier.size(sizes.iconSm)
+                    )
+                }
             }
         }
 
-        if (!isHero)
-            Text(
-                text = displayTitle,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface,
-
-
-                )
+        Text(
+            text = displayTitle,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = spacing.sm),
+        )
     }
-
-
 }
 
+/** Rating chip over imagery: white star, white label, translucent disc. */
 @Composable
-private fun GenreChip(
-    label: String,
-    contentColor: Color,
-) {
+private fun RatingPill(score: Double) {
+    val spacing = AppTheme.spacing
+    val display = String.format("%.1f", score.coerceIn(0.0, 10.0))
+
     Surface(
         shape = ShapePill,
-        color = AppTheme.colors.image.onChipSurface,
+        color = AppTheme.colors.image.chipSurface,
         modifier = Modifier.border(
-            AppTheme.sizes.glassBorderWidth,
-            AppTheme.colors.image.chipBorder,
-            ShapePill
-        )
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor,
-            modifier = Modifier.padding(
-                horizontal = AppTheme.spacing.chipPaddingH,
-                vertical = AppTheme.spacing.chipPaddingV
-            ),
-            maxLines = 1
-        )
-    }
-}
-
-@Composable
-private fun RatingChip(
-    score: Double,
-    accentColor: Color?,
-    contentColor: Color,
-) {
-    // Scale 0–10 → display as X.X
-    val display = String.format("%.1f", score.coerceIn(0.0, 10.0))
-    // Palette extraction can return null — fall back to the theme primary.
-    val chipColor = accentColor ?: MaterialTheme.colorScheme.primary
-
-    Surface(
-        shape = MaterialTheme.shapes.small,
-        color = chipColor.withAlpha(AppTheme.effects.ratingChipFillAlpha),
-        modifier = Modifier.border(
-            AppTheme.sizes.borderWidth,
-            chipColor.withAlpha(AppTheme.effects.ratingChipBorderAlpha),
-            MaterialTheme.shapes.small
+            width = AppTheme.sizes.hairline,
+            color = AppTheme.colors.image.chipBorder,
+            shape = ShapePill
         )
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = AppTheme.spacing.sm,
-                vertical = AppTheme.spacing.chipPaddingV
+                horizontal = spacing.sm,
+                vertical = spacing.xs
             ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.chipRowGap)
+            horizontalArrangement = Arrangement.spacedBy(spacing.inlineGap)
         ) {
             Icon(
                 imageVector = Icons.Filled.Star,
@@ -270,9 +238,36 @@ private fun RatingChip(
             )
             Text(
                 text = display,
-                style = MaterialTheme.typography.labelLarge,
-                color = contentColor
+                style = MaterialTheme.typography.labelMedium,
+                color = AppTheme.colors.image.onImage
             )
         }
+    }
+}
+
+/** Genre chip over imagery. */
+@Composable
+private fun OverlayChip(label: String) {
+    val spacing = AppTheme.spacing
+
+    Surface(
+        shape = ShapePill,
+        color = AppTheme.colors.image.onChipSurface,
+        modifier = Modifier.border(
+            width = AppTheme.sizes.hairline,
+            color = AppTheme.colors.image.chipBorder,
+            shape = ShapePill
+        )
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = AppTheme.colors.image.onImageMuted,
+            maxLines = 1,
+            modifier = Modifier.padding(
+                horizontal = spacing.sm,
+                vertical = spacing.xs
+            )
+        )
     }
 }
