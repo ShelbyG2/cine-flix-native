@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -101,7 +100,6 @@ fun PlayerLoadingLayer(
             Text(
                 text = displayTitle,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -118,7 +116,7 @@ fun PlayerLoadingLayer(
                         .weight(1f)
                         .height(AppTheme.spacing.xs),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                     drawStopIndicator = {},
                 )
                 Text(

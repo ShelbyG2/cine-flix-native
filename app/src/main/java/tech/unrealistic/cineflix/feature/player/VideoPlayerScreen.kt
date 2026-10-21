@@ -68,6 +68,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
@@ -116,6 +117,7 @@ private sealed interface TrackSheetMode {
  * restored when the screen leaves composition.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreen(
     tmdbId: Int,
@@ -672,6 +674,7 @@ fun VideoPlayerScreen(
  * `PlayerView` with its own controller disabled — every control is drawn by the
  * Compose layers above it (§0).
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 private fun createPlayerView(
     context: Context,
     player: ExoPlayer,
@@ -754,6 +757,7 @@ private fun ForceLandscapePlayback() {
 }
 
 @SuppressLint("SetJavaScriptEnabled")
+@androidx.annotation.OptIn(UnstableApi::class)
 private fun createPlayerWebView(
     context: Context,
     embedUrl: String,

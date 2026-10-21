@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 
-/** Scrim behind the controls — the instruction's 45% black over themed surface. */
+/** Scrim behind the controls — always black, never the light surface. */
 private val ControlsScrimAlpha = 0.45f
 
 /** Ignore sub-pixel drift when mirroring playback into the scrubber. */
@@ -94,7 +94,7 @@ fun PlayerControlsLayer(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = ControlsScrimAlpha))
+            .background(AppTheme.colors.playerBackground.copy(alpha = ControlsScrimAlpha))
     ) {
         // ── Top bar ─────────────────────────────────────────────────────────
         Row(
