@@ -40,7 +40,6 @@ import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.data.remote.models.displayTitle
 import tech.unrealistic.cineflix.helpers.genreNames
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.HeadlineStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 
@@ -172,7 +171,7 @@ fun DetailSheetHeroSection(
 
             Text(
                 text = title,
-                style = HeadlineStrongStyle,
+                style = MaterialTheme.typography.headlineMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

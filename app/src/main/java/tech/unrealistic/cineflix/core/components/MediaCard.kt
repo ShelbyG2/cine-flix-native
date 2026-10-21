@@ -40,7 +40,6 @@ import tech.unrealistic.cineflix.data.remote.models.Movie
 import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.helpers.genreNames
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.CaptionStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.withAlpha
@@ -271,7 +270,7 @@ private fun RatingChip(
             )
             Text(
                 text = display,
-                style = CaptionStrongStyle,
+                style = MaterialTheme.typography.labelLarge,
                 color = contentColor
             )
         }

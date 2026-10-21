@@ -95,8 +95,7 @@ dependencies {
     //color palette extractoir
     implementation("androidx.palette:palette-ktx:1.0.0")
 
-    //google fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.5")    //exoplayer
+    //exoplayer
     implementation("androidx.media3:media3-exoplayer:1.10.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.10.1")

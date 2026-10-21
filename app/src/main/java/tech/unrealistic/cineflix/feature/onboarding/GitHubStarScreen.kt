@@ -48,7 +48,6 @@ import androidx.compose.ui.res.painterResource
 import tech.unrealistic.cineflix.R
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.ShapeRound
@@ -164,7 +163,7 @@ fun GitHubStarScreen(
                 tint = MaterialTheme.colorScheme.onPrimary
             )
             Spacer(modifier = Modifier.width(spacing.gap10))
-            Text(text = "Star on GitHub", style = LabelStrongStyle)
+            Text(text = "Star on GitHub", style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(modifier = Modifier.height(spacing.buttonGap))

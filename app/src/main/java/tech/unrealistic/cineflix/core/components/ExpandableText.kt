@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.BodyLineHeightBoost
-import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 
 @Composable
 fun ExpandableText(
@@ -58,7 +57,7 @@ fun ExpandableText(
             ) {
                 Text(
                     text = if (isExpanded) "Show Less" else "Read More",
-                    style = LabelStrongStyle,
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
             }

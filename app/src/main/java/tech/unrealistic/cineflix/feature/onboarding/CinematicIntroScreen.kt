@@ -51,7 +51,6 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 import tech.unrealistic.cineflix.ui.theme.WordmarkStyle
@@ -362,7 +361,7 @@ fun CinematicIntroScreen(
             ) {
                 Text(
                     text = if (isLastSlide) "Get Started" else "Next",
-                    style = LabelStrongStyle
+                    style = MaterialTheme.typography.labelLarge
                 )
                 Spacer(modifier = Modifier.width(spacing.sm))
                 Icon(

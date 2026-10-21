@@ -34,7 +34,6 @@ import tech.unrealistic.cineflix.data.remote.models.Episode
 import tech.unrealistic.cineflix.helpers.formatTime
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
-import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
 
 @Composable
  fun TvEpisodeItem(
@@ -113,7 +112,7 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
             ) {
                 Text(
                     text = "${episode.episodeNumber}. $name",
-                    style = TitleStrongStyle,
+                    style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

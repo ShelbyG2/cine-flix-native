@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 
 @Composable
@@ -90,7 +89,7 @@ fun ActionButtons(
                     modifier = Modifier.size(sizes.iconMd)
                 )
                 Spacer(modifier = Modifier.width(spacing.buttonGap))
-                Text(text = "Play", style = LabelStrongStyle)
+                Text(text = "Play", style = MaterialTheme.typography.labelLarge)
             }
             if (onMediaClick != null) {  // Info button glass icon button
                 val detailScale by animateFloatAsState(

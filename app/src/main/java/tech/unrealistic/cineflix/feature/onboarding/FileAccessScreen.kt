@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
-import tech.unrealistic.cineflix.ui.theme.LabelStrongStyle
 import tech.unrealistic.cineflix.ui.theme.ShapeButton
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 import tech.unrealistic.cineflix.ui.theme.ShapePill
@@ -130,7 +129,7 @@ fun FileAccessScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Allow Access", style = LabelStrongStyle)
+            Text(text = "Allow Access", style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(modifier = Modifier.height(spacing.gap10))
