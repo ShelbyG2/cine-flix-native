@@ -3,6 +3,7 @@ package tech.unrealistic.cineflix
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -147,7 +148,11 @@ private fun MainAppContent() {
     val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeight = AppTheme.sizes.navBarHeight + navBarInset
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
 
         CompositionLocalProvider(LocalBottomBarInset provides bottomBarHeight) {
             NavDisplay(
