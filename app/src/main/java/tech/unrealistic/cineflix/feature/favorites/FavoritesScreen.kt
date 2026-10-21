@@ -21,7 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.twotone.WifiOff
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,6 +60,7 @@ import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 /**
  * Favourites — the user's local library.
@@ -112,7 +113,7 @@ fun FavouriteScreen(
         // ── Screen title ──────────────────────────────────────────────────
         Text(
             text = "My Library",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
                 start = AppTheme.spacing.lg,
@@ -135,7 +136,7 @@ fun FavouriteScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = Icons.TwoTone.WifiOff,
+                        imageVector = Icons.Outlined.WifiOff,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(AppTheme.sizes.stateIconLg)
@@ -150,7 +151,7 @@ fun FavouriteScreen(
                     Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
                     Button(
                         onClick = viewModel::onRetry,
-                        shape = MaterialTheme.shapes.medium
+                        shape = ShapePill
                     ) {
                         Text(text = "Try Again", style = MaterialTheme.typography.labelLarge)
                     }
@@ -366,7 +367,7 @@ private fun LikedEpisodeCard(
         }
         Text(
             text = episode.name,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -413,14 +414,14 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
         Spacer(modifier = Modifier.height(AppTheme.spacing.sm))
         Text(
             text = "Tap the heart on any title to add it here, or the bookmark to save it for later.",
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
         Button(
             onClick = onExplore,
-            shape = MaterialTheme.shapes.medium
+            shape = ShapePill
         ) {
             Text(text = "Explore Titles", style = MaterialTheme.typography.labelLarge)
         }

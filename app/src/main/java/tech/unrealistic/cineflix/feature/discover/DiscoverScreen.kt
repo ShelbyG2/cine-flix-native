@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,9 +36,9 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,14 +50,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tech.unrealistic.cineflix.EpisodePlayRequest
@@ -64,6 +64,7 @@ import tech.unrealistic.cineflix.R
 import tech.unrealistic.cineflix.core.components.EmptyState
 import tech.unrealistic.cineflix.core.components.ErrorState
 import tech.unrealistic.cineflix.core.components.MediaCard
+import tech.unrealistic.cineflix.core.components.enterFadeUp
 import tech.unrealistic.cineflix.core.components.ShimmerBox
 import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
@@ -73,7 +74,6 @@ import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapePill
-import tech.unrealistic.cineflix.ui.theme.withAlpha
 
 /**
  * Discover — browse, filter and search the TMDB catalogue.
@@ -146,7 +146,7 @@ fun DiscoverScreen(
         // ── Screen title ──────────────────────────────────────────────────
         Text(
             text = "Discover",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
                 start = AppTheme.spacing.lg,
@@ -157,7 +157,7 @@ fun DiscoverScreen(
         )
 
         // ── Search bar ────────────────────────────────────────────────────
-        OutlinedTextField(
+        TextField(
             value = searchQuery,
             onValueChange = viewModel::onSearchQueryChanged,
             placeholder = {
@@ -193,9 +193,15 @@ fun DiscoverScreen(
                 viewModel.onSearchSubmitted()
                 keyboardController?.hide()
             }),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                cursorColor = MaterialTheme.colorScheme.onSurface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -330,16 +336,17 @@ fun DiscoverScreen(
                             verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(
+                            itemsIndexed(
                                 items = state.items,
-                                key = { "${it.mediaType}_${it.id}" }
-                            ) { item ->
+                                key = { _, item -> "${item.mediaType}_${item.id}" }
+                            ) { index, item ->
                                 MediaCard(
                                     media = item,
                                     fillWidth = true,
                                     isSaved = savedIds.contains(item.id),
                                     onSaveToggle = { LibraryRepository.toggleSaved(item.id, item.mediaType) },
                                     modifier = Modifier
+                                        .enterFadeUp(index)
                                         .clickable {
                                             openMediaDetails(item.id, item.mediaType)
                                         }
@@ -414,19 +421,18 @@ private fun DiscoverChip(
         },
         shape = ShapePill,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                .withAlpha(AppTheme.effects.chipUnselectedAlpha),
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            selectedContainerColor = MaterialTheme.colorScheme.primary
-                .withAlpha(AppTheme.effects.chipSelectedAlpha),
-            selectedLabelColor = MaterialTheme.colorScheme.onBackground
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
         ),
         border = FilterChipDefaults.filterChipBorder(
             borderColor = MaterialTheme.colorScheme.outlineVariant,
             selectedBorderColor = MaterialTheme.colorScheme.primary,
             enabled = true,
             selected = selected
-        )
+        ),
+        modifier = Modifier.minimumInteractiveComponentSize()
     )
 }
 
