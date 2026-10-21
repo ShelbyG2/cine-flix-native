@@ -16,7 +16,7 @@ private fun TypeScaleSample() {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
-            .padding(AppTheme.spacing.lg),
+            .padding(AppTheme.spacing.xxl),
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.xs)
     ) {
         Text("Display large", style = MaterialTheme.typography.displayLarge)

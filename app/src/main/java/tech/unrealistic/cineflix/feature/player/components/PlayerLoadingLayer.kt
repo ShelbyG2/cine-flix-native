@@ -91,8 +91,8 @@ fun PlayerLoadingLayer(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = AppTheme.spacing.lg)
-                .padding(bottom = AppTheme.spacing.xl),
+                .padding(horizontal = AppTheme.spacing.xxl)
+                .padding(bottom = AppTheme.spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
         ) {

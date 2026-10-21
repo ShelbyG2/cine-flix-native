@@ -493,7 +493,7 @@ fun VideoPlayerScreen(
                 onClick = { currentOnExit() },
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(AppTheme.spacing.md)
+                    .padding(AppTheme.spacing.lg)
                     .size(AppTheme.sizes.touchTarget),
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = AppTheme.colors.image.scrimStrong,
@@ -519,8 +519,8 @@ fun VideoPlayerScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = AppTheme.spacing.md)
-                    .padding(bottom = AppTheme.spacing.lg),
+                    .padding(horizontal = AppTheme.spacing.lg)
+                    .padding(bottom = AppTheme.spacing.xxl),
                 verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
             ) {
                 Text(

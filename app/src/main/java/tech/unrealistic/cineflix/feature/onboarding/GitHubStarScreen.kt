@@ -75,11 +75,11 @@ fun GitHubStarScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = spacing.gap24),
+            .padding(horizontal = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(spacing.lg))
+        Spacer(modifier = Modifier.height(spacing.xxl))
 
         // ── Glass sphere with the GitHub mark ──────────────────────────────
         GitHubSphere(modifier = Modifier.weight(1f))
@@ -93,7 +93,7 @@ fun GitHubStarScreen(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(spacing.gap10))
+        Spacer(modifier = Modifier.height(spacing.sm))
         Text(
             text = "A star on GitHub takes two seconds and helps more people discover the app. It means a lot to an indie project!",
             style = MaterialTheme.typography.bodyLarge,
@@ -101,7 +101,7 @@ fun GitHubStarScreen(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(spacing.md))
+        Spacer(modifier = Modifier.height(spacing.lg))
 
         // ── Social proof pill (liquid glass) ───────────────────────────────
         Box {
@@ -111,8 +111,8 @@ fun GitHubStarScreen(
             )
             Row(
                 modifier = Modifier.padding(
-                    horizontal = spacing.md,
-                    vertical = spacing.gap10
+                    horizontal = spacing.lg,
+                    vertical = spacing.sm
                 ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -131,7 +131,7 @@ fun GitHubStarScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(spacing.gap22))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── Star on GitHub CTA ─────────────────────────────────────────────
         Button(
@@ -151,7 +151,7 @@ fun GitHubStarScreen(
             ),
             contentPadding = PaddingValues(
                 horizontal = spacing.buttonPaddingH,
-                vertical = spacing.buttonPaddingVTall
+                vertical = spacing.buttonPaddingV
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -160,7 +160,7 @@ fun GitHubStarScreen(
                 size = sizes.iconCompact,
                 tint = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.width(spacing.gap10))
+            Spacer(modifier = Modifier.width(spacing.sm))
             Text(text = "Star on GitHub", style = MaterialTheme.typography.labelLarge)
         }
 
@@ -172,7 +172,7 @@ fun GitHubStarScreen(
                 .height(sizes.touchTarget)
                 .clip(ShapePill)
                 .clickable(onClick = onComplete)
-                .padding(horizontal = spacing.gap20),
+                .padding(horizontal = spacing.xl),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -254,21 +254,21 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
             // Sphere + rings
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(sizes.sphereBox)
+                modifier = Modifier.size(OnboardingArt.sphereBox)
             ) {
                 val sphereColor = MaterialTheme.colorScheme.primary
 
                 // Glow ring 1
                 Box(
                     modifier = Modifier
-                        .size(sizes.sphereRing)
+                        .size(OnboardingArt.sphereRing)
                         .graphicsLayer {
                             scaleX = ring1Scale
                             scaleY = ring1Scale
                             alpha = ring1Alpha
                         }
                         .border(
-                            width = sizes.ringBorderWide,
+                            width = OnboardingArt.ringBorderWide,
                             color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha1),
                             shape = ShapePill
                         )
@@ -276,14 +276,14 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                 // Glow ring 2
                 Box(
                     modifier = Modifier
-                        .size(sizes.sphereRing)
+                        .size(OnboardingArt.sphereRing)
                         .graphicsLayer {
                             scaleX = ring2Scale
                             scaleY = ring2Scale
                             alpha = ring2Alpha
                         }
                         .border(
-                            width = sizes.ringBorderThin,
+                            width = OnboardingArt.ringBorderThin,
                             color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha2),
                             shape = ShapePill
                         )
@@ -293,7 +293,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(sizes.sphereOrb)
+                        .size(OnboardingArt.sphereOrb)
                         .clip(ShapePill)
                         .background(
                             Brush.radialGradient(
@@ -316,9 +316,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(start = spacing.gap24, top = spacing.gap18)
-                            .width(sizes.specularW)
-                            .height(sizes.specularH)
+                            .padding(start = spacing.xl, top = spacing.lg)
+                            .width(OnboardingArt.specularW)
+                            .height(OnboardingArt.specularH)
                             .graphicsLayer { rotationZ = -24f }
                             .clip(ShapePill)
                             .background(
@@ -336,9 +336,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = spacing.gap20, bottom = spacing.gap26)
-                            .width(sizes.rimSliverW)
-                            .height(sizes.rimSliverH)
+                            .padding(end = spacing.xl, bottom = spacing.xl)
+                            .width(OnboardingArt.rimSliverW)
+                            .height(OnboardingArt.rimSliverH)
                             .graphicsLayer { rotationZ = -30f }
                             .clip(ShapePill)
                             .background(colors.glass.border)
@@ -347,20 +347,20 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                     // GitHub mark with drop shadow — themed so it reads on
                     // light glass in light mode too
                     GitHubMark(
-                        size = sizes.githubMarkLarge,
+                        size = OnboardingArt.githubMarkLarge,
                         tint = MaterialTheme.colorScheme.onSurface,
                         drawShadow = true
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.md))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             // Ground shadow ellipse
             Box(
                 modifier = Modifier
-                    .width(sizes.sphereShadowW)
-                    .height(sizes.sphereShadowH)
+                    .width(OnboardingArt.sphereShadowW)
+                    .height(OnboardingArt.sphereShadowH)
                     .clip(ShapePill)
                     .background(
                         Brush.radialGradient(

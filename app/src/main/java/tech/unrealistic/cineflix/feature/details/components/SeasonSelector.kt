@@ -54,7 +54,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
     val sizes = AppTheme.sizes
     val colors = AppTheme.colors
 
-    Column(modifier = Modifier.padding(horizontal = spacing.md)) {
+    Column(modifier = Modifier.padding(horizontal = spacing.lg)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,7 +107,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
 
             Column(
                 modifier = Modifier
-                    .padding(start = spacing.gap12)
+                    .padding(start = spacing.md)
                     .weight(1f)
             ) {
                 Text(
@@ -136,7 +136,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(spacing.gap12),
+                        horizontalArrangement = Arrangement.spacedBy(spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Dedicated colour role — AA in both modes (was a hardcoded grey)
@@ -157,7 +157,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
                     if (onLike != null) {
                         IconButton(
                             onClick = onLike,
-                            modifier = Modifier.size(sizes.likeButton)  // 48dp target
+                            modifier = Modifier.size(sizes.touchTarget)  // 48dp target
                         ) {
                             Icon(
                                 imageVector = if (isLiked) Icons.Filled.Favorite

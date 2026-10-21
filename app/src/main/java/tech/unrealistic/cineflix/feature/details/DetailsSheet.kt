@@ -129,7 +129,7 @@ fun MediaDetailsBottomSheet(
                                     sheetViewModel.fetchSheetDetails(mediaType, mediaId)
                                 },
                                 modifier = Modifier.padding(
-                                    vertical = AppTheme.spacing.lg
+                                    vertical = AppTheme.spacing.xxl
                                 )
                             )
                         }
@@ -277,7 +277,7 @@ fun MediaDetailsBottomSheet(
                                     sheetViewModel.fetchSheetDetails(type, id)
                                 }
                             )
-                            Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
+                            Spacer(modifier = Modifier.height(AppTheme.spacing.xxl))
                         }
                     }
                 }
@@ -301,15 +301,15 @@ private fun TvSeasonSelector(
             text = "Episodes",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(
-                horizontal = AppTheme.spacing.md,
+                horizontal = AppTheme.spacing.lg,
                 vertical = AppTheme.spacing.sm
             )
         )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
-            modifier = Modifier.padding(bottom = AppTheme.spacing.gap12)
+            modifier = Modifier.padding(bottom = AppTheme.spacing.md)
         ) {
             items(seasons) { index ->
                 val seasonNumber = index + 1
@@ -318,7 +318,7 @@ private fun TvSeasonSelector(
                     onClick = { onSeasonSelected(seasonNumber) },
                     label = { Text("Season $seasonNumber") },
                     // 48dp accessible chip height
-                    modifier = Modifier.height(AppTheme.sizes.chipTouchArea)
+                    modifier = Modifier.height(AppTheme.sizes.touchTarget)
                 )
             }
         }

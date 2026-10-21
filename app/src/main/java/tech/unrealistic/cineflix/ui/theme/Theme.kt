@@ -8,10 +8,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -123,6 +126,7 @@ fun ForceLightSystemBarIcons(enabled: Boolean = true) {
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun CineflixTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -140,6 +144,14 @@ fun CineflixTheme(
         else -> LightColorScheme
     }
 
+    // Card metrics widen on medium/expanded windows instead of stretching.
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val windowSizeClass = if (activity != null) calculateWindowSizeClass(activity) else null
+    val sizes = remember(windowSizeClass) {
+        AppSizes.forWindowWidth(windowSizeClass?.widthSizeClass)
+    }
+
     // Status bar / nav bar icon colour follows the theme (light mode → dark icons)
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -155,7 +167,7 @@ fun CineflixTheme(
         LocalAppExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
         LocalAppEffects provides EffectSpec(),
         LocalAppSpacing provides AppSpacing(),
-        LocalAppSizes provides AppSizes(),
+        LocalAppSizes provides sizes,
         LocalAppMotion provides AppMotion(reduceMotion = rememberReduceMotion()),
     ) {
         MaterialTheme(

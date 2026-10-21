@@ -198,7 +198,7 @@ fun CinematicIntroScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = spacing.gap20, vertical = spacing.gap14),
+                .padding(horizontal = spacing.xl, vertical = spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -220,7 +220,7 @@ fun CinematicIntroScreen(
                     )
                     .clickable(onClick = onSkip)
                     .height(sizes.touchTarget)
-                    .padding(horizontal = spacing.gap18),
+                    .padding(horizontal = spacing.lg),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -237,7 +237,7 @@ fun CinematicIntroScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = spacing.gap20, vertical = spacing.gap18)
+                .padding(horizontal = spacing.xl, vertical = spacing.lg)
         ) {
 
             // Feature card + chips swap together with an AnimatePresence-style
@@ -268,8 +268,8 @@ fun CinematicIntroScreen(
                                         shape = ShapePill
                                     )
                                     .padding(
-                                        horizontal = spacing.gap12,
-                                        vertical = spacing.gap5
+                                        horizontal = spacing.md,
+                                        vertical = spacing.xs
                                     )
                             ) {
                                 Text(
@@ -281,7 +281,7 @@ fun CinematicIntroScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(spacing.gap12))
+                    Spacer(modifier = Modifier.height(spacing.md))
 
                     // Floating liquid glass feature card
                     Box {
@@ -291,7 +291,7 @@ fun CinematicIntroScreen(
                             shape = MaterialTheme.shapes.extraLarge
                         )
 
-                        Column(modifier = Modifier.padding(spacing.gap20)) {
+                        Column(modifier = Modifier.padding(spacing.xl)) {
                             Text(
                                 text = currentSlide.title,
                                 style = MaterialTheme.typography.headlineSmall,
@@ -308,7 +308,7 @@ fun CinematicIntroScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.gap20))
+            Spacer(modifier = Modifier.height(spacing.xl))
 
             // Progress dots — active expands into a pill (instant under reduce-motion)
             Row(
@@ -319,7 +319,7 @@ fun CinematicIntroScreen(
                 repeat(pageCount) { index ->
                     val isActive = index == page
                     val dotWidth by animateDpAsState(
-                        targetValue = if (isActive) sizes.dotActiveW else sizes.dotInactiveW,
+                        targetValue = if (isActive) OnboardingArt.dotActiveW else OnboardingArt.dotInactiveW,
                         animationSpec = tween(
                             if (motion.reduceMotion) 0 else 350,
                             easing = FastOutSlowInEasing
@@ -329,7 +329,7 @@ fun CinematicIntroScreen(
                     Box(
                         modifier = Modifier
                             .padding(horizontal = spacing.xs)
-                            .height(sizes.dotH)
+                            .height(OnboardingArt.dotH)
                             .width(dotWidth)
                             .clip(ShapePill)
                             .background(
@@ -340,7 +340,7 @@ fun CinematicIntroScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.gap18))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             // Next / Get Started
             Button(
@@ -354,7 +354,7 @@ fun CinematicIntroScreen(
                 ),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = spacing.buttonPaddingH,
-                    vertical = spacing.buttonPaddingVTall
+                    vertical = spacing.buttonPaddingV
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {

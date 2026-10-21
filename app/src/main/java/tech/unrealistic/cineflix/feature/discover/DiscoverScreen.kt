@@ -148,10 +148,10 @@ fun DiscoverScreen(
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
-                start = AppTheme.spacing.md,
-                top = AppTheme.spacing.md,
-                end = AppTheme.spacing.md,
-                bottom = AppTheme.spacing.gap12
+                start = AppTheme.spacing.lg,
+                top = AppTheme.spacing.lg,
+                end = AppTheme.spacing.lg,
+                bottom = AppTheme.spacing.md
             )
         )
 
@@ -198,15 +198,15 @@ fun DiscoverScreen(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AppTheme.spacing.md)
+                .padding(horizontal = AppTheme.spacing.lg)
                 .focusRequester(focusRequester)
         )
 
         // ── Category tabs (Movies / TV Shows) ─────────────────────────────
         LazyRow(
-            contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
-            modifier = Modifier.padding(top = AppTheme.spacing.gap12)
+            modifier = Modifier.padding(top = AppTheme.spacing.md)
         ) {
             items(DiscoverCategory.entries) { category ->
                 DiscoverChip(
@@ -222,9 +222,9 @@ fun DiscoverScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(
-                    start = AppTheme.spacing.md,
-                    top = AppTheme.spacing.gap14,
-                    end = AppTheme.spacing.md
+                    start = AppTheme.spacing.lg,
+                    top = AppTheme.spacing.lg,
+                    end = AppTheme.spacing.lg
                 )
             ) {
                 Text(
@@ -234,9 +234,9 @@ fun DiscoverScreen(
                 )
             }
             LazyRow(
-                contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+                contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
-                modifier = Modifier.padding(top = AppTheme.spacing.gap6)
+                modifier = Modifier.padding(top = AppTheme.spacing.sm)
             ) {
                 items(DiscoverSort.entries) { sort ->
                     DiscoverChip(
@@ -251,9 +251,9 @@ fun DiscoverScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(
-                    start = AppTheme.spacing.md,
-                    top = AppTheme.spacing.gap14,
-                    end = AppTheme.spacing.md
+                    start = AppTheme.spacing.lg,
+                    top = AppTheme.spacing.lg,
+                    end = AppTheme.spacing.lg
                 )
             ) {
                 Text(
@@ -263,10 +263,10 @@ fun DiscoverScreen(
                 )
             }
             LazyRow(
-                contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
+                contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
                 modifier = Modifier.padding(
-                    top = AppTheme.spacing.gap6,
+                    top = AppTheme.spacing.sm,
                     bottom = AppTheme.spacing.xs
                 )
             ) {
@@ -320,13 +320,13 @@ fun DiscoverScreen(
                             state = gridState,
                             columns = GridCells.Adaptive(minSize = AppTheme.sizes.gridCellMin),
                             contentPadding = PaddingValues(
-                                start = AppTheme.spacing.md,
-                                end = AppTheme.spacing.md,
-                                top = AppTheme.spacing.gap12,
-                                bottom = AppTheme.spacing.gap24
+                                start = AppTheme.spacing.lg,
+                                end = AppTheme.spacing.lg,
+                                top = AppTheme.spacing.md,
+                                bottom = AppTheme.spacing.xl
                             ),
-                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
-                            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
+                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
+                            verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg),
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(
@@ -349,7 +349,7 @@ fun DiscoverScreen(
                                 item(span = { GridItemSpan(maxLineSpan) }) {                                        Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = AppTheme.spacing.md),
+                                            .padding(vertical = AppTheme.spacing.lg),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator(
@@ -435,13 +435,13 @@ private fun DiscoverGridSkeleton(modifier: Modifier = Modifier) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = AppTheme.sizes.gridCellMin),
         contentPadding = PaddingValues(
-            start = AppTheme.spacing.md,
-            end = AppTheme.spacing.md,
-            top = AppTheme.spacing.gap12,
-            bottom = AppTheme.spacing.gap24
+            start = AppTheme.spacing.lg,
+            end = AppTheme.spacing.lg,
+            top = AppTheme.spacing.md,
+            bottom = AppTheme.spacing.xl
         ),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
-        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg),
         userScrollEnabled = false,
         modifier = modifier
             .fillMaxSize()
@@ -459,7 +459,7 @@ private fun DiscoverGridSkeleton(modifier: Modifier = Modifier) {
                 ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
-                        .height(AppTheme.spacing.gap12),
+                        .height(AppTheme.spacing.md),
                     shape = MaterialTheme.shapes.small
                 )
             }

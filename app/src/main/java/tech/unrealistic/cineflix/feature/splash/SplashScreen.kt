@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import tech.unrealistic.cineflix.ui.theme.AppTheme
 import tech.unrealistic.cineflix.ui.theme.ShapePill
@@ -100,7 +101,7 @@ fun SplashScreen(
                 val ring2Progress = if (motion.reduceMotion) 0.8f else animRing2Progress
 
                 val ringColor = MaterialTheme.colorScheme.primary
-                Canvas(modifier = Modifier.size(sizes.splashRingCanvas)) {
+                Canvas(modifier = Modifier.size(SplashArt.ringCanvas)) {
                     val maxSize = size.minDimension / 2f
                     listOf(ringProgress, ring2Progress).forEach { progress ->
                         val clamped = progress.coerceIn(0f, 1f)
@@ -108,7 +109,7 @@ fun SplashScreen(
                         drawCircle(
                             color = ringColor.withAlpha(0.28f * (1f - clamped)),
                             radius = radius,
-                            style = Stroke(width = sizes.ringBorderWide.toPx())
+                            style = Stroke(width = SplashArt.ringStroke.toPx())
                         )
                     }
                 }
@@ -117,7 +118,7 @@ fun SplashScreen(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(sizes.playButton)
+                        .size(SplashArt.playButton)
                         .clip(MaterialTheme.shapes.large)
                         .background(MaterialTheme.colorScheme.primary)
                         .border(
@@ -127,7 +128,7 @@ fun SplashScreen(
                         )
                 ) {
                     val glyphColor = MaterialTheme.colorScheme.onPrimary
-                    Canvas(modifier = Modifier.size(sizes.playGlyph)) {
+                    Canvas(modifier = Modifier.size(SplashArt.playGlyph)) {
                         val triangleWidth = size.width * 0.62f
                         val triangleHeight = size.height * 0.72f
                         val startX = (size.width - triangleWidth) / 2f + size.width * 0.06f
@@ -159,11 +160,11 @@ fun SplashScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.gap20))
+            Spacer(modifier = Modifier.height(spacing.xl))
 
             // ── Animated loading dots (static under reduce-motion) ──────────
             val dotsTransition = rememberInfiniteTransition(label = "splash_dots")
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.gap7)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.sm)) {
                 repeat(3) { index ->
                     val animPhase by dotsTransition.animateFloat(
                         initialValue = 0f,
@@ -181,7 +182,7 @@ fun SplashScreen(
 
                     Box(
                         modifier = Modifier
-                            .size(sizes.dotH)
+                            .size(SplashArt.dotH)
                             .graphicsLayer {
                                 alpha = dotAlpha
                                 scaleX = 0.7f + 0.3f * dotAlpha
@@ -220,4 +221,16 @@ private fun LetterFadeIn(letter: String, startDelayMillis: Long, immediate: Bool
             translationY = (1f - animated.value) * 24f
         }
     )
+}
+
+/**
+ * One-off splash artwork dimensions. They belong to this screen, not to the
+ * global size system, so the theme stops carrying values only one screen reads.
+ */
+private object SplashArt {
+    val ringCanvas = 120.dp
+    val playButton = 76.dp
+    val playGlyph  = 30.dp
+    val dotH       = 8.dp
+    val ringStroke = 2.dp
 }

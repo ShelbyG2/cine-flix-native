@@ -48,8 +48,8 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
             shape = RectangleShape
         )
 
-        Column(modifier = Modifier.padding(spacing.md)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing.gap6)) {
+        Column(modifier = Modifier.padding(spacing.lg)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(spacing.sm)) {
                 repeat(3) {
                     ShimmerBox(
                         modifier = Modifier
@@ -59,7 +59,7 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.md))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             ShimmerBox(
                 modifier = Modifier
@@ -67,19 +67,19 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
                     .height(titleHeight)
             )
 
-            Spacer(modifier = Modifier.height(spacing.md))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             Row(horizontalArrangement = Arrangement.spacedBy(spacing.sm)) {
                 repeat(3) {
                     ShimmerBox(
                         modifier = Modifier
                             .width(sizes.skeletonChipW)
-                            .height(spacing.gap12)
+                            .height(spacing.md)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.md))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             ShimmerBox(
                 modifier = Modifier
@@ -88,13 +88,13 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
                 shape = MaterialTheme.shapes.medium
             )
 
-            Spacer(modifier = Modifier.height(spacing.lg))
+            Spacer(modifier = Modifier.height(spacing.xxl))
 
             repeat(3) {
                 ShimmerBox(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(spacing.gap12)
+                        .height(spacing.md)
                 )
                 Spacer(modifier = Modifier.height(spacing.sm))
             }
@@ -122,8 +122,8 @@ fun EpisodeShimmerList(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = spacing.md, vertical = spacing.sm),
-                horizontalArrangement = Arrangement.spacedBy(spacing.gap12)
+                    .padding(horizontal = spacing.lg, vertical = spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(spacing.md)
             ) {
                 ShimmerBox(
                     modifier = Modifier
@@ -138,17 +138,17 @@ fun EpisodeShimmerList(
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.7f)
-                            .height(spacing.gap12)
+                            .height(spacing.md)
                     )
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(spacing.gap12)
+                            .height(spacing.md)
                     )
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.4f)
-                            .height(spacing.gap12)
+                            .height(spacing.md)
                     )
                 }
             }

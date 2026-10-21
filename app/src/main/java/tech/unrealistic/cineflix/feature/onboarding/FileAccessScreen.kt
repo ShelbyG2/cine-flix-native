@@ -64,11 +64,11 @@ fun FileAccessScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = spacing.gap24),
+            .padding(horizontal = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(spacing.gap24))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── 3D folder icon ─────────────────────────────────────────────────
         FolderIcon3D(modifier = Modifier.weight(1f))
@@ -80,23 +80,23 @@ fun FileAccessScreen(
                 shape = MaterialTheme.shapes.extraLarge
             )
 
-            Column(modifier = Modifier.padding(spacing.gap22)) {
+            Column(modifier = Modifier.padding(spacing.xl)) {
                 Text(
                     text = "Allow access to your files?",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(spacing.gap10))
+                Spacer(modifier = Modifier.height(spacing.sm))
                 Text(
                     text = "CINEFLIX needs storage access so you can save movies and episodes for offline watching.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(spacing.gap12))
+                Spacer(modifier = Modifier.height(spacing.md))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(spacing.gap6)
+                            .size(spacing.sm)
                             .clip(ShapeCircle)
                             .background(MaterialTheme.colorScheme.primary)
                     )
@@ -110,7 +110,7 @@ fun FileAccessScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(spacing.gap20))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── Actions ────────────────────────────────────────────────────────
         Button(
@@ -122,14 +122,14 @@ fun FileAccessScreen(
             ),
             contentPadding = PaddingValues(
                 horizontal = spacing.buttonPaddingH,
-                vertical = spacing.buttonPaddingVTall
+                vertical = spacing.buttonPaddingV
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Allow Access", style = MaterialTheme.typography.labelLarge)
         }
 
-        Spacer(modifier = Modifier.height(spacing.gap10))
+        Spacer(modifier = Modifier.height(spacing.sm))
 
         // Ghost border button — also advances the flow
         Button(
@@ -145,7 +145,7 @@ fun FileAccessScreen(
             ),
             contentPadding = PaddingValues(
                 horizontal = spacing.buttonPaddingH,
-                vertical = spacing.buttonPaddingVTall
+                vertical = spacing.buttonPaddingV
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -209,8 +209,8 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                         // ── Tab layer (behind, peeking above the body) ────
                         Box(
                             modifier = Modifier
-                                .width(sizes.folderTabW)
-                                .height(sizes.folderTabH)
+                                .width(OnboardingArt.folderTabW)
+                                .height(OnboardingArt.folderTabH)
                                 .clip(OnboardingArt.folderTabShape)
                                 .background(colors.glass.surface)
                                 .border(
@@ -223,8 +223,8 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                         // ── Body layer — frosted glass, holds the content ─
                         Box(
                             modifier = Modifier
-                                .width(sizes.folderBodyW)
-                                .height(sizes.folderBodyH)
+                                .width(OnboardingArt.folderBodyW)
+                                .height(OnboardingArt.folderBodyH)
                                 .clip(OnboardingArt.folderBodyShape)
                                 .background(colors.glass.surface)
                                 .border(
@@ -251,23 +251,23 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                                 // File lines
-                                sizes.fileLineWidths.forEach { lineWidth ->
+                                OnboardingArt.fileLineWidths.forEach { lineWidth ->
                                     Box(
                                         modifier = Modifier
-                                            .padding(vertical = spacing.gap5)
+                                            .padding(vertical = spacing.xs)
                                             .width(lineWidth)
-                                            .height(sizes.fileLineH)
+                                            .height(OnboardingArt.fileLineH)
                                             .clip(ShapePill)
                                             .background(MaterialTheme.colorScheme.outline)
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(spacing.gap10))
+                                Spacer(modifier = Modifier.height(spacing.sm))
 
                                 // Download glyph in a small glass disc
                                 Box(
                                     modifier = Modifier
-                                        .size(sizes.downloadDisc)
+                                        .size(OnboardingArt.downloadDisc)
                                         .clip(ShapeCircle)
                                         .background(colors.glass.surface)
                                         .border(
@@ -290,13 +290,13 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(spacing.gap18))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             // ── Ground shadow ellipse ──────────────────────────────────────
             Box(
                 modifier = Modifier
-                    .width(sizes.folderShadowW)
-                    .height(sizes.folderShadowH)
+                    .width(OnboardingArt.folderShadowW)
+                    .height(OnboardingArt.folderShadowH)
                     .clip(ShapePill)
                     .background(
                         Brush.radialGradient(

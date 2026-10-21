@@ -66,7 +66,7 @@ fun ActionButtons(
                     horizontal = spacing.actionRowH,
                     vertical = spacing.actionRowV
                 ),
-            horizontalArrangement = Arrangement.spacedBy(spacing.gap12),
+            horizontalArrangement = Arrangement.spacedBy(spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
 

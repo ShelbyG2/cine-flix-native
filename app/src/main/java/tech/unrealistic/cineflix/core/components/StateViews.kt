@@ -45,9 +45,9 @@ fun ErrorState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(spacing.lg),
+            .padding(spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(spacing.md)
+        verticalArrangement = Arrangement.spacedBy(spacing.lg)
     ) {
         Icon(
             imageVector = resolvedIcon,
@@ -106,7 +106,7 @@ fun EmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(spacing.lg),
+            .padding(spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.sm)
     ) {

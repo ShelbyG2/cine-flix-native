@@ -36,7 +36,7 @@ fun MediaSection(
             fontWeight = FontWeight.Bold,
             color    = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
-                horizontal = AppTheme.spacing.md,
+                horizontal = AppTheme.spacing.lg,
                 vertical = AppTheme.spacing.sm
             )
         )
@@ -45,8 +45,8 @@ fun MediaSection(
         // Grid for a single row adds unnecessary overhead
         LazyRow(
             state = rememberLazyListState(),
-            contentPadding      = PaddingValues(horizontal = AppTheme.spacing.md),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+            contentPadding      = PaddingValues(horizontal = AppTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
         ) {
             items(
                 items = items,

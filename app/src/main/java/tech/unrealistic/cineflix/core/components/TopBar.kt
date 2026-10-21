@@ -69,15 +69,15 @@ fun FloatingTopBar(
                     color = colors.image.pillBorder,
                     shape = ShapePill
                 )
-                .padding(AppTheme.spacing.gap2),
+                .padding(AppTheme.spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap2)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.xs)
         ) {
 
             // Search Icon inside the panel — 48dp touch target
             IconButton(
                 onClick = onSearchClick,
-                modifier = Modifier.size(AppTheme.sizes.topBarControl)
+                modifier = Modifier.size(AppTheme.sizes.touchTarget)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_search),

@@ -70,7 +70,7 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
                         .height(calculatedHeroHeight)
                 )
 
-                Spacer(modifier = Modifier.height(AppTheme.spacing.md))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
 
                 // ── 2. Horizontal Rows Skeletons ──
                 MediaSectionSkeleton(itemCount = 5)
@@ -126,8 +126,8 @@ fun HeroSectionSkeleton(
                         .fillMaxHeight()
                         .fillMaxWidth(0.65f)
                         .padding(
-                            horizontal = AppTheme.spacing.md,
-                            vertical = AppTheme.spacing.gap12
+                            horizontal = AppTheme.spacing.lg,
+                            vertical = AppTheme.spacing.md
                         ),
                     shape = MaterialTheme.shapes.large
                 )
@@ -138,11 +138,11 @@ fun HeroSectionSkeleton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = AppTheme.spacing.gap20,
-                        vertical = AppTheme.spacing.md
+                        horizontal = AppTheme.spacing.xl,
+                        vertical = AppTheme.spacing.lg
                     )
             ) {
-                Spacer(modifier = Modifier.height(AppTheme.spacing.gap12))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.md))
 
                 // Mock Chips Row (Rating + Genres)
                 Row(
@@ -167,12 +167,12 @@ fun HeroSectionSkeleton(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
 
                 // Mock Action Buttons Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ShimmerBox(
@@ -208,7 +208,7 @@ fun MediaSectionSkeleton(
         ShimmerBox(
             modifier = Modifier
                 .padding(
-                    horizontal = AppTheme.spacing.md,
+                    horizontal = AppTheme.spacing.lg,
                     vertical = AppTheme.spacing.sm
                 )
                 .width(AppTheme.sizes.skeletonTitleW)
@@ -219,8 +219,8 @@ fun MediaSectionSkeleton(
         // ── 2. Mock Media Item Row Track ──────────────────────────────────────
         // Keeps the exact contentPadding and arrangement metrics as your production row
         LazyRow(
-            contentPadding = PaddingValues(horizontal = AppTheme.spacing.md),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
             userScrollEnabled = false // Prevents the user from flicking incomplete rows
         ) {
             items(itemCount) {

@@ -137,12 +137,12 @@ fun DetailSheetHeroSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = spacing.md)
+                .padding(horizontal = spacing.lg)
                 .offset(y = -spacing.titleOverlap)
         ) {
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(spacing.gap6),
-                verticalArrangement = Arrangement.spacedBy(spacing.gap6),
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
                 modifier = Modifier.padding(bottom = spacing.sm)
             ) {
                 genres.take(4).forEach { genre ->
@@ -177,7 +177,7 @@ fun DetailSheetHeroSection(
             )
 
             Row(
-                modifier = Modifier.padding(top = spacing.gap6, bottom = spacing.md),
+                modifier = Modifier.padding(top = spacing.sm, bottom = spacing.lg),
                 horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -205,7 +205,7 @@ fun DetailSheetHeroSection(
             )
 
             overview?.takeIf { it.isNotBlank() }?.let { text ->
-                Spacer(modifier = Modifier.height(spacing.md))
+                Spacer(modifier = Modifier.height(spacing.lg))
                 ExpandableText(
                     text = text,
                     collapsedMaxLines = 3

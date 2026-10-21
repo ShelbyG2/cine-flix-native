@@ -152,7 +152,7 @@ fun MediaCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomStart)
-                            .padding(AppTheme.spacing.md)
+                            .padding(AppTheme.spacing.lg)
                     ) {
                         // Over imagery: always light, guaranteed by the card's gradient scrim
                         val contentColor = AppTheme.colors.image.onImage

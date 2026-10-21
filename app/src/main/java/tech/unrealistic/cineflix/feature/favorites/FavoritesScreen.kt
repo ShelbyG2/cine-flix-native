@@ -112,9 +112,9 @@ fun FavouriteScreen(
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
-                start = AppTheme.spacing.md,
-                top = AppTheme.spacing.md,
-                end = AppTheme.spacing.md,
+                start = AppTheme.spacing.lg,
+                top = AppTheme.spacing.lg,
+                end = AppTheme.spacing.lg,
                 bottom = AppTheme.spacing.xs
             )
         )
@@ -128,7 +128,7 @@ fun FavouriteScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(AppTheme.spacing.lg),
+                        .padding(AppTheme.spacing.xxl),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
@@ -137,14 +137,14 @@ fun FavouriteScreen(
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(AppTheme.sizes.stateIconLg)
                     )
-                    Spacer(modifier = Modifier.height(AppTheme.spacing.md))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
                     Text(
                         text = state.message,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
                     Button(
                         onClick = viewModel::onRetry,
                         shape = MaterialTheme.shapes.medium
@@ -194,7 +194,7 @@ fun FavouriteScreen(
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(
-                                horizontal = AppTheme.spacing.md,
+                                horizontal = AppTheme.spacing.lg,
                                 vertical = AppTheme.spacing.sm
                             )
                         )
@@ -202,14 +202,14 @@ fun FavouriteScreen(
                             text = "Episodes you want to revisit",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = AppTheme.spacing.md)
+                            modifier = Modifier.padding(horizontal = AppTheme.spacing.lg)
                         )
                         LazyRow(
                             contentPadding = PaddingValues(
-                                horizontal = AppTheme.spacing.md,
-                                vertical = AppTheme.spacing.gap12
+                                horizontal = AppTheme.spacing.lg,
+                                vertical = AppTheme.spacing.md
                             ),
-                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12)
+                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md)
                         ) {
                             items(
                                 items = state.episodes,
@@ -228,7 +228,7 @@ fun FavouriteScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(AppTheme.spacing.gap24))
+                    Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
                 }
             }
         }
@@ -274,13 +274,13 @@ private fun LibraryRow(
     onItemClick: (Int, String) -> Unit,
     savedStyle: Boolean = false
 ) {
-    Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
+    Column(modifier = Modifier.padding(bottom = AppTheme.spacing.xl)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(
-                horizontal = AppTheme.spacing.md,
+                horizontal = AppTheme.spacing.lg,
                 vertical = AppTheme.spacing.sm
             )
         )
@@ -288,14 +288,14 @@ private fun LibraryRow(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = AppTheme.spacing.md)
+            modifier = Modifier.padding(horizontal = AppTheme.spacing.lg)
         )
         LazyRow(
             contentPadding = PaddingValues(
-                horizontal = AppTheme.spacing.md,
-                vertical = AppTheme.spacing.gap12
+                horizontal = AppTheme.spacing.lg,
+                vertical = AppTheme.spacing.md
             ),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12)
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md)
         ) {
             items(items = items, key = { "${it.mediaType}_${it.id}" }) { item ->
                 if (savedStyle) {
@@ -367,7 +367,7 @@ private fun LikedEpisodeCard(
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = AppTheme.spacing.gap6)
+            modifier = Modifier.padding(top = AppTheme.spacing.sm)
         )
         Text(
             text = episode.airDate,
@@ -389,8 +389,8 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = AppTheme.spacing.lg,
-                vertical = AppTheme.spacing.gap48
+                horizontal = AppTheme.spacing.xxl,
+                vertical = AppTheme.spacing.xxxl
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -400,7 +400,7 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(AppTheme.sizes.stateIconLg)
         )
-        Spacer(modifier = Modifier.height(AppTheme.spacing.md))
+        Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
         Text(
             text = "Your library is empty",
             style = MaterialTheme.typography.titleMedium,
@@ -414,7 +414,7 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(AppTheme.spacing.gap20))
+        Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
         Button(
             onClick = onExplore,
             shape = MaterialTheme.shapes.medium
@@ -437,12 +437,12 @@ private fun LibrarySkeleton(modifier: Modifier = Modifier) {
             .semantics { contentDescription = "Loading…" }
     ) {
         repeat(2) {
-            Column(modifier = Modifier.padding(bottom = AppTheme.spacing.gap24)) {
+            Column(modifier = Modifier.padding(bottom = AppTheme.spacing.xl)) {
                 // title placeholder — mirrors titleLarge spatial height
                 ShimmerBox(
                     modifier = Modifier
                         .padding(
-                            horizontal = AppTheme.spacing.md,
+                            horizontal = AppTheme.spacing.lg,
                             vertical = AppTheme.spacing.sm
                         )
                         .width(AppTheme.sizes.skeletonTitleW)
@@ -451,10 +451,10 @@ private fun LibrarySkeleton(modifier: Modifier = Modifier) {
                 )
                 LazyRow(
                     contentPadding = PaddingValues(
-                        horizontal = AppTheme.spacing.md,
-                        vertical = AppTheme.spacing.gap12
+                        horizontal = AppTheme.spacing.lg,
+                        vertical = AppTheme.spacing.md
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.gap12),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
                     userScrollEnabled = false
                 ) {
                     items(5) {

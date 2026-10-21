@@ -106,7 +106,7 @@ fun PlayerControlsLayer(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppTheme.spacing.md),
+                .padding(AppTheme.spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -184,7 +184,7 @@ fun PlayerControlsLayer(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.lg)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.xxl)) {
                 // Hidden buttons leave a 48dp slot behind so play/pause stays
                 // centred (§3.2).
                 AnimatedVisibility(visible = showPrev) {
@@ -235,7 +235,7 @@ fun PlayerControlsLayer(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppTheme.spacing.md),
+                .padding(AppTheme.spacing.lg),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {

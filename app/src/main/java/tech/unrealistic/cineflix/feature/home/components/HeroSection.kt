@@ -127,12 +127,12 @@ fun HeroSection(
 
             HorizontalCenteredHeroCarousel(
                 state = carouselState,
-                itemSpacing = spacing.gap10,
+                itemSpacing = spacing.sm,
                 modifier = Modifier
                     .height(carouselHeight),
                 contentPadding = PaddingValues(
-                    start = spacing.gap10,
-                    end = spacing.gap10,
+                    start = spacing.sm,
+                    end = spacing.sm,
                     top = spacing.heroTopInset
                 ),
                 content = { index ->
@@ -188,7 +188,7 @@ fun HeroSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = 0.dp, end = spacing.md
+                        top = 0.dp, end = spacing.lg
                     )
             )
 
