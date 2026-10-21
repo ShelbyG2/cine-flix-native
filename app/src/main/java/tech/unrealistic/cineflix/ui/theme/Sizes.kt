@@ -49,6 +49,8 @@ data class AppSizes(
     val wavyBarsHeight:   Dp = 28.dp,
     val dragHandleWidth:  Dp = 36.dp,
     val dragHandleHeight: Dp = 4.dp,
+    /** List entrance rise (fade-up). */
+    val listRise:         Dp = 12.dp,
 
     // ── Card / poster dimensions (adaptive) ─────────────────────────────────
     /** Width of a poster in a horizontal row — grows with the window. */
