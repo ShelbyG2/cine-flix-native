@@ -73,7 +73,6 @@ import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.AspectRatioFrameLayout
-import java.util.Locale
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -86,6 +85,8 @@ import tech.unrealistic.cineflix.data.remote.streamProviders
 import tech.unrealistic.cineflix.feature.player.components.PlayerControlsLayer
 import tech.unrealistic.cineflix.feature.player.components.PlayerLoadingLayer
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Controls auto-hide delay (§3). */
 private const val ControlsAutoHideMs = 3_000L
@@ -167,6 +168,14 @@ fun VideoPlayerScreen(
     var resizeMode by remember { mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
     var playerViewRef by remember { mutableStateOf<PlayerView?>(null) }
 
+    // Explicit choices made in the track sheets. Every sheet highlights
+    // exactly one option, so the radio state is driven from here instead of
+    // from the player's track selection, which only catches up once the new
+    // track parameters have been applied.
+    var qualityChoice by remember { mutableStateOf<QualityChoice>(QualityChoice.Auto) }
+    var subtitleChoice by remember { mutableStateOf<SubtitleChoice?>(null) }
+    var audioChoiceKey by remember { mutableStateOf<String?>(null) }
+
     // Controls show/hide: any tap reveals them, 3 seconds of no interaction
     // hides them again (§3).
     var controlsVisible by remember { mutableStateOf(false) }
@@ -176,7 +185,7 @@ fun VideoPlayerScreen(
         controlsVisible = true
         hideJob?.cancel()
         hideJob = controlsScope.launch {
-            delay(ControlsAutoHideMs)
+            delay(ControlsAutoHideMs.milliseconds)
             controlsVisible = false
         }
     }
@@ -185,6 +194,8 @@ fun VideoPlayerScreen(
     val currentOnExit by rememberUpdatedState(onExit)
 
     ForceLandscapePlayback()
+    // Player chrome is always dark imagery — pale system icons in both themes.
+    ForceLightSystemBarIcons()
     BackHandler { currentOnExit() }
 
     LaunchedEffect(embedUrls, reloadKey) {
@@ -291,16 +302,32 @@ fun VideoPlayerScreen(
     val videoGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_VIDEO } ?: emptyList()
     val audioGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_AUDIO } ?: emptyList()
     val textGroups = tracksState?.groups?.filter { it.type == C.TRACK_TYPE_TEXT } ?: emptyList()
-    val hasQualityTracks = videoGroups.any { group -> (0 until group.length).any { true } }
-    val qualityVisible = tracksState != null && hasQualityTracks
-    val qualityEnabled = tracksState != null && videoGroups.sumOf { it.length } > 1
-    val hasSubtitleTracks = textGroups.isNotEmpty()
-    val subtitleVisible = tracksState != null && hasSubtitleTracks
-    val subtitleEnabled = tracksState != null && textGroups.sumOf { it.length } >= 1 // allow selection even if 1? but instruction says "Disable a button if only one option exists for that type" - subtitles: Off + tracks, so if only 1 track maybe enabled? Or check total options
-    val subtitleEnabledCalc = tracksState != null && (textGroups.sumOf { it.length } >= 1 || true) // easier: if multiple tracks or we have options
-    val hasAudioTracks = audioGroups.isNotEmpty()
-    val audioVisible = tracksState != null && hasAudioTracks
-    val audioEnabled = tracksState != null && audioGroups.sumOf { it.length } > 1
+
+    // Options shown in the sheets. Their keys stay stable while the manifest
+    // is unchanged, so a selection survives the track list being rebuilt.
+    val qualityOptions = remember(tracksState) { videoTrackOptions(videoGroups) }
+    val subtitleOptions = remember(tracksState) { textTrackOptions(textGroups) }
+    val audioOptions = remember(tracksState) { audioTrackOptions(audioGroups) }
+
+    // What each sheet highlights: the user's explicit choice, or - for
+    // subtitles and audio - whatever the player currently has selected.
+    val playerSubtitleKey = remember(tracksState) { selectedTrackKey(textGroups, "t") }
+    val playerAudioKey = remember(tracksState) { selectedTrackKey(audioGroups, "a") }
+    val effectiveQuality = qualityChoice
+    val effectiveSubtitle = subtitleChoice
+        ?: playerSubtitleKey?.let { SubtitleChoice.Track(it) }
+        ?: SubtitleChoice.Off
+    val effectiveAudioKey = audioChoiceKey ?: playerAudioKey
+
+    val qualityVisible = tracksState != null && qualityOptions.isNotEmpty()
+    val qualityEnabled = tracksState != null && qualityOptions.size > 1
+    // Subtitles always get a button: "Off" is a valid choice even when the
+    // stream carries no text tracks at all.
+    // Only show subtitle/audio buttons when streaming has succeeded (exoPlayer is ready).
+    val subtitleVisible = exoPlayer != null && tracksState != null
+    val subtitleEnabled = exoPlayer != null && tracksState != null
+    val audioVisible = exoPlayer != null && tracksState != null && audioOptions.isNotEmpty()
+    val audioEnabled = exoPlayer != null && tracksState != null && audioOptions.size > 1
 
     // Loading: the stream has not been handed to ExoPlayer yet, or ExoPlayer is
     // buffering it. A WebView fallback owns its own loading state instead.
@@ -509,193 +536,98 @@ fun VideoPlayerScreen(
                 )
                 when (mode) {
                     TrackSheetMode.Quality -> {
-                        val tracks = availableTracks
-                        val vGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_VIDEO } ?: emptyList()
-                        val params = exoPlayer.trackSelectionParameters
-                        val isAuto = params.maxVideoWidth >= 2147483646 || params.maxVideoHeight >= 2147483646
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = isAuto,
-                                    onClick = {
-                                        exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                                            .buildUpon()
-                                            .clearVideoSizeConstraints()
-                                            .build()
-                                        trackSheetMode = null
-                                    }
-                                )
-                                .padding(vertical = AppTheme.spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(selected = isAuto, onClick = null)
-                            Text(
-                                text = "Auto",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(start = AppTheme.spacing.sm)
-                            )
-                        }
-                        vGroups.forEach { group ->
-                            for (i in 0 until group.length) {
-                                val format = group.getTrackFormat(i)
-                                val label = when {
-                                    format.height >= 2160 -> "4K"
-                                    format.height >= 1080 -> "1080p"
-                                    format.height >= 720 -> "720p"
-                                    format.height >= 480 -> "480p"
-                                    format.height > 0 -> "${format.height}p"
-                                    else -> format.label ?: "Unknown"
-                                }
-                                val isSelected = group.isTrackSelected(i)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .selectable(
-                                            selected = isSelected,
-                                            onClick = {
-                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                                                    .buildUpon()
-                                                    .setMaxVideoSize(format.width, format.height)
-                                                    .setMinVideoSize(format.width, format.height)
-                                                    .build()
-                                                trackSheetMode = null
-                                            }
-                                        )
-                                        .padding(vertical = AppTheme.spacing.sm),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(selected = isSelected, onClick = null)
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(start = AppTheme.spacing.sm),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
+                        // Auto is the default and stays selected until the user
+                        // pins a rendition.
+                        TrackOptionRow(
+                            label = "Auto",
+                            selected = qualitySelectedKey(effectiveQuality) == null,
+                            onClick = {
+                                qualityChoice = QualityChoice.Auto
+                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                    .buildUpon()
+                                    .clearVideoSizeConstraints()
+                                    .setMinVideoSize(0, 0)
+                                    .build()
+                                trackSheetMode = null
                             }
+                        )
+                        qualityOptions.forEach { option ->
+                            TrackOptionRow(
+                                label = option.label,
+                                selected = qualitySelectedKey(effectiveQuality) == option.key,
+                                onClick = {
+                                    qualityChoice = QualityChoice.Manual(option.key)
+                                    val builder = exoPlayer.trackSelectionParameters
+                                        .buildUpon()
+                                        .clearVideoSizeConstraints()
+                                    if (option.height > 0) {
+                                        builder
+                                            .setMaxVideoSize(
+                                                if (option.width > 0) option.width else Int.MAX_VALUE,
+                                                option.height,
+                                            )
+                                            .setMinVideoSize(0, option.height)
+                                    }
+                                    exoPlayer.trackSelectionParameters = builder.build()
+                                    trackSheetMode = null
+                                }
+                            )
                         }
                     }
                     TrackSheetMode.Subtitle -> {
-                        val tracks = availableTracks
-                        val tGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_TEXT } ?: emptyList()
-                        // Off option
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = false,
-                                    onClick = {
-                                        exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                                            .buildUpon()
-                                            .setIgnoredTextSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                                            .setPreferredTextLanguage(null)
-                                            .build()
-                                        trackSheetMode = null
-                                    }
-                                )
-                                .padding(vertical = AppTheme.spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(selected = false, onClick = null)
-                            Text(
-                                text = "Off",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(start = AppTheme.spacing.sm)
+                        TrackOptionRow(
+                            label = "Off",
+                            selected = subtitleSelectedKey(effectiveSubtitle) == null,
+                            onClick = {
+                                subtitleChoice = SubtitleChoice.Off
+                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                    .buildUpon()
+                                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                                    .setIgnoredTextSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                                    .setPreferredTextLanguage(null)
+                                    .build()
+                                trackSheetMode = null
+                            }
+                        )
+                        subtitleOptions.forEach { option ->
+                            TrackOptionRow(
+                                label = option.label,
+                                selected = subtitleSelectedKey(effectiveSubtitle) == option.key,
+                                onClick = {
+                                    subtitleChoice = SubtitleChoice.Track(option.key)
+                                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                        .buildUpon()
+                                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                                        .setIgnoredTextSelectionFlags(0)
+                                        .setPreferredTextLanguage(option.language)
+                                        .build()
+                                    trackSheetMode = null
+                                }
                             )
                         }
-                        tGroups.forEach { group ->
-                            for (i in 0 until group.length) {
-                                val format = group.getTrackFormat(i)
-                                val lang = format.language
-                                val label = if (!lang.isNullOrBlank()) {
-                                    val disp = Locale(lang).displayLanguage
-                                    if (disp.isNotBlank()) disp else lang
-                                } else if (!format.label.isNullOrBlank()) {
-                                    format.label!!
-                                } else {
-                                    "Unknown"
-                                }
-                                val isSelected = group.isTrackSelected(i)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .selectable(
-                                            selected = isSelected,
-                                            onClick = {
-                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                                                    .buildUpon()
-                                                    .apply { val tl = format.language; if (tl != null) setPreferredTextLanguage(tl) }
-                                                    .build()
-                                                trackSheetMode = null
-                                            }
-                                        )
-                                        .padding(vertical = AppTheme.spacing.sm),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(selected = isSelected, onClick = null)
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(start = AppTheme.spacing.sm)
-                                    )
-                                }
-                            }
+                        if (subtitleOptions.isEmpty()) {
+                            Text(
+                                text = "No subtitle tracks available for this stream",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = AppTheme.spacing.sm)
+                            )
                         }
                     }
                     TrackSheetMode.Audio -> {
-                        val tracks = availableTracks
-                        val aGroups = tracks?.groups?.filter { it.type == C.TRACK_TYPE_AUDIO } ?: emptyList()
-                        aGroups.forEach { group ->
-                            for (i in 0 until group.length) {
-                                val format = group.getTrackFormat(i)
-                                val lang = format.language
-                                val base = if (!lang.isNullOrBlank()) {
-                                    val disp = Locale(lang).displayLanguage
-                                    if (disp.isNotBlank()) disp else lang
-                                } else if (!format.label.isNullOrBlank()) {
-                                    format.label!!
-                                } else {
-                                    "Unknown"
+                        audioOptions.forEach { option ->
+                            TrackOptionRow(
+                                label = option.label,
+                                selected = effectiveAudioKey == option.key,
+                                onClick = {
+                                    audioChoiceKey = option.key
+                                    exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
+                                        .buildUpon()
+                                        .setPreferredAudioLanguage(option.language)
+                                        .build()
+                                    trackSheetMode = null
                                 }
-                                val audioLabel = when (format.channelCount) {
-                                    6 -> "$base (5.1)"
-                                    2 -> "$base (Stereo)"
-                                    1 -> "$base (Mono)"
-                                    in 3..Int.MAX_VALUE -> "$base (${format.channelCount}ch)"
-                                    else -> base
-                                }
-                                val isSelected = group.isTrackSelected(i)
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .selectable(
-                                            selected = isSelected,
-                                            onClick = {
-                                                exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
-                                                    .buildUpon()
-                                                    .apply { val l = format.language; if (l != null) setPreferredAudioLanguage(l) else setPreferredAudioLanguage(null) }
-                                                    .build()
-                                                trackSheetMode = null
-                                            }
-                                        )
-                                        .padding(vertical = AppTheme.spacing.sm),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(selected = isSelected, onClick = null)
-                                    Text(
-                                        text = audioLabel,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(start = AppTheme.spacing.sm)
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
                     TrackSheetMode.Layout -> {
@@ -720,7 +652,7 @@ fun VideoPlayerScreen(
                                     .padding(vertical = AppTheme.spacing.sm),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                RadioButton(selected = selected, onClick = null)
+                                RadioButton(selected = selected, onClick = {})
                                 Text(
                                     text = label,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -894,4 +826,37 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+/**
+ * One selectable row of a track sheet: a radio button plus its label (§4.5).
+ * The radio state comes from the sheet's single selection, so exactly one row
+ * is ever highlighted.
+ */
+@Composable
+private fun TrackOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = selected,
+                onClick = onClick,
+            )
+            .padding(vertical = AppTheme.spacing.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = {})
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = AppTheme.spacing.sm),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

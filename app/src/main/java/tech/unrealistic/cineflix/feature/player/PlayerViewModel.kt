@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * What the player screen should render. `NoStream` means the embed page never
@@ -44,7 +45,7 @@ class PlayerViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = PlayerUiState.Loading
             for (embedUrl in embedUrls) {
-                val stream = withTimeoutOrNull(RESOLVE_TIMEOUT_MS) {
+                val stream = withTimeoutOrNull(RESOLVE_TIMEOUT_MS.milliseconds) {
                     runCatching { resolve(embedUrl) }.getOrNull()
                 }
                 if (stream != null && stream.url.isNotBlank()) {

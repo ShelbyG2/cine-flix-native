@@ -39,6 +39,11 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        // Media3's Format calls into android.text.TextUtils when it derives a
+        // default label, which the JVM stubs would otherwise reject.
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {

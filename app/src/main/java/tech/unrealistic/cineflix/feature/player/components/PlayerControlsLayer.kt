@@ -273,31 +273,19 @@ private fun Scrubber(
     modifier: Modifier = Modifier,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    var dragging by remember { mutableStateOf(false) }
     val sliderState = rememberSliderState(
         value = fraction,
         valueRange = 0f..1f,
     )
 
-    LaunchedEffect(interactionSource) {
-        interactionSource.interactions.collect { interaction ->
-            when (interaction) {
-                is PressInteraction.Press -> dragging = true
-                is PressInteraction.Release,
-                is PressInteraction.Cancel -> dragging = false
-            }
-        }
-    }
-
-    LaunchedEffect(sliderState) {
-        snapshotFlow { sliderState.value }.collect { value ->
-            if (dragging && durationMs > 0) onSeek((value * durationMs).toLong())
-        }
-    }
-
-    LaunchedEffect(fraction) {
-        if (!dragging && abs(sliderState.value - fraction) > POSITION_SYNC_EPSILON) {
-            sliderState.value = fraction
+    // User-driven value changes (drag, tap, arrow keys) through Material3's Slider.
+    // onValueChange is called for every user change: drag, tap, and arrow keys.
+    // We store the new value and seek playback directly.
+    sliderState.onValueChange = { newValue ->
+        sliderState.value = newValue
+        val duration = durationMs
+        if (duration > 0) {
+            onSeek((newValue * duration).toLong())
         }
     }
 
