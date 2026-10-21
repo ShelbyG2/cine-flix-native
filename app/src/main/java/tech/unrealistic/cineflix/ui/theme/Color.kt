@@ -202,6 +202,7 @@ data class EffectSpec(
     val chipUnselectedAlpha:   Float = 0.5f,
     val chipSelectedAlpha:     Float = 0.25f,
     val posterFadeAlpha:       Float = 0.95f,
+    val heroTopAlpha:          Float = 0.85f,
     val heroMidAlpha:          Float = 0.60f,
     val heroMutedAlpha:        Float = 0.75f,
 )

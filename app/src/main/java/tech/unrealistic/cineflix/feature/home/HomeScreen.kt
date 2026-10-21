@@ -218,6 +218,7 @@ fun HomeScreen(
                 FloatingTopBar(
                     hazeState = topBarHaze,
                     onSearchClick = { onNavigate?.invoke() },
+                    isScrolled = isScrolledPastHero,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .onGloballyPositioned { coordinates ->

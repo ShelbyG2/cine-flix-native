@@ -37,15 +37,28 @@ string still exists; no navigation, data, ViewModel or business-logic change.
 
 ## Top bar — `core/components/TopBar.kt`
 
-- Same glass material as the nav (one material), hairline bottom edge only,
-  `WordmarkStyle` wordmark, existing search control only.
+- **Restored original scroll-gated design (user request, 2026-10-21):** over
+  the hero the bar is a bare row — transparent, white wordmark, search icon on
+  its dark glass pill floating on the artwork; once `isScrolledPastHero`
+  (`scroll > carouselHeight`) the glass material fades in (same Haze material
+  as the nav, hairline on the bottom edge) and the wordmark switches to theme
+  ink. The row always reserves the same height, so no layout jump. The
+  skeleton mirrors the over-hero state (`isScrolled = false`).
 
 ## Home — `feature/home/*`
 
 - **Before:** colored hero chips/gradient chrome, fixed 140dp cards, ad-hoc
   spacing, decorative grain layer per card (`GlassMorphCard`).
 - **After:** full-bleed hero with bottom scrim, headline title, rating + genre
-  chips in `onImageChipSurface`/`secondaryContainer`; action row restyled to
+  chips in `onImageChipSurface`/`secondaryContainer`;
+- **Hero backdrop restored (user request, 2026-10-21):** the section background
+  is again **driven by the focused movie** — `PaletteHelper` extracts the
+  poster's vibrant / dark-muted swatches on each `currentItem` change and they
+  crossfade (`longFadeMs` via motion tokens, instant under reduce motion) into
+  the vertical gradient (top/mid/muted stops → screen background, alpha stops
+  from `EffectSpec.heroTopAlpha/MidAlpha/MutedAlpha/posterFadeAlpha`, the
+  `heroTopAlpha` token restored at its old 0.85f value). Gradient only — the
+  old rim/specular/grain layers were not restored (user choice). action row restyled to
   solid primary Play + monochrome icon discs (heart stays red); sections with
   `titleLarge` headers, 8dp posters, `titleMedium` titles, `bodySmall` gray
   metadata; rows fade up once via `enterFadeUp`; hero grain drawn once, cached;
@@ -146,6 +159,14 @@ string still exists; no navigation, data, ViewModel or business-logic change.
    those screens are always dark full-bleed.
 6. **Chromatic exceptions** limited to error/success/warning containers and the
    red favourite heart; rating stars and saved state are white over imagery.
+7. **User-directed revert (2026-10-21, overrides 1–6 where they conflict):**
+   the hero backdrop takes the focused poster's palette colours again (the
+   original signature design) and the top bar is scroll-gated (invisible as a
+   bar over the hero, glass past it). This supersedes the monochrome-chrome
+   rule for the hero backdrop only and AGENTS.md's "hiding on scroll is not
+   added" note — both were explicit user instructions to restore the original
+   design. Chrome (chips, buttons, text, bars) stays monochrome; only the hero
+   gradient carries the poster tint, matching the original implementation.
 
 ## Deliberately left
 

@@ -88,6 +88,8 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
             FloatingTopBar(
                 hazeState = topBarHaze,
                 onSearchClick = {},
+                // Skeleton mirrors the top of the screen — still over the hero.
+                isScrolled = false,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .onGloballyPositioned { coordinates ->
