@@ -112,7 +112,7 @@ import tech.unrealistic.cineflix.ui.theme.ShapeCircle
             ) {
                 Text(
                     text = "${episode.episodeNumber}. $name",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

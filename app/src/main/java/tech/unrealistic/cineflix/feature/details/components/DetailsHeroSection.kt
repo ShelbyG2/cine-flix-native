@@ -145,16 +145,16 @@ fun DetailSheetHeroSection(
                 genres.take(4).forEach { genre ->
                     Surface(
                         shape = ShapePill,
-                        // Solid role — solid chip keeps text AA over the backdrop fade
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        // Solid role — keeps text AA over the backdrop fade
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         border = BorderStroke(
                             sizes.hairline,
-                            MaterialTheme.colorScheme.outline
+                            MaterialTheme.colorScheme.outlineVariant
                         )
                     ) {
                         Text(
                             text = genre,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             modifier = Modifier.padding(

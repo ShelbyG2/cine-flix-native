@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -46,7 +47,9 @@ import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
 import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.BottomSheetShape
 import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 
@@ -76,6 +79,10 @@ fun MediaDetailsBottomSheet(
             onDismissRequest = onDismissRequest,
             modifier = modifier,
             sheetState = sheetState,
+            // 28dp top corners, raised neutral surface (M3 would tint this).
+            shape = BottomSheetShape,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 0.dp,
             contentWindowInsets = { WindowInsets.navigationBars },
             dragHandle = {
                 // Themed drag handle — dismiss affordance (was: empty = no handle)
@@ -299,7 +306,7 @@ private fun TvSeasonSelector(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Episodes",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(
                 horizontal = AppTheme.spacing.lg,
                 vertical = AppTheme.spacing.sm
@@ -316,9 +323,15 @@ private fun TvSeasonSelector(
                 FilterChip(
                     selected = seasonNumber == selectedSeasonNumber,
                     onClick = { onSeasonSelected(seasonNumber) },
-                    label = { Text("Season $seasonNumber") },
-                    // 48dp accessible chip height
-                    modifier = Modifier.height(AppTheme.sizes.touchTarget)
+                    label = {
+                        Text(
+                            text = "Season $seasonNumber",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
+                    shape = ShapePill,
+                    // 48dp hit area without inflating the visual chip height.
+                    modifier = Modifier.minimumInteractiveComponentSize()
                 )
             }
         }
