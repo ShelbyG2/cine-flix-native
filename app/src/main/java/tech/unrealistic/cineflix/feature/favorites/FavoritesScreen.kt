@@ -351,12 +351,12 @@ private fun LikedEpisodeCard(
                     .padding(AppTheme.sizes.overlayButtonPad)
                     .size(AppTheme.sizes.touchTarget)   // 48dp target
                     .clip(ShapeCircle)
-                    .background(AppTheme.colors.imageChipSurface)
+                    .background(AppTheme.colors.image.chipSurface)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = "Unlike episode",
-                    tint = AppTheme.colors.favouriteActive,
+                    tint = AppTheme.colors.accent.favourite,
                     modifier = Modifier.size(AppTheme.sizes.iconSm)
                 )
             }

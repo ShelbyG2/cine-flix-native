@@ -98,7 +98,7 @@ fun MediaCard(
                             brush = Brush.verticalGradient(
                                 0.5f to Color.Transparent,
                                 1.0f to MaterialTheme.colorScheme.background
-                                    .withAlpha(AppTheme.colors.posterFadeAlpha)
+                                    .withAlpha(AppTheme.effects.posterFadeAlpha)
                             )
                         )
                 )
@@ -111,15 +111,15 @@ fun MediaCard(
                             .padding(AppTheme.sizes.overlayButtonPad)
                             .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
                             .clip(ShapeCircle)
-                            .background(AppTheme.colors.imageChipSurface)
+                            .background(AppTheme.colors.image.chipSurface)
                     ) {
                         Icon(
                             imageVector = if (isFavourite) Icons.Filled.Favorite
                             else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (isFavourite) "Remove from favourites"
                             else "Add to favourites",
-                            tint = if (isFavourite) AppTheme.colors.favouriteActive
-                            else AppTheme.colors.onImage,
+                            tint = if (isFavourite) AppTheme.colors.accent.favourite
+                            else AppTheme.colors.image.onImage,
                             modifier = Modifier.size(AppTheme.sizes.iconSm)
                         )
                     }
@@ -134,15 +134,15 @@ fun MediaCard(
                             .padding(AppTheme.sizes.overlayButtonPad)
                             .size(AppTheme.sizes.touchTarget)   // 48dp accessible target
                             .clip(ShapeCircle)
-                            .background(AppTheme.colors.imageChipSurface)
+                            .background(AppTheme.colors.image.chipSurface)
                     ) {
                         Icon(
                             imageVector = if (isSaved) Icons.Filled.Bookmark
                             else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isSaved) "Remove from saved"
                             else "Save for later",
-                            tint = if (isSaved) AppTheme.colors.savedActive
-                            else AppTheme.colors.onImage,
+                            tint = if (isSaved) AppTheme.colors.accent.saved
+                            else AppTheme.colors.image.onImage,
                             modifier = Modifier.size(AppTheme.sizes.iconSm)
                         )
                     }
@@ -156,7 +156,7 @@ fun MediaCard(
                             .padding(AppTheme.spacing.md)
                     ) {
                         // Over imagery: always light, guaranteed by the card's gradient scrim
-                        val contentColor = AppTheme.colors.onImage
+                        val contentColor = AppTheme.colors.image.onImage
                         Text(
                             text = displayTitle,
                             style = MaterialTheme.typography.headlineSmall,
@@ -215,10 +215,10 @@ private fun GenreChip(
 ) {
     Surface(
         shape = ShapePill,
-        color = AppTheme.colors.onImageChipSurface,
+        color = AppTheme.colors.image.onChipSurface,
         modifier = Modifier.border(
             AppTheme.sizes.glassBorderWidth,
-            AppTheme.colors.onImageChipBorder,
+            AppTheme.colors.image.chipBorder,
             ShapePill
         )
     ) {
@@ -248,10 +248,10 @@ private fun RatingChip(
 
     Surface(
         shape = MaterialTheme.shapes.small,
-        color = chipColor.withAlpha(AppTheme.colors.ratingChipFillAlpha),
+        color = chipColor.withAlpha(AppTheme.effects.ratingChipFillAlpha),
         modifier = Modifier.border(
             AppTheme.sizes.borderWidth,
-            chipColor.withAlpha(AppTheme.colors.ratingChipBorderAlpha),
+            chipColor.withAlpha(AppTheme.effects.ratingChipBorderAlpha),
             MaterialTheme.shapes.small
         )
     ) {
@@ -266,7 +266,7 @@ private fun RatingChip(
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
-                tint = AppTheme.colors.ratingStar,
+                tint = AppTheme.colors.accent.rating,
                 modifier = Modifier.size(AppTheme.sizes.iconXs)
             )
             Text(

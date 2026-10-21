@@ -80,7 +80,7 @@ fun PlayerLoadingLayer(
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            AppTheme.colors.imageScrimStart,
+                            AppTheme.colors.image.scrimStart,
                             MaterialTheme.colorScheme.background.copy(alpha = SCRIM_BOTTOM_ALPHA),
                         )
                     )

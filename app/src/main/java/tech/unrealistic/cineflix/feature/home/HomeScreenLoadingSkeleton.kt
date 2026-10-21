@@ -97,8 +97,8 @@ fun HeroSectionSkeleton(
     modifier: Modifier = Modifier,
     topPadding: Dp,
 ) {
-    val skeletonVibrant = AppTheme.colors.skeletonBase
-    val skeletonMuted = AppTheme.colors.skeletonHighlight
+    val skeletonVibrant = AppTheme.colors.skeleton.base
+    val skeletonMuted = AppTheme.colors.skeleton.highlight
     // Heights derive from the production type scale, not separate literals.
     val density = LocalDensity.current
     val chipHeight = with(density) {

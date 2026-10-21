@@ -156,7 +156,7 @@ fun CinematicIntroScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            colors.imageTopScrim,
+                            colors.image.topScrim,
                             Color.Transparent
                         )
                     )
@@ -172,7 +172,7 @@ fun CinematicIntroScreen(
                         colorStops = arrayOf(
                             0.35f to Color.Transparent,
                             0.70f to MaterialTheme.colorScheme.background
-                                .withAlpha(colors.heroMutedAlpha),
+                                .withAlpha(AppTheme.effects.heroMutedAlpha),
                             1.00f to MaterialTheme.colorScheme.background
                         )
                     )
@@ -188,7 +188,7 @@ fun CinematicIntroScreen(
                         colors = listOf(
                             Color.Transparent,
                             Color.Transparent,
-                            colors.imageVignette
+                            colors.image.vignette
                         ),
                         radius = 1_200f
                     )
@@ -207,17 +207,17 @@ fun CinematicIntroScreen(
             Text(
                 text = "CINEFLIX",
                 style = WordmarkStyle,
-                color = colors.onImage
+                color = colors.image.onImage
             )
 
             // Skip pill — liquid glass / frosted, 48dp target
             Box(
                 modifier = Modifier
                     .clip(ShapePill)
-                    .background(colors.onImageChipSurface)
+                    .background(colors.image.onChipSurface)
                     .border(
                         width = sizes.hairline,
-                        color = colors.onImageChipBorder,
+                        color = colors.image.chipBorder,
                         shape = ShapePill
                     )
                     .clickable(onClick = onSkip)
@@ -228,7 +228,7 @@ fun CinematicIntroScreen(
                 Text(
                     text = "Skip",
                     style = MaterialTheme.typography.labelLarge,
-                    color = colors.onImageMuted
+                    color = colors.image.onImageMuted
                 )
             }
         }
@@ -263,10 +263,10 @@ fun CinematicIntroScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(ShapePill)
-                                    .background(colors.onImageChipSurface)
+                                    .background(colors.image.onChipSurface)
                                     .border(
                                         width = sizes.glassBorderWidth,
-                                        color = colors.onImageChipBorder,
+                                        color = colors.image.chipBorder,
                                         shape = ShapePill
                                     )
                                     .padding(
@@ -277,7 +277,7 @@ fun CinematicIntroScreen(
                                 Text(
                                     text = chip,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = colors.onImageMuted
+                                    color = colors.image.onImageMuted
                                 )
                             }
                         }
@@ -297,13 +297,13 @@ fun CinematicIntroScreen(
                             Text(
                                 text = currentSlide.title,
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = colors.onImage
+                                color = colors.image.onImage
                             )
                             Spacer(modifier = Modifier.height(spacing.sm))
                             Text(
                                 text = currentSlide.subtitle,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = colors.onImageMuted
+                                color = colors.image.onImageMuted
                             )
                         }
                     }
@@ -335,8 +335,8 @@ fun CinematicIntroScreen(
                             .width(dotWidth)
                             .clip(ShapePill)
                             .background(
-                                if (isActive) colors.onImage
-                                else colors.progressDotInactive
+                                if (isActive) colors.image.onImage
+                                else OnboardingArt.progressDotInactive
                             )
                     )
                 }
@@ -351,8 +351,8 @@ fun CinematicIntroScreen(
                 },
                 shape = ShapeButton,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.onImage,
-                    contentColor = colors.onImageInverse
+                    containerColor = colors.image.onImage,
+                    contentColor = colors.image.onImageInverse
                 ),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     horizontal = spacing.buttonPaddingH,

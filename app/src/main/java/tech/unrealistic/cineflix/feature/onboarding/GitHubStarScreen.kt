@@ -122,7 +122,7 @@ fun GitHubStarScreen(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = colors.ratingStar,
+                    tint = colors.accent.rating,
                     modifier = Modifier.size(sizes.iconSm)
                 )
                 Spacer(modifier = Modifier.width(spacing.buttonGap))
@@ -272,7 +272,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         }
                         .border(
                             width = sizes.ringBorderWide,
-                            color = sphereColor.withAlpha(colors.pulseRingAlpha1),
+                            color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha1),
                             shape = ShapePill
                         )
                 )
@@ -287,7 +287,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         }
                         .border(
                             width = sizes.ringBorderThin,
-                            color = sphereColor.withAlpha(colors.pulseRingAlpha2),
+                            color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha2),
                             shape = ShapePill
                         )
                 )
@@ -301,9 +301,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    colors.glassGloss,
-                                    colors.glassSurface,
-                                    colors.sphereShade
+                                    colors.glass.gloss,
+                                    colors.glass.surface,
+                                    OnboardingArt.sphereShade
                                 ),
                                 center = Offset(90f, 60f),
                                 radius = 260f
@@ -311,7 +311,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         )
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.glassBorder,
+                            color = colors.glass.border,
                             shape = ShapePill
                         )
                 ) {
@@ -327,9 +327,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        colors.glassGloss,
-                                        colors.glassGloss.withAlpha(
-                                            colors.glassGloss.alpha * 0.1f
+                                        colors.glass.gloss,
+                                        colors.glass.gloss.withAlpha(
+                                            colors.glass.gloss.alpha * 0.1f
                                         )
                                     )
                                 )
@@ -344,7 +344,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                             .height(sizes.rimSliverH)
                             .graphicsLayer { rotationZ = -30f }
                             .clip(ShapePill)
-                            .background(colors.glassBorder)
+                            .background(colors.glass.border)
                     )
 
                     // GitHub mark with drop shadow — themed so it reads on
@@ -368,7 +368,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                colors.imageChipSurface,
+                                colors.image.chipSurface,
                                 Color.Transparent
                             )
                         )
@@ -395,7 +395,7 @@ private fun GitHubMark(
             Icon(
                 painter = painterResource(R.drawable.ic_github),
                 contentDescription = null,
-                tint = AppTheme.colors.imageVignette,
+                tint = AppTheme.colors.image.vignette,
                 modifier = Modifier
                     .matchParentSize()
                     .graphicsLayer {

@@ -56,7 +56,7 @@ fun ActionButtons(
     val sizes = AppTheme.sizes
 
     // Always light-on-dark: buttons sit over (scrimmed) imagery in BOTH modes
-    val contentColor = colors.onImage
+    val contentColor = colors.image.onImage
 
     Column(modifier = modifier) {
 
@@ -76,7 +76,7 @@ fun ActionButtons(
                 onClick = onPlay,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.onImage, contentColor = colors.onImageInverse
+                    containerColor = colors.image.onImage, contentColor = colors.image.onImageInverse
                 ),
                 contentPadding = PaddingValues(
                     horizontal = spacing.buttonPaddingH,
@@ -101,13 +101,13 @@ fun ActionButtons(
                 IconButton(
                     onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = colors.scrimSoft,
+                        containerColor = colors.image.scrimSoft,
                         contentColor = contentColor
                     ), modifier = Modifier
                         .size(sizes.actionButton)
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.pillBorder,
+                            color = colors.image.pillBorder,
                             shape = ShapeCircle
                         )
                 ) {
@@ -149,13 +149,13 @@ fun ActionButtons(
             if (onSave != null) {
                 IconButton(
                     onClick = onSave, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = colors.scrimSoft,
-                        contentColor = if (isSaved) colors.savedActive else contentColor
+                        containerColor = colors.image.scrimSoft,
+                        contentColor = if (isSaved) colors.accent.saved else contentColor
                     ), modifier = Modifier
                         .size(sizes.actionButton)
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.pillBorder,
+                            color = colors.image.pillBorder,
                             shape = ShapeCircle
                         )
                 ) {
@@ -176,13 +176,13 @@ fun ActionButtons(
             if (onFavourite != null) {
                 IconButton(
                     onClick = onFavourite, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = colors.scrimSoft,
-                        contentColor = if (isFavourite) colors.favouriteActive else contentColor
+                        containerColor = colors.image.scrimSoft,
+                        contentColor = if (isFavourite) colors.accent.favourite else contentColor
                     ), modifier = Modifier
                         .size(sizes.actionButton)
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.pillBorder,
+                            color = colors.image.pillBorder,
                             shape = ShapeCircle
                         )
                 ) {
@@ -205,14 +205,14 @@ fun ActionButtons(
             if (onMediaShare != null) {
                 IconButton(
                     onClick = onMediaShare, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = colors.scrimSoft,
+                        containerColor = colors.image.scrimSoft,
                         contentColor = contentColor
 
                         ), modifier = Modifier
                         .size(sizes.actionButton)
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.pillBorder,
+                            color = colors.image.pillBorder,
                             shape = ShapeCircle
                         )
                 ) {

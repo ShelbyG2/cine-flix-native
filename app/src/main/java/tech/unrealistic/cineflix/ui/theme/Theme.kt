@@ -153,6 +153,7 @@ fun CineflixTheme(
 
     CompositionLocalProvider(
         LocalAppExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+        LocalAppEffects provides EffectSpec(),
         LocalAppSpacing provides AppSpacing(),
         LocalAppSizes provides AppSizes(),
         LocalAppMotion provides AppMotion(reduceMotion = rememberReduceMotion()),
@@ -172,6 +173,7 @@ fun CineflixTheme(
 // ═══════════════════════════════════════════════════════════════════════════
 object AppTheme {
     val colors:  AppExtendedColors @Composable get() = LocalAppExtendedColors.current
+    val effects: EffectSpec        @Composable get() = LocalAppEffects.current
     val spacing: AppSpacing        @Composable get() = LocalAppSpacing.current
     val sizes:   AppSizes          @Composable get() = LocalAppSizes.current
     val motion:  AppMotion         @Composable get() = LocalAppMotion.current

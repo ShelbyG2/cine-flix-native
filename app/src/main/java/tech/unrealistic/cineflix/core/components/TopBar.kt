@@ -56,17 +56,17 @@ fun FloatingTopBar(
         Text(
             text = "CINEFLIX",
             style = WordmarkStyle,
-            color = if (isScrolled) MaterialTheme.colorScheme.onSurface else colors.onImage
+            color = if (isScrolled) MaterialTheme.colorScheme.onSurface else colors.image.onImage
         )
 
         // The Floating Glass Panel (Pill Shape)
         Row(
             modifier = Modifier
                 .clip(ShapePill)
-                .background(colors.scrimStrong) // dark pill keeps the icon legible in both modes
+                .background(colors.image.scrimStrong) // dark pill keeps the icon legible in both modes
                 .border(
                     width = AppTheme.sizes.hairline,
-                    color = colors.pillBorder,
+                    color = colors.image.pillBorder,
                     shape = ShapePill
                 )
                 .padding(AppTheme.spacing.gap2),
@@ -82,7 +82,7 @@ fun FloatingTopBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_search),
                     contentDescription = "Search",
-                    tint = colors.onImage,
+                    tint = colors.image.onImage,
                     modifier = Modifier.size(AppTheme.sizes.iconMd)
                 )
             }

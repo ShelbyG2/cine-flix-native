@@ -34,31 +34,32 @@ fun GlassMorphOverlay(
     shape: Shape = MaterialTheme.shapes.large,
 ) {
     val colors = AppTheme.colors
+    val effects = AppTheme.effects
 
     Box(
         modifier = modifier
             .clip(shape)
 
             // ── Layer 1: Frosted base ─────────────────────────────────
-            .background(colors.glassSurface)
+            .background(colors.glass.surface)
 
             // ── Layer 2 + 4: Specular gloss + noise via single draw pass
             .drawWithCache {
                 // Pre-build the gloss brush once — reused across frames
                 val glossBrush = Brush.verticalGradient(
                     colors = listOf(
-                        colors.glassGloss,
-                        colors.glassGloss.withAlpha(colors.glassGloss.alpha * 0.5f),
-                        colors.glassSurface.withAlpha(0f),
+                        colors.glass.gloss,
+                        colors.glass.gloss.withAlpha(colors.glass.gloss.alpha * 0.5f),
+                        colors.glass.surface.withAlpha(0f),
                     ), startY = 0f, endY = size.height * 0.55f   // gloss covers top 55%
                 )
 
                 // Diagonal specular streak — like light catching a glass edge
                 val streakBrush = Brush.linearGradient(
                     colors = listOf(
-                        colors.glassGloss.withAlpha(0f),
-                        colors.glassGloss.withAlpha(colors.glassGloss.alpha * 0.6f),
-                        colors.glassGloss.withAlpha(0f),
+                        colors.glass.gloss.withAlpha(0f),
+                        colors.glass.gloss.withAlpha(colors.glass.gloss.alpha * 0.6f),
+                        colors.glass.gloss.withAlpha(0f),
                     ),
                     start = Offset(0f, 0f),
                     end = Offset(size.width * 0.6f, size.height * 0.4f),
@@ -74,9 +75,9 @@ fun GlassMorphOverlay(
                     drawRect(streakBrush)
                     // Noise grain — seeded random dots for texture
                     drawNoise(
-                        colors.glassNoise,
-                        alpha = colors.glassNoiseAlpha,
-                        density = colors.glassNoiseDensity
+                        colors.glass.noise,
+                        alpha = effects.glassNoiseAlpha,
+                        density = effects.glassNoiseDensity
                     )
                 }
             }
@@ -86,10 +87,10 @@ fun GlassMorphOverlay(
                 width = AppTheme.sizes.glassBorderWidth,
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        colors.glassBorder,
-                        colors.glassBorder.withAlpha(colors.glassBorder.alpha * 0.3f),
-                        colors.glassBorder.withAlpha(0f),
-                        colors.glassBorder.withAlpha(colors.glassBorder.alpha * 0.1f),
+                        colors.glass.border,
+                        colors.glass.border.withAlpha(colors.glass.border.alpha * 0.3f),
+                        colors.glass.border.withAlpha(0f),
+                        colors.glass.border.withAlpha(colors.glass.border.alpha * 0.1f),
                     )
                 ), shape = shape
         ))

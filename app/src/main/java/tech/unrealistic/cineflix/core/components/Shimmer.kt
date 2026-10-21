@@ -50,7 +50,7 @@ fun Modifier.shimmerEffect(): Modifier = composed {
 
     //Reduce motion → static skeleton block, no travelling gradient
     if (motion.reduceMotion) {
-        return@composed this.background(colors.skeletonBase)
+        return@composed this.background(colors.skeleton.base)
     }
 
     //Keep track of the pixel bounds of the target composable
@@ -73,7 +73,7 @@ fun Modifier.shimmerEffect(): Modifier = composed {
     //construct linear gradient  brush followin the translated animation values
     val shimmerBrush = if (size.width > 0) {
         Brush.linearGradient(
-            colors = listOf(colors.skeletonBase, colors.skeletonHighlight, colors.skeletonBase),
+            colors = listOf(colors.skeleton.base, colors.skeleton.highlight, colors.skeleton.base),
             start = Offset(translateAnimation, 0f),
             end = Offset(translateAnimation + size.width.toFloat(), size.height.toFloat())
         )

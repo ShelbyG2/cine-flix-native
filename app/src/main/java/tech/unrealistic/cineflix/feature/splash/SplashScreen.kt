@@ -123,7 +123,7 @@ fun SplashScreen(
                         .background(MaterialTheme.colorScheme.primary)
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.stroke,
+                            color = MaterialTheme.colorScheme.outline,
                             shape = ShapePlay
                         )
                 ) {

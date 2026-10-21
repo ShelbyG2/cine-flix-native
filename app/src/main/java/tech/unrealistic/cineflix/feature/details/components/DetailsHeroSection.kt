@@ -117,10 +117,10 @@ fun DetailSheetHeroSection(
                     modifier = Modifier
                         .size(CloseButtonVisualSize)   // visual size only
                         .clip(ShapeCircle)
-                        .background(colors.scrimStrong)
+                        .background(colors.image.scrimStrong)
                         .border(
                             width = sizes.glassBorderWidth,
-                            color = colors.pillBorder,
+                            color = colors.image.pillBorder,
                             shape = ShapeCircle
                         ),
                     contentAlignment = Alignment.Center
@@ -128,7 +128,7 @@ fun DetailSheetHeroSection(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close details",
-                        tint = colors.onImage,   // light in BOTH modes over dark disc
+                        tint = colors.image.onImage,   // light in BOTH modes over dark disc
                         modifier = Modifier.size(sizes.iconSm)
                     )
                 }
@@ -153,7 +153,7 @@ fun DetailSheetHeroSection(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         border = BorderStroke(
                             sizes.hairline,
-                            colors.stroke
+                            MaterialTheme.colorScheme.outline
                         )
                     ) {
                         Text(

@@ -145,7 +145,7 @@ fun FileAccessScreen(
             ),
             border = androidx.compose.foundation.BorderStroke(
                 width = sizes.borderWidth,
-                color = colors.stroke
+                color = MaterialTheme.colorScheme.outline
             ),
             contentPadding = PaddingValues(
                 horizontal = spacing.buttonPaddingH,
@@ -216,10 +216,10 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                 .width(sizes.folderTabW)
                                 .height(sizes.folderTabH)
                                 .clip(ShapeTab)
-                                .background(colors.glassSurface)
+                                .background(colors.glass.surface)
                                 .border(
                                     width = sizes.borderWidth,
-                                    color = colors.glassBorder,
+                                    color = colors.glass.border,
                                     shape = ShapeTab
                                 )
                         )
@@ -230,10 +230,10 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                 .width(sizes.folderBodyW)
                                 .height(sizes.folderBodyH)
                                 .clip(ShapeFolderBody)
-                                .background(colors.glassSurface)
+                                .background(colors.glass.surface)
                                 .border(
                                     width = sizes.borderWidth,
-                                    color = colors.glassBorder,
+                                    color = colors.glass.border,
                                     shape = ShapeFolderBody
                                 ),
                             contentAlignment = Alignment.Center
@@ -245,7 +245,7 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                     .background(
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                colors.glassGloss,
+                                                colors.glass.gloss,
                                                 Color.Transparent
                                             )
                                         )
@@ -262,7 +262,7 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                             .width(lineWidth)
                                             .height(sizes.fileLineH)
                                             .clip(ShapePill)
-                                            .background(colors.stroke)
+                                            .background(MaterialTheme.colorScheme.outline)
                                     )
                                 }
 
@@ -273,10 +273,10 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                     modifier = Modifier
                                         .size(sizes.downloadDisc)
                                         .clip(ShapeCircle)
-                                        .background(colors.glassSurface)
+                                        .background(colors.glass.surface)
                                         .border(
                                             width = sizes.borderWidth,
-                                            color = colors.glassBorder,
+                                            color = colors.glass.border,
                                             shape = ShapeCircle
                                         ),
                                     contentAlignment = Alignment.Center
@@ -305,7 +305,7 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                colors.imageChipSurface,
+                                colors.image.chipSurface,
                                 Color.Transparent
                             )
                         )

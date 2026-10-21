@@ -414,10 +414,10 @@ private fun DiscoverChip(
         shape = ShapePill,
         colors = FilterChipDefaults.filterChipColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
-                .withAlpha(AppTheme.colors.chipUnselectedAlpha),
+                .withAlpha(AppTheme.effects.chipUnselectedAlpha),
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             selectedContainerColor = MaterialTheme.colorScheme.primary
-                .withAlpha(AppTheme.colors.chipSelectedAlpha),
+                .withAlpha(AppTheme.effects.chipSelectedAlpha),
             selectedLabelColor = MaterialTheme.colorScheme.onBackground
         ),
         border = FilterChipDefaults.filterChipBorder(

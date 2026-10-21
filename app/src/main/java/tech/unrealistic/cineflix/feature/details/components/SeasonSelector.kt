@@ -77,7 +77,7 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
                     .width(sizes.episodeStillW)
                     .aspectRatio(16f / 9f)
                     .clip(MaterialTheme.shapes.small)
-                    .background(colors.skeletonBase)
+                    .background(colors.skeleton.base)
             ) {
                 AsyncImage(
                     model = stillPath?.let { path -> "https://image.tmdb.org/t/p/w300$path" },
@@ -92,14 +92,14 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
                             .align(Alignment.Center)
                             .size(sizes.iconXl)
                             .clip(ShapeCircle)
-                            .background(colors.scrimStrong),
+                            .background(colors.image.scrimStrong),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PlayArrow,
                             // The row's click label already names the action.
                             contentDescription = null,
-                            tint = colors.onImage,
+                            tint = colors.image.onImage,
                             modifier = Modifier.size(sizes.iconSm)
                         )
                     }
@@ -165,7 +165,7 @@ import tech.unrealistic.cineflix.ui.theme.TitleStrongStyle
                                 else Icons.Outlined.FavoriteBorder,
                                 contentDescription = if (isLiked) "Unlike episode"
                                 else "Like episode",
-                                tint = if (isLiked) colors.favouriteActive
+                                tint = if (isLiked) colors.accent.favourite
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(sizes.iconCompact)
                             )

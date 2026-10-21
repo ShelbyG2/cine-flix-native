@@ -206,6 +206,7 @@ fun GlassHeroBackground(
     content: @Composable () -> Unit
 ) {
     val colors = AppTheme.colors
+    val effects = AppTheme.effects
     val sizes = AppTheme.sizes
 
     Box(
@@ -216,9 +217,9 @@ fun GlassHeroBackground(
                 width = sizes.glassBorderWidth,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        colors.glassBorder,
+                        colors.glass.border,
                         Color.Transparent,
-                        colors.glassBorder.withAlpha(colors.glassBorder.alpha * 0.1f)
+                        colors.glass.border.withAlpha(colors.glass.border.alpha * 0.1f)
                     )
                 ),
                 shape = RectangleShape
@@ -233,11 +234,11 @@ fun GlassHeroBackground(
                 .background(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0.00f to vibrantColor.withAlpha(colors.heroTopAlpha),
-                            0.40f to vibrantColor.withAlpha(colors.heroMidAlpha),
-                            0.75f to mutedColor.withAlpha(colors.heroMutedAlpha),
+                            0.00f to vibrantColor.withAlpha(effects.heroTopAlpha),
+                            0.40f to vibrantColor.withAlpha(effects.heroMidAlpha),
+                            0.75f to mutedColor.withAlpha(effects.heroMutedAlpha),
                             1.00f to MaterialTheme.colorScheme.background
-                                .withAlpha(colors.posterFadeAlpha)
+                                .withAlpha(effects.posterFadeAlpha)
                         )
                     )
                 )
@@ -251,7 +252,7 @@ fun GlassHeroBackground(
                     val streak = Brush.linearGradient(
                         colors = listOf(
                             Color.Transparent,
-                            colors.glassGloss.withAlpha(colors.glassGloss.alpha * 0.6f),
+                            colors.glass.gloss.withAlpha(colors.glass.gloss.alpha * 0.6f),
                             Color.Transparent
                         ),
                         start = Offset(0f, 0f),
@@ -263,10 +264,10 @@ fun GlassHeroBackground(
                         // Fixed seed inside the draw scope keeps the grain pattern
                         // identical on every redraw.
                         val random = Random(42)
-                        repeat(colors.glassNoiseDensity) {
+                        repeat(effects.glassNoiseDensity) {
                             drawCircle(
-                                color = colors.glassNoise.withAlpha(
-                                    colors.glassNoiseAlpha * random.nextFloat()
+                                color = colors.glass.noise.withAlpha(
+                                    effects.glassNoiseAlpha * random.nextFloat()
                                 ),
                                 radius = random.nextFloat() * 1.2f,
                                 center = Offset(

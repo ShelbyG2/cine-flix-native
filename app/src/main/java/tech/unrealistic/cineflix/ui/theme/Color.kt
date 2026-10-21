@@ -46,6 +46,9 @@ internal val ColorWarningDark  = Color(0xFFFF9F0A)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LIGHT — ink on white
+//   body text  #0B0B0C on #FFFFFF   19.0:1  AA
+//   secondary  #6C6C70 on #FFFFFF    5.0:1  AA
+//   outline    #8E8E93 on #FFFFFF    3.3:1  AA (icons / large text)
 // ═══════════════════════════════════════════════════════════════════════════
 internal val md_light_primary              = ColorInk
 internal val md_light_onPrimary            = ColorWhite
@@ -87,6 +90,9 @@ internal val md_light_surfaceContainerHighest = ColorGray200
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DARK — true black, white ink (OLED)
+//   body text  #F2F2F7 on #000000  18.9:1  AA
+//   secondary  #98989D on #000000   7.0:1  AA
+//   outline    #7C7C80 on #000000   4.4:1  AA (icons / large text)
 // ═══════════════════════════════════════════════════════════════════════════
 internal val md_dark_primary              = ColorWhite
 internal val md_dark_onPrimary            = ColorBlack
@@ -126,9 +132,11 @@ internal val md_dark_surfaceContainerHigh    = ColorD300
 internal val md_dark_surfaceContainerHighest = ColorD400
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EXTENDED COLORS (structure unchanged so call sites keep compiling)
+// EXTENDED COLORS — grouped by purpose instead of one flat 60-field bag.
 // ═══════════════════════════════════════════════════════════════════════════
-data class AppExtendedColors(
+
+/** Status colors: the only chromatic colors besides the favourite heart. */
+data class StatusColors(
     val success:            Color,
     val onSuccess:          Color,
     val successContainer:   Color,
@@ -137,180 +145,179 @@ data class AppExtendedColors(
     val onWarning:          Color,
     val warningContainer:   Color,
     val onWarningContainer: Color,
-    val navbar:             Color,
-    val cover:              Color,
-    val player:             Color,
-    val subText:            Color,
-    val stroke:             Color,
+)
 
-    val glassSurface:       Color,
-    val glassBorder:        Color,
-    val glassGloss:         Color,
-    val glassNoise:         Color,
-    val glassNoiseAlpha:    Float,
+/** The single translucent material used by the top bar and the nav bar. */
+data class GlassColors(
+    val surface: Color,
+    val border:  Color,
+    val gloss:   Color,
+    val noise:   Color,
+)
 
-    val onImage:            Color,
-    val onImageMuted:       Color,
-    val onImageInverse:     Color,
-    val imageScrimStart:    Color,
-    val imageScrimEnd:      Color,
-    val scrimStrong:        Color,
-    val scrimSoft:          Color,
-    val imageTopScrim:      Color,
-    val imageVignette:      Color,
-    val progressDotInactive: Color,
+/** Scrims, text and chip fills that sit over poster/backdrop imagery. */
+data class ImageOverlayColors(
+    val onImage:        Color,
+    val onImageMuted:   Color,
+    val onImageInverse: Color,
+    val scrimStart:     Color,
+    val scrimEnd:       Color,
+    val scrimStrong:    Color,
+    val scrimSoft:      Color,
+    val topScrim:       Color,
+    val vignette:       Color,
+    val chipSurface:    Color,
+    val onChipSurface:  Color,
+    val chipBorder:     Color,
+    val pillBorder:     Color,
+)
 
-    val ratingStar:         Color,
-    val favouriteActive:    Color,
-    val savedActive:        Color,
+/** Rating / favourite / saved marks. Stars and saved are white; the heart is red. */
+data class AccentColors(
+    val rating:    Color,
+    val favourite: Color,
+    val saved:     Color,
+)
 
-    val imageChipSurface:   Color,
-    val onImageChipSurface: Color,
-    val onImageChipBorder:  Color,
-    val pillBorder:         Color,
-    val ratingChipFillAlpha:  Float,
-    val ratingChipBorderAlpha: Float,
-    val chipUnselectedAlpha:  Float,
-    val chipSelectedAlpha:    Float,
-    val posterFadeAlpha:      Float,
-    val heroTopAlpha:       Float,
-    val heroMidAlpha:       Float,
-    val heroMutedAlpha:     Float,
-    val glassNoiseDensity:  Int,
-    val sphereShade:        Color,
-    val playerBackground:   Color,
-    val pulseRingAlpha1:    Float,
-    val pulseRingAlpha2:    Float,
+/** Bottom navigation icon roles. */
+data class NavColors(
+    val selectedIcon:   Color,
+    val unselectedIcon: Color,
+)
 
-    val navSelectedIcon:    Color,
-    val navUnselectedIcon:  Color,
+/** Skeleton shimmer base + highlight. */
+data class SkeletonColors(
+    val base:      Color,
+    val highlight: Color,
+)
 
-    val skeletonBase:       Color,
-    val skeletonHighlight:  Color,
+/**
+ * Non-color numeric specs that used to live inside the colour bag:
+ * overlay alphas and the noise density of the glass grain.
+ */
+data class EffectSpec(
+    val ratingChipFillAlpha:   Float = 0.35f,
+    val ratingChipBorderAlpha: Float = 0.50f,
+    val chipUnselectedAlpha:   Float = 0.5f,
+    val chipSelectedAlpha:     Float = 0.25f,
+    val posterFadeAlpha:       Float = 0.95f,
+    val heroTopAlpha:          Float = 0.85f,
+    val heroMidAlpha:          Float = 0.60f,
+    val heroMutedAlpha:        Float = 0.75f,
+    val glassNoiseAlpha:       Float = 0.03f,
+    val glassNoiseDensity:     Int   = 400,
+)
+
+data class AppExtendedColors(
+    val status:    StatusColors,
+    val glass:     GlassColors,
+    val image:     ImageOverlayColors,
+    val accent:    AccentColors,
+    val nav:       NavColors,
+    val skeleton:  SkeletonColors,
+    /** True-black playback background in both modes. */
+    val playerBackground: Color,
 )
 
 internal val LightExtendedColors = AppExtendedColors(
-    success            = ColorSuccessLight,
-    onSuccess          = ColorWhite,
-    successContainer   = Color(0xFFE3F5E8),
-    onSuccessContainer = Color(0xFF0B3D1C),
-    warning            = ColorWarningLight,
-    onWarning          = ColorWhite,
-    warningContainer   = Color(0xFFFFF1E0),
-    onWarningContainer = Color(0xFF4A2200),
-    navbar             = ColorGray50,
-    cover              = ColorGray100,
-    player             = ColorWhite,
-    subText            = ColorGray600,
-    stroke             = ColorGray400,
-
+    status = StatusColors(
+        success            = ColorSuccessLight,
+        onSuccess          = ColorWhite,
+        successContainer   = Color(0xFFE3F5E8),
+        onSuccessContainer = Color(0xFF0B3D1C),
+        warning            = ColorWarningLight,
+        onWarning          = ColorWhite,
+        warningContainer   = Color(0xFFFFF1E0),
+        onWarningContainer = Color(0xFF4A2200),
+    ),
     // Apple-style thin material: white, hairline rim
-    glassSurface       = Color(0xB3FFFFFF),
-    glassBorder        = Color(0x1F000000),
-    glassGloss         = Color(0xB3FFFFFF),
-    glassNoise         = Color(0x0F000000),
-    glassNoiseAlpha    = 0.03f,
-
-    onImage            = ColorWhite,
-    onImageMuted       = Color(0xD9FFFFFF),
-    onImageInverse     = ColorInk,
-    imageScrimStart    = Color(0x00000000),
-    imageScrimEnd      = Color(0xCC000000),
-    scrimStrong        = Color(0xCC000000),
-    scrimSoft          = Color(0xA6000000),
-    imageTopScrim      = Color(0xA6000000),
-    imageVignette      = Color(0x73000000),
-    progressDotInactive = Color(0x4DFFFFFF),
-
+    glass = GlassColors(
+        surface = Color(0xB3FFFFFF),
+        border  = Color(0x1F000000),
+        gloss   = Color(0xB3FFFFFF),
+        noise   = Color(0x0F000000),
+    ),
+    image = ImageOverlayColors(
+        onImage        = ColorWhite,
+        onImageMuted   = Color(0xD9FFFFFF),
+        onImageInverse = ColorInk,
+        scrimStart     = Color(0x00000000),
+        scrimEnd       = Color(0xCC000000),
+        scrimStrong    = Color(0xCC000000),
+        scrimSoft      = Color(0xA6000000),
+        topScrim       = Color(0xA6000000),
+        vignette       = Color(0x73000000),
+        chipSurface    = Color(0x8C000000),
+        onChipSurface  = Color(0x1FFFFFFF),
+        chipBorder     = Color(0x40FFFFFF),
+        pillBorder     = Color(0x40FFFFFF),
+    ),
     // Monochrome: stars and saved are white over imagery; only the heart is red
-    ratingStar         = ColorWhite,
-    favouriteActive    = ColorHeart,
-    savedActive        = ColorWhite,
-
-    imageChipSurface   = Color(0x8C000000),
-    onImageChipSurface = Color(0x1FFFFFFF),
-    onImageChipBorder  = Color(0x40FFFFFF),
-    pillBorder         = Color(0x40FFFFFF),
-    ratingChipFillAlpha  = 0.35f,
-    ratingChipBorderAlpha = 0.50f,
-    chipUnselectedAlpha  = 0.5f,
-    chipSelectedAlpha    = 0.25f,
-    posterFadeAlpha      = 0.95f,
-    heroTopAlpha       = 0.85f,
-    heroMidAlpha       = 0.60f,
-    heroMutedAlpha     = 0.75f,
-    glassNoiseDensity  = 400,
-    sphereShade        = Color(0x40000000),
-    pulseRingAlpha1    = 0.8f,
-    pulseRingAlpha2    = 0.6f,
-    playerBackground   = ColorBlack,
-
-    navSelectedIcon    = ColorInk,
-    navUnselectedIcon  = ColorGray400,
-
-    skeletonBase       = ColorGray200,
-    skeletonHighlight  = ColorGray100,
+    accent = AccentColors(
+        rating    = ColorWhite,
+        favourite = ColorHeart,
+        saved     = ColorWhite,
+    ),
+    nav = NavColors(
+        selectedIcon   = ColorInk,
+        unselectedIcon = ColorGray400,
+    ),
+    skeleton = SkeletonColors(
+        base      = ColorGray200,
+        highlight = ColorGray100,
+    ),
+    playerBackground = ColorBlack,
 )
 
 internal val DarkExtendedColors = AppExtendedColors(
-    success            = ColorSuccessDark,
-    onSuccess          = Color(0xFF0A2E15),
-    successContainer   = Color(0xFF12351F),
-    onSuccessContainer = Color(0xFFD6F5DF),
-    warning            = ColorWarningDark,
-    onWarning          = Color(0xFF2B1700),
-    warningContainer   = Color(0xFF4A2C00),
-    onWarningContainer = Color(0xFFFFE2B8),
-    navbar             = ColorD100,
-    cover              = ColorBlack,
-    player             = ColorBlack,
-    subText            = ColorD700,
-    stroke             = ColorD600,
-
-    glassSurface       = Color(0x1FFFFFFF),
-    glassBorder        = Color(0x33FFFFFF),
-    glassGloss         = Color(0x26FFFFFF),
-    glassNoise         = Color(0x14FFFFFF),
-    glassNoiseAlpha    = 0.03f,
-
-    onImage            = ColorWhite,
-    onImageMuted       = Color(0xD9FFFFFF),
-    onImageInverse     = ColorInk,
-    imageScrimStart    = Color(0x00000000),
-    imageScrimEnd      = Color(0xCC000000),
-    scrimStrong        = Color(0xCC000000),
-    scrimSoft          = Color(0x66000000),
-    imageTopScrim      = Color(0xA6000000),
-    imageVignette      = Color(0x73000000),
-    progressDotInactive = Color(0x4DFFFFFF),
-
-    ratingStar         = ColorWhite,
-    favouriteActive    = ColorHeart,
-    savedActive        = ColorWhite,
-
-    imageChipSurface   = Color(0x8C000000),
-    onImageChipSurface = Color(0x1FFFFFFF),
-    onImageChipBorder  = Color(0x40FFFFFF),
-    pillBorder         = Color(0x26FFFFFF),
-    ratingChipFillAlpha  = 0.35f,
-    ratingChipBorderAlpha = 0.50f,
-    chipUnselectedAlpha  = 0.5f,
-    chipSelectedAlpha    = 0.25f,
-    posterFadeAlpha      = 0.95f,
-    heroTopAlpha       = 0.85f,
-    heroMidAlpha       = 0.60f,
-    heroMutedAlpha     = 0.75f,
-    glassNoiseDensity  = 400,
-    sphereShade        = Color(0x40000000),
-    pulseRingAlpha1    = 0.8f,
-    pulseRingAlpha2    = 0.6f,
-    playerBackground   = ColorBlack,
-
-    navSelectedIcon    = ColorWhite,
-    navUnselectedIcon  = ColorGray400,
-
-    skeletonBase       = ColorD200,
-    skeletonHighlight  = ColorD300,
+    status = StatusColors(
+        success            = ColorSuccessDark,
+        onSuccess          = Color(0xFF0A2E15),
+        successContainer   = Color(0xFF12351F),
+        onSuccessContainer = Color(0xFFD6F5DF),
+        warning            = ColorWarningDark,
+        onWarning          = Color(0xFF2B1700),
+        warningContainer   = Color(0xFF4A2C00),
+        onWarningContainer = Color(0xFFFFE2B8),
+    ),
+    glass = GlassColors(
+        surface = Color(0x1FFFFFFF),
+        border  = Color(0x33FFFFFF),
+        gloss   = Color(0x26FFFFFF),
+        noise   = Color(0x14FFFFFF),
+    ),
+    image = ImageOverlayColors(
+        onImage        = ColorWhite,
+        onImageMuted   = Color(0xD9FFFFFF),
+        onImageInverse = ColorInk,
+        scrimStart     = Color(0x00000000),
+        scrimEnd       = Color(0xCC000000),
+        scrimStrong    = Color(0xCC000000),
+        scrimSoft      = Color(0x66000000),
+        topScrim       = Color(0xA6000000),
+        vignette       = Color(0x73000000),
+        chipSurface    = Color(0x8C000000),
+        onChipSurface  = Color(0x1FFFFFFF),
+        chipBorder     = Color(0x40FFFFFF),
+        pillBorder     = Color(0x26FFFFFF),
+    ),
+    accent = AccentColors(
+        rating    = ColorWhite,
+        favourite = ColorHeart,
+        saved     = ColorWhite,
+    ),
+    nav = NavColors(
+        selectedIcon   = ColorWhite,
+        unselectedIcon = ColorGray400,
+    ),
+    skeleton = SkeletonColors(
+        base      = ColorD200,
+        highlight = ColorD300,
+    ),
+    playerBackground = ColorBlack,
 )
 
 val LocalAppExtendedColors = staticCompositionLocalOf { LightExtendedColors }
+
+/** Effect alphas / densities are mode-independent. */
+val LocalAppEffects = staticCompositionLocalOf { EffectSpec() }

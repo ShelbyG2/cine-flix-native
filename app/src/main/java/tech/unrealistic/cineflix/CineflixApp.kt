@@ -150,16 +150,16 @@ private fun MainAppContent() {
                             contentDescription = it.label,
                             // Theme roles: AA in BOTH modes (white/grey hardcoded
                             // failed in light mode where the nav surface is light)
-                            tint = if (it == currentTab) AppTheme.colors.navSelectedIcon
-                            else AppTheme.colors.navUnselectedIcon
+                            tint = if (it == currentTab) AppTheme.colors.nav.selectedIcon
+                            else AppTheme.colors.nav.unselectedIcon
                         )
                     },
                     label = {
                         Text(
                             text = it.label,
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (it == currentTab) AppTheme.colors.navSelectedIcon
-                            else AppTheme.colors.navUnselectedIcon
+                            color = if (it == currentTab) AppTheme.colors.nav.selectedIcon
+                            else AppTheme.colors.nav.unselectedIcon
                         )
                     },
                     selected = it == currentTab,

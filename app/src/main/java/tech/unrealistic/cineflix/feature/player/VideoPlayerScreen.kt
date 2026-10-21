@@ -496,8 +496,8 @@ fun VideoPlayerScreen(
                     .padding(AppTheme.spacing.md)
                     .size(AppTheme.sizes.touchTarget),
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = AppTheme.colors.scrimStrong,
-                    contentColor = AppTheme.colors.onImage
+                    containerColor = AppTheme.colors.image.scrimStrong,
+                    contentColor = AppTheme.colors.image.onImage
                 )
             ) {
                 Icon(
