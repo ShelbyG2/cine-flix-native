@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -45,6 +46,13 @@ private val DarkColorScheme = darkColorScheme(
     inversePrimary       = md_dark_inversePrimary,
     surfaceTint          = md_dark_surfaceTint,
     scrim                = md_dark_scrim,
+    surfaceBright           = md_dark_surfaceBright,
+    surfaceDim              = md_dark_surfaceDim,
+    surfaceContainerLowest  = md_dark_surfaceContainerLowest,
+    surfaceContainerLow     = md_dark_surfaceContainerLow,
+    surfaceContainer        = md_dark_surfaceContainer,
+    surfaceContainerHigh    = md_dark_surfaceContainerHigh,
+    surfaceContainerHighest = md_dark_surfaceContainerHighest,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -77,7 +85,43 @@ private val LightColorScheme = lightColorScheme(
     inversePrimary       = md_light_inversePrimary,
     surfaceTint          = md_light_surfaceTint,
     scrim                = md_light_scrim,
+    surfaceBright           = md_light_surfaceBright,
+    surfaceDim              = md_light_surfaceDim,
+    surfaceContainerLowest  = md_light_surfaceContainerLowest,
+    surfaceContainerLow     = md_light_surfaceContainerLow,
+    surfaceContainer        = md_light_surfaceContainer,
+    surfaceContainerHigh    = md_light_surfaceContainerHigh,
+    surfaceContainerHighest = md_light_surfaceContainerHighest,
 )
+
+/**
+ * Forces light system-bar icons for as long as the composable is on screen.
+ * Full-bleed dark imagery (hero, details backdrop, the player) needs pale icons
+ * even in light theme, where the theme default is dark icons.
+ * Restores the previous values on dispose so the next screen is unaffected.
+ */
+@Composable
+fun ForceLightSystemBarIcons(enabled: Boolean = true) {
+    val view = LocalView.current
+    if (view.isInEditMode) return
+
+    DisposableEffect(view, enabled) {
+        val controller = (view.context as? Activity)?.window
+            ?.let { window -> WindowCompat.getInsetsController(window, view) }
+        val previousStatus = controller?.isAppearanceLightStatusBars
+        val previousNav = controller?.isAppearanceLightNavigationBars
+        if (enabled) {
+            controller?.isAppearanceLightStatusBars = false
+            controller?.isAppearanceLightNavigationBars = false
+        }
+        onDispose {
+            if (enabled && controller != null) {
+                previousStatus?.let { controller.isAppearanceLightStatusBars = it }
+                previousNav?.let { controller.isAppearanceLightNavigationBars = it }
+            }
+        }
+    }
+}
 
 @Composable
 fun CineflixTheme(

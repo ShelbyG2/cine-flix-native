@@ -3,6 +3,7 @@ package tech.unrealistic.cineflix.ui.theme
 
 import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
@@ -25,17 +26,23 @@ data class AppMotion(
 
 val LocalAppMotion = staticCompositionLocalOf { AppMotion() }
 
-/** Reads the system animator duration scale; 0 means animations are off. */
+/**
+ * Reads the system animator duration scale once per composition entry.
+ * 0 means animations are off (reduce motion). Keyed on the context so a
+ * configuration change re-reads the setting, but recomposition does not.
+ */
 @Composable
 fun rememberReduceMotion(): Boolean {
     val context = LocalContext.current
-    return try {
-        Settings.Global.getFloat(
-            context.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f
-        ) == 0f
-    } catch (e: Exception) {
-        false
+    return remember(context) {
+        try {
+            Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1f
+            ) == 0f
+        } catch (e: Exception) {
+            false
+        }
     }
 }

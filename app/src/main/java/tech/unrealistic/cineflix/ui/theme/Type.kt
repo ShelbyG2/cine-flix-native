@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import tech.unrealistic.cineflix.R
 
@@ -122,14 +123,14 @@ val AppTypography = Typography(
         fontWeight    = FontWeight.Bold,
         fontSize      = FontSizeH1,                          // 49sp
         lineHeight    = lineHeightFor(49f, 1.10f),           // 110% = 53.9sp
-        letterSpacing = (-49f * 0.05f / 100f).sp            // -5% (decreased)
+        letterSpacing = (-0.02).em                          // tight display tracking
     ),
     displayMedium = TextStyle(
         fontFamily    = LexendFamily,
         fontWeight    = FontWeight.Bold,
         fontSize      = FontSizeH2,                          // 39sp
         lineHeight    = lineHeightFor(39f, 1.10f),           // 42.9sp
-        letterSpacing = (-39f * 0.05f / 100f).sp
+        letterSpacing = (-0.02).em
     ),
     displaySmall = TextStyle(
         fontFamily    = LexendFamily,
@@ -296,10 +297,11 @@ val TitleStrongStyle = TextStyle(
     letterSpacing = 0.sp
 )
 
-/** Splash wordmark — per-letter staggered fade (Bold, wide tracking). */
+/** Splash wordmark — per-letter staggered fade (Bold, wide tracking).
+ *  The family only declares Light→Bold, so Bold is the heaviest real weight. */
 val SplashWordmarkStyle = TextStyle(
     fontFamily    = LexendFamily,
-    fontWeight    = FontWeight.Black,
+    fontWeight    = FontWeight.Bold,
     fontSize      = FontSizeH4,                          // 25sp (headlineMedium)
     lineHeight    = lineHeightFor(25f, 1.10f),
     letterSpacing = 6.sp

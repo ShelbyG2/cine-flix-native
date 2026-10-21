@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -426,6 +427,10 @@ private fun EmptyLibrary(onExplore: () -> Unit) {
 /** Skeleton matching the production row metrics (shimmer). */
 @Composable
 private fun LibrarySkeleton(modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    val titleHeight = with(density) {
+        MaterialTheme.typography.titleLarge.lineHeight.toDp()
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -441,7 +446,7 @@ private fun LibrarySkeleton(modifier: Modifier = Modifier) {
                             vertical = AppTheme.spacing.sm
                         )
                         .width(AppTheme.sizes.skeletonTitleW)
-                        .height(AppTheme.sizes.skeletonTitleH),
+                        .height(titleHeight),
                     shape = MaterialTheme.shapes.small
                 )
                 LazyRow(

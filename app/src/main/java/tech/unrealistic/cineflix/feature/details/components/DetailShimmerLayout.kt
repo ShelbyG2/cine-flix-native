@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import tech.unrealistic.cineflix.core.components.ShimmerBox
@@ -26,6 +27,14 @@ import tech.unrealistic.cineflix.ui.theme.AppTheme
 fun DetailShimmerLayout(modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
     val sizes = AppTheme.sizes
+    // Placeholder heights come from the production type scale + chip padding.
+    val density = LocalDensity.current
+    val titleHeight = with(density) {
+        MaterialTheme.typography.headlineMedium.lineHeight.toDp()
+    }
+    val chipHeight = with(density) {
+        MaterialTheme.typography.labelLarge.lineHeight.toDp()
+    } + spacing.chipPaddingV * 2
 
     Column(
         modifier = modifier
@@ -45,7 +54,7 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
                     ShimmerBox(
                         modifier = Modifier
                             .width(sizes.skeletonGenreW)
-                            .height(sizes.skeletonChipH)
+                            .height(chipHeight)
                     )
                 }
             }
@@ -55,7 +64,7 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
             ShimmerBox(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
-                    .height(sizes.skeletonTitleH)
+                    .height(titleHeight)
             )
 
             Spacer(modifier = Modifier.height(spacing.md))
@@ -75,7 +84,7 @@ fun DetailShimmerLayout(modifier: Modifier = Modifier) {
             ShimmerBox(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(sizes.skeletonAction),
+                    .height(sizes.actionButton),
                 shape = MaterialTheme.shapes.medium
             )
 

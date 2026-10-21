@@ -50,7 +50,8 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .semantics { contentDescription = "Loading…" }
     ) {
-        val calculatedHeroHeight = maxHeight * 0.5f
+        // Same fraction the loaded HomeScreen uses — skeletons match content.
+        val calculatedHeroHeight = maxHeight * AppTheme.sizes.heroHeightFraction
 
         // 2. ROOT LAYER Stacking Box
         Box(modifier = Modifier.fillMaxSize()) {
@@ -98,6 +99,11 @@ fun HeroSectionSkeleton(
 ) {
     val skeletonVibrant = AppTheme.colors.skeletonBase
     val skeletonMuted = AppTheme.colors.skeletonHighlight
+    // Heights derive from the production type scale, not separate literals.
+    val density = LocalDensity.current
+    val chipHeight = with(density) {
+        MaterialTheme.typography.labelLarge.lineHeight.toDp()
+    } + AppTheme.spacing.chipPaddingV * 2
 
     GlassHeroBackground(
         vibrantColor = skeletonVibrant,
@@ -110,9 +116,9 @@ fun HeroSectionSkeleton(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // 💡 Uses the exact topPadding dynamic token passed from HomeScreenSkeleton
-                    .padding(top = topPadding)
-                    .height(AppTheme.sizes.skeletonHeroTrackH),
+                    .weight(1f)
+                    // Uses the exact topPadding dynamic token passed from HomeScreenSkeleton
+                    .padding(top = topPadding),
                 contentAlignment = Alignment.Center
             ) {
                 ShimmerBox(
@@ -146,7 +152,7 @@ fun HeroSectionSkeleton(
                     ShimmerBox(
                         modifier = Modifier.size(
                             width = AppTheme.sizes.skeletonChipW,
-                            height = AppTheme.sizes.skeletonChipH
+                            height = chipHeight
                         ),
                         shape = MaterialTheme.shapes.small
                     )
@@ -154,7 +160,7 @@ fun HeroSectionSkeleton(
                         ShimmerBox(
                             modifier = Modifier.size(
                                 width = AppTheme.sizes.skeletonGenreW,
-                                height = AppTheme.sizes.skeletonChipH
+                                height = chipHeight
                             ),
                             shape = ShapePill
                         )
@@ -176,7 +182,7 @@ fun HeroSectionSkeleton(
                         shape = MaterialTheme.shapes.medium
                     )
                     ShimmerBox(
-                        modifier = Modifier.size(AppTheme.sizes.skeletonAction),
+                        modifier = Modifier.size(AppTheme.sizes.actionButton),
                         shape = ShapeCircle
                     )
                 }
@@ -190,18 +196,23 @@ fun MediaSectionSkeleton(
     modifier: Modifier = Modifier,
     itemCount: Int = 5 // Shows 5 visible shimmering items by default
 ) {
+    val density = LocalDensity.current
+    val titleHeight = with(density) {
+        MaterialTheme.typography.titleLarge.lineHeight.toDp()
+    }
+
     Column(modifier = modifier.padding(bottom = AppTheme.spacing.sectionPaddingBottom)) {
 
         // ── 1. Mock Section Title Header ─────────────────────────────────────
-        // Replicates the padding bounds of the text title line
+        // Replicates the padding bounds and the titleLarge line height
         ShimmerBox(
             modifier = Modifier
                 .padding(
                     horizontal = AppTheme.spacing.md,
                     vertical = AppTheme.spacing.sm
                 )
-                .width(AppTheme.sizes.skeletonTitleW) // Fixed width block representing a text title row
-                .height(AppTheme.sizes.skeletonTitleH), // Matches the typographic spatial height of titleLarge
+                .width(AppTheme.sizes.skeletonTitleW)
+                .height(titleHeight),
             shape = MaterialTheme.shapes.small
         )
 
@@ -213,12 +224,14 @@ fun MediaSectionSkeleton(
             userScrollEnabled = false // Prevents the user from flicking incomplete rows
         ) {
             items(itemCount) {
-                // Mock Card Item
-                // Mirrors the MediaCard poster dimensions from AppSizes
+                // Mock Card Item — same width and 2:3 poster ratio as MediaCard
                 ShimmerBox(
                     modifier = Modifier
-                        .width(AppTheme.sizes.skeletonPosterW)
-                        .height(AppTheme.sizes.skeletonPosterH),
+                        .width(AppTheme.sizes.mediaCardWidth)
+                        .height(
+                            AppTheme.sizes.mediaCardWidth *
+                                    AppTheme.sizes.mediaCardPosterRatio
+                        ),
                     shape = MaterialTheme.shapes.medium
                 )
             }

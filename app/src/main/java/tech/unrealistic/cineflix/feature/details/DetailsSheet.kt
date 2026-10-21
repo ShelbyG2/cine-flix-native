@@ -47,6 +47,7 @@ import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
 import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
 import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 
@@ -69,6 +70,8 @@ fun MediaDetailsBottomSheet(
     onEpisodeLike: ((seriesId: Int, seasonNumber: Int, episodeId: Int) -> Unit)? = null
 ) {
     if (showBottomSheet) {
+        // The sheet opens on a full-bleed backdrop — keep status icons pale.
+        ForceLightSystemBarIcons()
         ModalBottomSheet(
             onDismissRequest = onDismissRequest,
             modifier = modifier,

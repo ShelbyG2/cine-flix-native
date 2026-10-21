@@ -36,6 +36,8 @@ import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
 
 
 @SuppressLint("SuspiciousIndentation")
@@ -54,7 +56,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val carouselHeight = screenHeight * 0.4f
+    val carouselHeight = screenHeight * AppTheme.sizes.heroHeightFraction
     val isScrolledPastHero by remember {
         derivedStateOf { scrollState.value > carouselHeight.value.toInt() }
     }
@@ -119,6 +121,9 @@ fun HomeScreen(
         }
 
         is HomeUiState.Success -> {
+            // The hero is full-bleed behind the status bar, so icons must stay pale
+            // while it is on screen; below it the bar is solid and theme icons win.
+            ForceLightSystemBarIcons(enabled = !isScrolledPastHero)
             val carouselState = rememberCarouselState(
                 itemCount = { state.trendingMixed.size })
             Box(
