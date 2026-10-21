@@ -1,8 +1,9 @@
 package tech.unrealistic.cineflix.feature.onboarding
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import tech.unrealistic.cineflix.ui.theme.BottomSheetShape
+import tech.unrealistic.cineflix.ui.theme.ShapeMedium
 
 /**
  * One-off artwork values for the onboarding illustrations.
@@ -53,17 +54,12 @@ internal object OnboardingArt {
     val folderShadowW = 170.dp
     val folderShadowH = 22.dp
 
-    /** Folder artwork corners — they belong to the illustration, not the system. */
-    val folderTabShape = RoundedCornerShape(
-        topStart = 18.dp,
-        topEnd = 18.dp,
-        bottomStart = 6.dp,
-        bottomEnd = 6.dp,
-    )
-    val folderBodyShape = RoundedCornerShape(
-        topStart = 8.dp,
-        topEnd = 8.dp,
-        bottomStart = 18.dp,
-        bottomEnd = 18.dp,
-    )
+    /**
+     * Folder artwork corners, expressed with system tokens so the radius
+     * system stays 8 / 16 / 28 / pill everywhere. The tab keeps a rounded top
+     * and a flat bottom (it sits flush on the body) — same construction as the
+     * sheet shape; the body uses the 16dp card radius.
+     */
+    val folderTabShape = BottomSheetShape
+    val folderBodyShape = ShapeMedium
 }

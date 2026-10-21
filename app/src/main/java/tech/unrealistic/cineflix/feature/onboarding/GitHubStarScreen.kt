@@ -82,7 +82,7 @@ fun GitHubStarScreen(
     ) {
         Spacer(modifier = Modifier.height(spacing.xxl))
 
-        // ── Glass sphere with the GitHub mark ──────────────────────────────
+        // ── Sphere with the GitHub mark ─────────────────────────────────────
         GitHubSphere(modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.height(spacing.sectionPaddingBottom))
@@ -193,7 +193,7 @@ fun GitHubStarScreen(
 }
 
 /**
- * The 3D glass sphere: dual pulsing glow rings, radial glass body, a primary
+ * The 3D sphere: dual pulsing glow rings, radial body, a primary
  * specular ellipse, a secondary rim highlight and a ground shadow. The GitHub
  * mark sits in the centre with a soft drop shadow.
  * Pulse rings are frozen mid-glow under reduce-motion.
@@ -301,7 +301,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         )
                 )
 
-                // Glass body + highlights + mark
+                // Sphere body + highlights + mark
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -310,8 +310,8 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    colors.glass.surface,
-                                    colors.glass.surface,
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
                                     OnboardingArt.sphereShade
                                 ),
                                 center = Offset(90f, 60f),
@@ -320,7 +320,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                         )
                         .border(
                             width = sizes.borderWidth,
-                            color = colors.glass.border,
+                            color = MaterialTheme.colorScheme.outlineVariant,
                             shape = ShapePill
                         )
                 ) {
@@ -336,9 +336,9 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        colors.glass.surface,
-                                        colors.glass.surface.withAlpha(
-                                            colors.glass.surface.alpha * 0.1f
+                                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.withAlpha(
+                                            MaterialTheme.colorScheme.surfaceContainerHigh.alpha * 0.1f
                                         )
                                     )
                                 )
@@ -353,7 +353,7 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                             .height(OnboardingArt.rimSliverH)
                             .graphicsLayer { rotationZ = -30f }
                             .clip(ShapePill)
-                            .background(colors.glass.border)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                     )
 
                     // GitHub mark with drop shadow — themed so it reads on

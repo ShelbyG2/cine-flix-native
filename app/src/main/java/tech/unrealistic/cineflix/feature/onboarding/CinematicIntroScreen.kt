@@ -89,7 +89,7 @@ private val introSlides = listOf(
 /**
  * Screen 1 — Cinematic Intro.
  * Full-bleed Unsplash images with a Ken Burns zoom, layered cinematic gradients,
- * a depth-of-field vignette, floating liquid-glass feature card, chip tags,
+ * a depth-of-field vignette, a raised feature card, chip tags,
  * progress dots (active = expanded white pill) and a Next / Get Started button.
  */
 @Composable
@@ -211,7 +211,7 @@ fun CinematicIntroScreen(
                 color = colors.image.onImage
             )
 
-            // Skip pill — liquid glass / frosted, 48dp target
+            // Skip pill — translucent chip over imagery, 48dp target
             Box(
                 modifier = Modifier
                     .clip(ShapePill)
@@ -234,7 +234,7 @@ fun CinematicIntroScreen(
             }
         }
 
-        // ── Bottom content: chips + glass feature card + dots + button ─────
+        // ── Bottom content: chips + feature card + dots + button ──────────
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -288,7 +288,7 @@ fun CinematicIntroScreen(
 
                     Spacer(modifier = Modifier.height(spacing.md))
 
-                    // Floating liquid glass feature card
+                    // Feature card
                     Box {
                         // Solid raised surface + hairline rim (glass is reserved
                         // for the two bars and the hero action pill).

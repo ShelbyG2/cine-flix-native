@@ -47,8 +47,8 @@ private const val FOLDER_TILT_MS = 2_600
 
 /**
  * Screen 2 — File Access Permission.
- * 3D tilted frosted-glass folder (tab + body layers, file lines, download icon,
- * ground shadow) above a system-style glass permission card.
+ * 3D tilted folder (tab + body layers, file lines, download icon,
+ * ground shadow) above a system-style permission card.
  * Both buttons advance the flow.
  */
 @Composable
@@ -166,9 +166,9 @@ fun FileAccessScreen(
 }
 
 /**
- * Folder built from two frosted-glass layers (tab + body) tilted back on the
- * X axis with a perspective camera, file lines and a download glyph inside,
- * and a soft ground shadow ellipse underneath for depth.
+ * Folder built from two raised surfaces (tab + body) tilted back on the X axis
+ * with a perspective camera, file lines and a download glyph inside, and a soft
+ * ground shadow ellipse underneath for depth.
  */
 @Composable
 private fun FolderIcon3D(modifier: Modifier = Modifier) {
@@ -219,36 +219,36 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                                 .width(OnboardingArt.folderTabW)
                                 .height(OnboardingArt.folderTabH)
                                 .clip(OnboardingArt.folderTabShape)
-                                .background(colors.glass.surface)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(
                                     width = sizes.borderWidth,
-                                    color = colors.glass.border,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
                                     shape = OnboardingArt.folderTabShape
                                 )
                         )
 
-                        // ── Body layer — frosted glass, holds the content ─
+                        // ── Body layer — raised surface, holds the content ─
                         Box(
                             modifier = Modifier
                                 .width(OnboardingArt.folderBodyW)
                                 .height(OnboardingArt.folderBodyH)
                                 .clip(OnboardingArt.folderBodyShape)
-                                .background(colors.glass.surface)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(
                                     width = sizes.borderWidth,
-                                    color = colors.glass.border,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
                                     shape = OnboardingArt.folderBodyShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Gloss streak on the glass
+                            // Soft top highlight
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .background(
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                colors.glass.surface,
+                                                MaterialTheme.colorScheme.surfaceContainerHigh,
                                                 Color.Transparent
                                             )
                                         )
@@ -271,15 +271,15 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
 
                                 Spacer(modifier = Modifier.height(spacing.sm))
 
-                                // Download glyph in a small glass disc
+                                // Download glyph in a small raised disc
                                 Box(
                                     modifier = Modifier
                                         .size(OnboardingArt.downloadDisc)
                                         .clip(ShapeCircle)
-                                        .background(colors.glass.surface)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                         .border(
                                             width = sizes.borderWidth,
-                                            color = colors.glass.border,
+                                            color = MaterialTheme.colorScheme.outlineVariant,
                                             shape = ShapeCircle
                                         ),
                                     contentAlignment = Alignment.Center
