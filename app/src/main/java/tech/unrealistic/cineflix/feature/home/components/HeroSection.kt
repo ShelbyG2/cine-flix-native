@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +67,11 @@ fun HeroSection(
     val context = LocalContext.current
     val motion = AppTheme.motion
     val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+    // The cards start below the floating top bar (status bar + bar content),
+    // so the bar never sits on top of the artwork.
+    val topBarBottom = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+        sizes.topBarHeight
     val effects = AppTheme.effects
     val defaultVibrant = MaterialTheme.colorScheme.primaryContainer
     val defaultMuted = MaterialTheme.colorScheme.surface
@@ -139,7 +147,7 @@ fun HeroSection(
                 contentPadding = PaddingValues(
                     start = spacing.lg,
                     end = spacing.lg,
-                    top = spacing.heroTopInset
+                    top = topBarBottom + spacing.heroTopInset
                 ),
                 content = { index ->
                     val item = items.getOrNull(index) ?: return@HorizontalCenteredHeroCarousel

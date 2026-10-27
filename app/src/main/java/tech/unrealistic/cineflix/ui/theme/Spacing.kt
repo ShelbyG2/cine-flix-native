@@ -36,7 +36,7 @@ data class AppSpacing(
     val buttonPaddingV:     Dp = 12.dp,
     val buttonGap:          Dp = 8.dp,   // icon ↔ label inside buttons
     val sectionPaddingBottom: Dp = 24.dp,
-    val heroTopInset:       Dp = 48.dp,  // carousel inset under the top bar
+    val heroTopInset:       Dp = 12.dp,  // gap between the floating top bar and the hero cards
     val titleOverlap:       Dp = 24.dp,  // details title overlap onto backdrop
 )
 
