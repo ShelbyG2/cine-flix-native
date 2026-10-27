@@ -24,6 +24,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the 'is this commit on master?' check can walk it.
+          fetch-depth: 0
+
+      # Releases only ever come from master: a tag must point at a commit that
+      # master contains, and manual runs must target master. Anything else is
+      # a branch experiment, not a stable build.
+      - name: Only build commits that live on master
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            sha="$(git rev-parse "${GITHUB_SHA}^{commit}")"
+            git fetch --no-tags origin master:refs/remotes/origin/master
+            if ! git merge-base --is-ancestor "$sha" origin/master; then
+              echo "::error::Tag $GITHUB_REF_NAME ($sha) is not reachable from master — refusing to publish an unstable build"
+              exit 1
+            fi
+            echo "Tag $GITHUB_REF_NAME is on master — OK"
+          else
+            if [ "$GITHUB_REF_NAME" != "master" ]; then
+              echo "::error::Manual runs must target master (got '$GITHUB_REF_NAME')"
+              exit 1
+            fi
+            echo "Manual run on master — OK"
+          fi
 
       - uses: actions/setup-java@v4
         with:
