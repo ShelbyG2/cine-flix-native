@@ -10,6 +10,15 @@ plugins {
 }
 val localProps = Properties()
 val file = file("local.properties")
+
+// Release signing — values live in keystore.properties at the repo root
+// (gitignored alongside the keystore). Without the file the release build
+// stays unsigned, exactly as before.
+val releaseSigning = Properties().apply {
+    val propsFile = rootProject.file("keystore.properties")
+    if (propsFile.exists()) propsFile.inputStream().use { load(it) }
+}.takeIf { it.isNotEmpty() }
+
 android {
     namespace = "tech.unrealistic.cineflix"
     compileSdk = 37
@@ -24,10 +33,23 @@ android {
 
     }
 
+    signingConfigs {
+        releaseSigning?.let { props ->
+            create("release") {
+                storeFile = rootProject.file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            releaseSigning?.let {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
