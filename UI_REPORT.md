@@ -64,6 +64,13 @@ string still exists; no navigation, data, ViewModel or business-logic change.
   metadata; rows fade up once via `enterFadeUp`; hero grain drawn once, cached;
   `ForceLightSystemBarIcons` over the hero; skeleton mirrors production bounds
   from the same tokens (top bar, hero, chips, action row, two rows).
+- **Hero cards no longer sit under the top bar (user report, 2026-10-27):**
+  carousel content inset is now `statusBars + topBarHeight + heroTopInset`
+  instead of the fixed 48dp, which let the status-bar + 56dp bar row draw
+  across the poster tops. `heroTopInset` was retuned to a 12dp grid gap (the
+  gap under the bar), which also matches the loading skeleton's track padding.
+  Bounds verified on device via accessibility dump: row bottom ≈231px vs.
+  focused poster top ≈336px — clear gap, no overlap.
 - **Files:** `HomeScreen.kt`, `HomeScreenLoadingSkeleton.kt`,
   `components/HeroSection.kt`, `components/Media Section.kt`.
 
