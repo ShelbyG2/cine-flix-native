@@ -39,6 +39,9 @@ class HomeViewModel : ViewModel() {
         fetchAllHomeData()
     }
 
+    /** Retry affordance for the error state — re-runs the existing fetch. */
+    fun onRetry() = fetchAllHomeData()
+
     private fun fetchAllHomeData() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
@@ -87,7 +90,7 @@ class HomeViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.value =
                     HomeUiState.Error(
-                        message = "An ${e.localizedMessage} error occurred"
+                        message = "Something went wrong. Please try again."
                     )
 
             }

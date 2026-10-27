@@ -1,5 +1,6 @@
 package tech.unrealistic.cineflix.ui.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -7,8 +8,16 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary              = md_dark_primary,
@@ -40,6 +49,13 @@ private val DarkColorScheme = darkColorScheme(
     inversePrimary       = md_dark_inversePrimary,
     surfaceTint          = md_dark_surfaceTint,
     scrim                = md_dark_scrim,
+    surfaceBright           = md_dark_surfaceBright,
+    surfaceDim              = md_dark_surfaceDim,
+    surfaceContainerLowest  = md_dark_surfaceContainerLowest,
+    surfaceContainerLow     = md_dark_surfaceContainerLow,
+    surfaceContainer        = md_dark_surfaceContainer,
+    surfaceContainerHigh    = md_dark_surfaceContainerHigh,
+    surfaceContainerHighest = md_dark_surfaceContainerHighest,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -72,8 +88,45 @@ private val LightColorScheme = lightColorScheme(
     inversePrimary       = md_light_inversePrimary,
     surfaceTint          = md_light_surfaceTint,
     scrim                = md_light_scrim,
+    surfaceBright           = md_light_surfaceBright,
+    surfaceDim              = md_light_surfaceDim,
+    surfaceContainerLowest  = md_light_surfaceContainerLowest,
+    surfaceContainerLow     = md_light_surfaceContainerLow,
+    surfaceContainer        = md_light_surfaceContainer,
+    surfaceContainerHigh    = md_light_surfaceContainerHigh,
+    surfaceContainerHighest = md_light_surfaceContainerHighest,
 )
 
+/**
+ * Forces light system-bar icons for as long as the composable is on screen.
+ * Full-bleed dark imagery (hero, details backdrop, the player) needs pale icons
+ * even in light theme, where the theme default is dark icons.
+ * Restores the previous values on dispose so the next screen is unaffected.
+ */
+@Composable
+fun ForceLightSystemBarIcons(enabled: Boolean = true) {
+    val view = LocalView.current
+    if (view.isInEditMode) return
+
+    DisposableEffect(view, enabled) {
+        val controller = (view.context as? Activity)?.window
+            ?.let { window -> WindowCompat.getInsetsController(window, view) }
+        val previousStatus = controller?.isAppearanceLightStatusBars
+        val previousNav = controller?.isAppearanceLightNavigationBars
+        if (enabled) {
+            controller?.isAppearanceLightStatusBars = false
+            controller?.isAppearanceLightNavigationBars = false
+        }
+        onDispose {
+            if (enabled && controller != null) {
+                previousStatus?.let { controller.isAppearanceLightStatusBars = it }
+                previousNav?.let { controller.isAppearanceLightNavigationBars = it }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun CineflixTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -91,9 +144,49 @@ fun CineflixTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    // Card metrics widen on medium/expanded windows instead of stretching.
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val windowSizeClass = if (activity != null) calculateWindowSizeClass(activity) else null
+    val sizes = remember(windowSizeClass) {
+        AppSizes.forWindowWidth(windowSizeClass?.widthSizeClass)
+    }
+
+    // Status bar / nav bar icon colour follows the theme (light mode → dark icons)
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalAppExtendedColors provides if (darkTheme) DarkExtendedColors else LightExtendedColors,
+        LocalAppEffects provides EffectSpec(),
+        LocalAppSpacing provides AppSpacing(),
+        LocalAppSizes provides sizes,
+        LocalAppMotion provides AppMotion(reduceMotion = rememberReduceMotion()),
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            shapes = AppShapes,
+            content = content
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AppTheme — single access point for every design token.
+// Composables use MaterialTheme.* for M3 roles and AppTheme.* for the rest.
+// ═══════════════════════════════════════════════════════════════════════════
+object AppTheme {
+    val colors:  AppExtendedColors @Composable get() = LocalAppExtendedColors.current
+    val effects: EffectSpec        @Composable get() = LocalAppEffects.current
+    val spacing: AppSpacing        @Composable get() = LocalAppSpacing.current
+    val sizes:   AppSizes          @Composable get() = LocalAppSizes.current
+    val motion:  AppMotion         @Composable get() = LocalAppMotion.current
 }

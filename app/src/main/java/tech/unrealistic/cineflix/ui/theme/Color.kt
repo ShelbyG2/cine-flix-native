@@ -1,194 +1,142 @@
 package tech.unrealistic.cineflix.ui.theme
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// AUTO-GENERATED FROM TOKENS STUDIO JSON
-// Raw palette — never reference these directly in composables.
-// Use MaterialTheme.colorScheme.* or AppTheme.colors.* instead.
-// ═══════════════════════════════════════════════════════════════════════════
-
-// ── Absolute ──────────────────────────────────────────────────────────────
-internal val ColorBlack        = Color(0xFF000000)
-internal val ColorWhite        = Color(0xFFFFFFFF)
-
-// ── Gray scale ────────────────────────────────────────────────────────────
-internal val ColorGray100      = Color(0xFFF7FAFC)
-internal val ColorGray200      = Color(0xFFEDF2F7)
-internal val ColorGray300      = Color(0xFFE2E8F0)
-internal val ColorGray400      = Color(0xFFCBD5E0)
-internal val ColorGray500      = Color(0xFFA0AEC0)
-internal val ColorGray600      = Color(0xFF718096)
-internal val ColorGray700      = Color(0xFF4A5568)
-internal val ColorGray800      = Color(0xFF2D3748)
-internal val ColorGray900      = Color(0xFF1A202C)
-
-// ── Red ───────────────────────────────────────────────────────────────────
-internal val ColorRed100       = Color(0xFFFFF5F5)
-internal val ColorRed200       = Color(0xFFFED7D7)
-internal val ColorRed300       = Color(0xFFFEB2B2)
-internal val ColorRed400       = Color(0xFFFC8181)
-internal val ColorRed500       = Color(0xFFF56565)
-internal val ColorRed600       = Color(0xFFE53E3E)
-internal val ColorRed700       = Color(0xFFC53030)
-internal val ColorRed800       = Color(0xFF9B2C2C)
-internal val ColorRed900       = Color(0xFF742A2A)
-
-// ── Orange ────────────────────────────────────────────────────────────────
-internal val ColorOrange100    = Color(0xFFFFFAF0)
-internal val ColorOrange200    = Color(0xFFFEEBC8)
-internal val ColorOrange300    = Color(0xFFFBD38D)
-internal val ColorOrange400    = Color(0xFFF6AD55)
-internal val ColorOrange500    = Color(0xFFED8936)
-internal val ColorOrange600    = Color(0xFFDD6B20)
-internal val ColorOrange700    = Color(0xFFC05621)
-internal val ColorOrange800    = Color(0xFF9C4221)
-internal val ColorOrange900    = Color(0xFF7B341E)
-
-// ── Green ─────────────────────────────────────────────────────────────────
-internal val ColorGreen100     = Color(0xFFF0FFF4)
-internal val ColorGreen200     = Color(0xFFC6F6D5)
-internal val ColorGreen300     = Color(0xFF9AE6B4)
-internal val ColorGreen400     = Color(0xFF68D391)
-internal val ColorGreen500     = Color(0xFF48BB78)
-internal val ColorGreen600     = Color(0xFF38A169)
-internal val ColorGreen700     = Color(0xFF2F855A)
-internal val ColorGreen800     = Color(0xFF276749)
-internal val ColorGreen900     = Color(0xFF22543D)
-
-// ── Teal (primary accent) ──────────────────────────────────────────────────
-internal val ColorTeal100      = Color(0xFFE6FFFA)
-internal val ColorTeal200      = Color(0xFFB2F5EA)
-internal val ColorTeal300      = Color(0xFF81E6D9)
-internal val ColorTeal400      = Color(0xFF4FD1C5)
-internal val ColorTeal500      = Color(0xFF38B2AC)
-internal val ColorTeal600      = Color(0xFF319795)
-internal val ColorTeal700      = Color(0xFF2C7A7B)
-internal val ColorTeal800      = Color(0xFF285E61)
-internal val ColorTeal900      = Color(0xFF234E52)
-
-// ── Blue ──────────────────────────────────────────────────────────────────
-internal val ColorBlue100      = Color(0xFFEBF8FF)
-internal val ColorBlue200      = Color(0xFFBEE3F8)
-internal val ColorBlue300      = Color(0xFF90CDF4)
-internal val ColorBlue400      = Color(0xFF63B3ED)
-internal val ColorBlue500      = Color(0xFF4299E1)
-internal val ColorBlue600      = Color(0xFF3182CE)
-internal val ColorBlue700      = Color(0xFF2B6CB0)
-internal val ColorBlue800      = Color(0xFF2C5282)
-internal val ColorBlue900      = Color(0xFF2A4365)
-
-// ── Indigo ────────────────────────────────────────────────────────────────
-internal val ColorIndigo100    = Color(0xFFEBF4FF)
-internal val ColorIndigo500    = Color(0xFF667EEA)
-internal val ColorIndigo600    = Color(0xFF5A67D8)
-internal val ColorIndigo700    = Color(0xFF4C51BF)
-internal val ColorIndigo800    = Color(0xFF434190)
-internal val ColorIndigo900    = Color(0xFF3C366B)
-
-// ── Purple ────────────────────────────────────────────────────────────────
-internal val ColorPurple100    = Color(0xFFFAF5FF)
-internal val ColorPurple400    = Color(0xFFB794F4)
-internal val ColorPurple500    = Color(0xFF9F7AEA)
-internal val ColorPurple600    = Color(0xFF805AD5)
-internal val ColorPurple700    = Color(0xFF6B46C1)
-internal val ColorPurple800    = Color(0xFF553C9A)
-internal val ColorPurple900    = Color(0xFF44337A)
-
-// ── Pink ──────────────────────────────────────────────────────────────────
-internal val ColorPink100      = Color(0xFFFFF5F7)
-internal val ColorPink500      = Color(0xFFED64A6)
-internal val ColorPink600      = Color(0xFFD53F8C)
-internal val ColorPink700      = Color(0xFFB83280)
+/** Theme-internal helper: same color, new alpha. */
+fun Color.withAlpha(alpha: Float): Color = Color(red, green, blue, alpha)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SEMANTIC / BRAND TOKENS
-// Mapped directly from the top-level JSON keys
+// MONOCHROME PALETTE — black & white, Apple-style system grays.
+// No brand hue. Color appears only for status (error/success/warning) and the
+// favourite heart. Never reference these directly in composables.
 // ═══════════════════════════════════════════════════════════════════════════
+internal val ColorBlack      = Color(0xFF000000)
+internal val ColorWhite      = Color(0xFFFFFFFF)
+internal val ColorInk        = Color(0xFF0B0B0C)   // light-mode primary / text (19:1 on white)
 
-internal val ColorNavbar           = Color(0xFF1B1B1B)  // Navbar
-internal val ColorCover            = Color(0xFF131313)  // Cover / Home / Player
-internal val ColorPrimaryBrand     = Color(0xFF131313)  // Primary
-internal val ColorText             = Color(0xFF040404)  // Text
-internal val ColorLightBackground  = Color(0xFF848484)  // Light Background
-internal val ColorStroke           = Color(0xFF969696)  // Stroke
-internal val ColorSecondaryBrand   = Color(0xFFB8B8B8)  // Secondary Color
-internal val ColorSubText          = Color(0xFF878787)  // Sub Text
-internal val ColorBlack2B          = Color(0xFF2B2B2B)  // Black #2b2b2b
+// Light neutrals
+internal val ColorGray50     = Color(0xFFFAFAFC)
+internal val ColorGray100    = Color(0xFFF2F2F7)   // grouped background
+internal val ColorGray150    = Color(0xFFEBEBF0)
+internal val ColorGray200    = Color(0xFFE5E5EA)   // hairlines
+internal val ColorGray400    = Color(0xFF8E8E93)   // outlines / inactive icons (3.3:1 on white)
+internal val ColorGray600    = Color(0xFF6C6C70)   // secondary text (5.0:1 on white)
+internal val ColorGray700    = Color(0xFF3A3A3C)
+
+// Dark neutrals
+internal val ColorD050       = Color(0xFF0B0B0C)
+internal val ColorD100       = Color(0xFF111113)
+internal val ColorD200       = Color(0xFF1C1C1E)   // cards / sheets
+internal val ColorD300       = Color(0xFF2C2C2E)   // raised / variant
+internal val ColorD400       = Color(0xFF3A3A3C)
+internal val ColorD500       = Color(0xFF48484A)   // dark hairlines
+internal val ColorD600       = Color(0xFF7C7C80)   // dark outlines (4.4:1 on black)
+internal val ColorD700       = Color(0xFF98989D)   // dark secondary text (7:1 on black)
+internal val ColorD900       = Color(0xFFF2F2F7)   // dark-mode text
+
+// Functional status only (the only chromatic colors in the app)
+internal val ColorErrorLight = Color(0xFFD70015)   // 5.6:1 on white
+internal val ColorErrorDark  = Color(0xFFFF453A)
+internal val ColorHeart      = Color(0xFFFF453A)
+internal val ColorSuccessLight = Color(0xFF248A3D)
+internal val ColorSuccessDark  = Color(0xFF30D158)
+internal val ColorWarningLight = Color(0xFFB25000)
+internal val ColorWarningDark  = Color(0xFFFF9F0A)
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LIGHT COLOR SCHEME
+// LIGHT — ink on white
+//   body text  #0B0B0C on #FFFFFF   19.0:1  AA
+//   secondary  #6C6C70 on #FFFFFF    5.0:1  AA
+//   outline    #8E8E93 on #FFFFFF    3.3:1  AA (icons / large text)
 // ═══════════════════════════════════════════════════════════════════════════
-internal val md_light_primary              = ColorTeal600
+internal val md_light_primary              = ColorInk
 internal val md_light_onPrimary            = ColorWhite
-internal val md_light_primaryContainer     = ColorTeal100
-internal val md_light_onPrimaryContainer   = ColorTeal900
-internal val md_light_secondary            = ColorBlue600
+internal val md_light_primaryContainer     = ColorGray100
+internal val md_light_onPrimaryContainer   = ColorInk
+internal val md_light_secondary            = ColorGray700
 internal val md_light_onSecondary          = ColorWhite
-internal val md_light_secondaryContainer   = ColorBlue100
-internal val md_light_onSecondaryContainer = ColorBlue900
-internal val md_light_tertiary             = ColorPurple600
+internal val md_light_secondaryContainer   = ColorGray200
+internal val md_light_onSecondaryContainer = ColorInk
+internal val md_light_tertiary             = ColorGray600
 internal val md_light_onTertiary           = ColorWhite
-internal val md_light_tertiaryContainer    = ColorPurple100
-internal val md_light_onTertiaryContainer  = ColorPurple900
-internal val md_light_error                = ColorRed600
+internal val md_light_tertiaryContainer    = ColorGray100
+internal val md_light_onTertiaryContainer  = ColorInk
+internal val md_light_error                = ColorErrorLight
 internal val md_light_onError              = ColorWhite
-internal val md_light_errorContainer       = ColorRed100
-internal val md_light_onErrorContainer     = ColorRed800
-internal val md_light_background           = ColorLightBackground  // #ececec
-internal val md_light_onBackground         = ColorText             // #040404
+internal val md_light_errorContainer       = Color(0xFFFFE5E3)
+internal val md_light_onErrorContainer     = Color(0xFF5C0009)
+internal val md_light_background           = ColorWhite
+internal val md_light_onBackground         = ColorInk
 internal val md_light_surface              = ColorWhite
-internal val md_light_onSurface            = ColorText
+internal val md_light_onSurface            = ColorInk
 internal val md_light_surfaceVariant       = ColorGray100
-internal val md_light_onSurfaceVariant     = ColorSubText          // #878787
-internal val md_light_outline              = ColorStroke           // #969696
-internal val md_light_outlineVariant       = ColorGray300
-internal val md_light_inverseSurface       = ColorGray800
+internal val md_light_onSurfaceVariant     = ColorGray600
+internal val md_light_outline              = ColorGray400
+internal val md_light_outlineVariant       = ColorGray200
+internal val md_light_inverseSurface       = ColorD200
 internal val md_light_inverseOnSurface     = ColorGray100
-internal val md_light_inversePrimary       = ColorTeal300
-internal val md_light_surfaceTint          = ColorTeal600
+internal val md_light_inversePrimary       = ColorWhite
+internal val md_light_surfaceTint          = ColorInk
 internal val md_light_scrim                = ColorBlack
+// Surface ladder (pure neutral — no lavender)
+internal val md_light_surfaceBright           = ColorWhite
+internal val md_light_surfaceDim              = Color(0xFFDCDCE0)
+internal val md_light_surfaceContainerLowest  = ColorWhite
+internal val md_light_surfaceContainerLow     = ColorGray50
+internal val md_light_surfaceContainer        = ColorGray100
+internal val md_light_surfaceContainerHigh    = ColorGray150
+internal val md_light_surfaceContainerHighest = ColorGray200
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DARK COLOR SCHEME
+// DARK — true black, white ink (OLED)
+//   body text  #F2F2F7 on #000000  18.9:1  AA
+//   secondary  #98989D on #000000   7.0:1  AA
+//   outline    #7C7C80 on #000000   4.4:1  AA (icons / large text)
 // ═══════════════════════════════════════════════════════════════════════════
-internal val md_dark_primary              = ColorTeal300
-internal val md_dark_onPrimary            = ColorTeal900
-internal val md_dark_primaryContainer     = ColorTeal800
-internal val md_dark_onPrimaryContainer   = ColorTeal100
-internal val md_dark_secondary            = ColorBlue300
-internal val md_dark_onSecondary          = ColorBlue900
-internal val md_dark_secondaryContainer   = ColorBlue800
-internal val md_dark_onSecondaryContainer = ColorBlue100
-internal val md_dark_tertiary             = ColorPurple400
-internal val md_dark_onTertiary           = ColorPurple900
-internal val md_dark_tertiaryContainer    = ColorPurple800
-internal val md_dark_onTertiaryContainer  = ColorPurple100
-internal val md_dark_error                = ColorRed400
-internal val md_dark_onError              = ColorRed900
-internal val md_dark_errorContainer       = ColorRed800
-internal val md_dark_onErrorContainer     = ColorRed100
-internal val md_dark_background           = ColorCover             // #131313
+internal val md_dark_primary              = ColorWhite
+internal val md_dark_onPrimary            = ColorBlack
+internal val md_dark_primaryContainer     = ColorD300
+internal val md_dark_onPrimaryContainer   = ColorWhite
+internal val md_dark_secondary            = ColorGray200
+internal val md_dark_onSecondary          = ColorD200
+internal val md_dark_secondaryContainer   = ColorD300
+internal val md_dark_onSecondaryContainer = ColorD900
+internal val md_dark_tertiary             = Color(0xFFAEAEB2)
+internal val md_dark_onTertiary           = ColorD200
+internal val md_dark_tertiaryContainer    = ColorD400
+internal val md_dark_onTertiaryContainer  = ColorD900
+internal val md_dark_error                = ColorErrorDark
+internal val md_dark_onError              = ColorBlack
+internal val md_dark_errorContainer       = Color(0xFF4A1512)
+internal val md_dark_onErrorContainer     = Color(0xFFFFD9D6)
+internal val md_dark_background           = ColorBlack
 internal val md_dark_onBackground         = ColorWhite
-internal val md_dark_surface              = ColorNavbar            // #1b1b1b
-internal val md_dark_onSurface            = ColorGray300
-internal val md_dark_surfaceVariant       = ColorBlack2B           // #2b2b2b
-internal val md_dark_onSurfaceVariant     = ColorSecondaryBrand    // #b8b8b8
-internal val md_dark_outline              = ColorStroke            // #969696
-internal val md_dark_outlineVariant       = ColorGray700
-internal val md_dark_inverseSurface       = ColorLightBackground
-internal val md_dark_inverseOnSurface     = ColorCover
-internal val md_dark_inversePrimary       = ColorTeal600
-internal val md_dark_surfaceTint          = ColorTeal300
+internal val md_dark_surface              = ColorD200
+internal val md_dark_onSurface            = ColorD900
+internal val md_dark_surfaceVariant       = ColorD300
+internal val md_dark_onSurfaceVariant     = ColorD700
+internal val md_dark_outline              = ColorD600
+internal val md_dark_outlineVariant       = ColorD500
+internal val md_dark_inverseSurface       = ColorD900
+internal val md_dark_inverseOnSurface     = ColorD200
+internal val md_dark_inversePrimary       = ColorBlack
+internal val md_dark_surfaceTint          = ColorWhite
 internal val md_dark_scrim                = ColorBlack
+internal val md_dark_surfaceBright           = ColorD300
+internal val md_dark_surfaceDim              = ColorBlack
+internal val md_dark_surfaceContainerLowest  = ColorBlack
+internal val md_dark_surfaceContainerLow     = ColorD050
+internal val md_dark_surfaceContainer        = ColorD200
+internal val md_dark_surfaceContainerHigh    = ColorD300
+internal val md_dark_surfaceContainerHighest = ColorD400
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EXTENDED SEMANTIC COLORS
-// Extra roles that don't exist in the M3 spec — accessed via AppTheme.colors
+// EXTENDED COLORS — grouped by purpose instead of one flat 60-field bag.
 // ═══════════════════════════════════════════════════════════════════════════
-data class AppExtendedColors(
+
+/** Status colors: the only chromatic colors besides the favourite heart. */
+data class StatusColors(
     val success:            Color,
     val onSuccess:          Color,
     val successContainer:   Color,
@@ -197,42 +145,174 @@ data class AppExtendedColors(
     val onWarning:          Color,
     val warningContainer:   Color,
     val onWarningContainer: Color,
-    // Screen-specific surfaces from the brand tokens
-    val navbar:             Color,
-    val cover:              Color,
-    val player:             Color,
-    val subText:            Color,
-    val stroke:             Color,
+)
+
+/** The single translucent material used by the top bar and the nav bar. */
+data class GlassColors(
+    /** Translucent tint drawn over the blurred backdrop. */
+    val surface: Color,
+    /** Hairline on the bar's own edge. */
+    val border:  Color,
+    /** Solid, slightly more opaque material for API < 31 (no blur). */
+    val fallback: Color,
+)
+
+/** Scrims, text and chip fills that sit over poster/backdrop imagery. */
+data class ImageOverlayColors(
+    val onImage:        Color,
+    val onImageMuted:   Color,
+    val onImageInverse: Color,
+    val scrimStart:     Color,
+    val scrimStrong:    Color,
+    val scrimSoft:      Color,
+    val topScrim:       Color,
+    val vignette:       Color,
+    val chipSurface:    Color,
+    val onChipSurface:  Color,
+    val chipBorder:     Color,
+    val pillBorder:     Color,
+)
+
+/** Rating / favourite / saved marks. Stars and saved are white; the heart is red. */
+data class AccentColors(
+    val rating:    Color,
+    val favourite: Color,
+    val saved:     Color,
+)
+
+/** Bottom navigation icon roles. */
+data class NavColors(
+    val selectedIcon:   Color,
+    val unselectedIcon: Color,
+)
+
+/** Skeleton shimmer base + highlight. */
+data class SkeletonColors(
+    val base:      Color,
+    val highlight: Color,
+)
+
+/**
+ * Non-color numeric specs that used to live inside the colour bag:
+ * the alphas of image overlays and the details hero gradient.
+ */
+data class EffectSpec(
+    val ratingChipFillAlpha:   Float = 0.35f,
+    val ratingChipBorderAlpha: Float = 0.50f,
+    val chipUnselectedAlpha:   Float = 0.5f,
+    val chipSelectedAlpha:     Float = 0.25f,
+    val posterFadeAlpha:       Float = 0.95f,
+    val heroTopAlpha:          Float = 0.85f,
+    val heroMidAlpha:          Float = 0.60f,
+    val heroMutedAlpha:        Float = 0.75f,
+)
+
+data class AppExtendedColors(
+    val status:    StatusColors,
+    val glass:     GlassColors,
+    val image:     ImageOverlayColors,
+    val accent:    AccentColors,
+    val nav:       NavColors,
+    val skeleton:  SkeletonColors,
+    /** True-black playback background in both modes. */
+    val playerBackground: Color,
 )
 
 internal val LightExtendedColors = AppExtendedColors(
-    success            = ColorGreen600,
-    onSuccess          = ColorWhite,
-    successContainer   = ColorGreen100,
-    onSuccessContainer = ColorGreen900,
-    warning            = ColorOrange500,
-    onWarning          = ColorWhite,
-    warningContainer   = ColorOrange100,
-    onWarningContainer = ColorOrange900,
-    navbar             = ColorLightBackground,
-    cover              = ColorLightBackground,
-    player             = ColorLightBackground,
-    subText            = ColorSubText,
-    stroke             = ColorStroke,
+    status = StatusColors(
+        success            = ColorSuccessLight,
+        onSuccess          = ColorWhite,
+        successContainer   = Color(0xFFE3F5E8),
+        onSuccessContainer = Color(0xFF0B3D1C),
+        warning            = ColorWarningLight,
+        onWarning          = ColorWhite,
+        warningContainer   = Color(0xFFFFF1E0),
+        onWarningContainer = Color(0xFF4A2200),
+    ),
+    // Apple-style thin material: white, hairline rim
+    glass = GlassColors(
+        surface  = Color(0xB3FFFFFF),   // white at ~70%
+        border   = Color(0x1F000000),   // 12% ink hairline
+        fallback = Color(0xF0F2F2F7),   // surfaceContainer at ~94%
+    ),
+    image = ImageOverlayColors(
+        onImage        = ColorWhite,
+        onImageMuted   = Color(0xD9FFFFFF),
+        onImageInverse = ColorInk,
+        scrimStart     = Color(0x00000000),
+        scrimStrong    = Color(0xCC000000),
+        scrimSoft      = Color(0xA6000000),
+        topScrim       = Color(0xA6000000),
+        vignette       = Color(0x73000000),
+        chipSurface    = Color(0x8C000000),
+        onChipSurface  = Color(0x1FFFFFFF),
+        chipBorder     = Color(0x40FFFFFF),
+        pillBorder     = Color(0x40FFFFFF),
+    ),
+    // Monochrome: stars and saved are white over imagery; only the heart is red
+    accent = AccentColors(
+        rating    = ColorWhite,
+        favourite = ColorHeart,
+        saved     = ColorWhite,
+    ),
+    nav = NavColors(
+        selectedIcon   = ColorInk,
+        unselectedIcon = ColorGray400,
+    ),
+    skeleton = SkeletonColors(
+        base      = ColorGray200,
+        highlight = ColorGray100,
+    ),
+    playerBackground = ColorBlack,
 )
 
 internal val DarkExtendedColors = AppExtendedColors(
-    success            = ColorGreen400,
-    onSuccess          = ColorGreen900,
-    successContainer   = ColorGreen800,
-    onSuccessContainer = ColorGreen100,
-    warning            = ColorOrange400,
-    onWarning          = ColorOrange900,
-    warningContainer   = ColorOrange800,
-    onWarningContainer = ColorOrange100,
-    navbar             = ColorNavbar,          // #1b1b1b
-    cover              = ColorCover,           // #131313
-    player             = ColorCover,           // #131313
-    subText            = ColorSubText,         // #878787
-    stroke             = ColorStroke,          // #969696
+    status = StatusColors(
+        success            = ColorSuccessDark,
+        onSuccess          = Color(0xFF0A2E15),
+        successContainer   = Color(0xFF12351F),
+        onSuccessContainer = Color(0xFFD6F5DF),
+        warning            = ColorWarningDark,
+        onWarning          = Color(0xFF2B1700),
+        warningContainer   = Color(0xFF4A2C00),
+        onWarningContainer = Color(0xFFFFE2B8),
+    ),
+    glass = GlassColors(
+        surface  = Color(0xB31C1C1E),   // #1C1C1E at ~70%
+        border   = Color(0x33FFFFFF),   // 20% white hairline
+        fallback = Color(0xF0111113),   // #111113 at ~94%
+    ),
+    image = ImageOverlayColors(
+        onImage        = ColorWhite,
+        onImageMuted   = Color(0xD9FFFFFF),
+        onImageInverse = ColorInk,
+        scrimStart     = Color(0x00000000),
+        scrimStrong    = Color(0xCC000000),
+        scrimSoft      = Color(0x66000000),
+        topScrim       = Color(0xA6000000),
+        vignette       = Color(0x73000000),
+        chipSurface    = Color(0x8C000000),
+        onChipSurface  = Color(0x1FFFFFFF),
+        chipBorder     = Color(0x40FFFFFF),
+        pillBorder     = Color(0x26FFFFFF),
+    ),
+    accent = AccentColors(
+        rating    = ColorWhite,
+        favourite = ColorHeart,
+        saved     = ColorWhite,
+    ),
+    nav = NavColors(
+        selectedIcon   = ColorWhite,
+        unselectedIcon = ColorGray400,
+    ),
+    skeleton = SkeletonColors(
+        base      = ColorD200,
+        highlight = ColorD300,
+    ),
+    playerBackground = ColorBlack,
 )
+
+val LocalAppExtendedColors = staticCompositionLocalOf { LightExtendedColors }
+
+/** Effect alphas / densities are mode-independent. */
+val LocalAppEffects = staticCompositionLocalOf { EffectSpec() }

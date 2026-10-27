@@ -1,6 +1,7 @@
 package tech.unrealistic.cineflix.feature.details
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,17 +12,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,12 +35,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.core.components.EmptyState
+import tech.unrealistic.cineflix.EpisodePlayRequest
+import tech.unrealistic.cineflix.core.components.ErrorState
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.data.remote.models.Tv
 import tech.unrealistic.cineflix.feature.details.components.DetailSheetHeroSection
+import tech.unrealistic.cineflix.feature.details.components.DetailShimmerLayout
+import tech.unrealistic.cineflix.feature.details.components.EpisodeShimmerList
 import tech.unrealistic.cineflix.feature.details.components.TvEpisodeItem
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import androidx.compose.ui.unit.dp
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.BottomSheetShape
+import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,22 +63,45 @@ fun MediaDetailsBottomSheet(
     mediaId: Int,
     mediaType: String,
     sheetState: SheetState,
-    onPlayClick: (Any) -> Unit = {},
-    onFavourite: (Any) -> Unit = {},
-    onMediaShare: (Any) -> Unit = {},
-    isFavourite: Boolean = false,
-    isSaved: Boolean = false,
-    onSave: (Any) -> Unit = {},
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
+    onFavourite: (MediaItem) -> Unit = {},
+    onMediaShare: (MediaItem) -> Unit = {},
+    onSave: (MediaItem) -> Unit = {},
     likedEpisodeIds: Set<Int> = emptySet(),
     onEpisodeLike: ((seriesId: Int, seasonNumber: Int, episodeId: Int) -> Unit)? = null
 ) {
     if (showBottomSheet) {
+        // The sheet opens on a full-bleed backdrop — keep status icons pale.
+        ForceLightSystemBarIcons()
         ModalBottomSheet(
             onDismissRequest = onDismissRequest,
             modifier = modifier,
             sheetState = sheetState,
+            // 28dp top corners, raised neutral surface (M3 would tint this).
+            shape = BottomSheetShape,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 0.dp,
             contentWindowInsets = { WindowInsets.navigationBars },
-            dragHandle = {}
+            dragHandle = {
+                // Themed drag handle — dismiss affordance (was: empty = no handle)
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = AppTheme.spacing.xs)
+                            .width(AppTheme.sizes.dragHandleWidth)
+                            .height(AppTheme.sizes.dragHandleHeight)
+                            .background(
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                ShapePill
+                            )
+                    )
+                }
+            }
         ) {
             val sheetViewModel: DetailsSheetViewModel = viewModel()
             val currentEpisodes by sheetViewModel.currentSeasonEpisode.collectAsStateWithLifecycle()
@@ -84,23 +123,21 @@ fun MediaDetailsBottomSheet(
                 when (val state = uiState) {
                     is DetailsSheetState.Loading -> {
                         item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(300.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
+                            DetailShimmerLayout()
                         }
                     }
 
                     is DetailsSheetState.Error -> {
                         item {
-                            Text(
-                                text = state.message,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(16.dp)
+                            ErrorState(
+                                title = "Couldn't load details",
+                                message = state.message,
+                                onRetry = {
+                                    sheetViewModel.fetchSheetDetails(mediaType, mediaId)
+                                },
+                                modifier = Modifier.padding(
+                                    vertical = AppTheme.spacing.xxl
+                                )
                             )
                         }
                     }
@@ -111,6 +148,18 @@ fun MediaDetailsBottomSheet(
                             is DetailsSheetState.TvSuccess -> state.tv to state.similarShows
                             else -> throw IllegalStateException("Invalid state context")
                         }
+                        // Favourite state lives in the sheet state so it stays
+                        // correct when "More Like This" swaps the displayed item.
+                        val isFavourite = when (state) {
+                            is DetailsSheetState.MovieSuccess -> state.isFavourite
+                            is DetailsSheetState.TvSuccess -> state.isFavourite
+                            else -> false
+                        }
+                        val isSaved = when (state) {
+                            is DetailsSheetState.MovieSuccess -> state.isSaved
+                            is DetailsSheetState.TvSuccess -> state.isSaved
+                            else -> false
+                        }
 
                         // 1. HERO SECTION & METADATA
                         item {
@@ -118,7 +167,31 @@ fun MediaDetailsBottomSheet(
                                 mediaItem = mediaItem,
                                 isTvShow = state is DetailsSheetState.TvSuccess,
                                 onDismissRequest = onDismissRequest,
-                                onPlayClick = onPlayClick,
+                                // A film starts immediately; a series starts at
+                                // the first episode of the season on screen.
+                                onPlayClick = { item ->
+                                    if (item is Tv) {
+                                        // A series starts at the first episode of
+                                        // the season shown, with everything the
+                                        // player needs for next/previous.
+                                        onPlayEpisode(
+                                            EpisodePlayRequest(
+                                                seriesId = item.id,
+                                                season = selectedSeason,
+                                                episode = 1,
+                                                seriesTitle = item.name,
+                                                backdropPath = item.backdropPath,
+                                                episodeTitle = currentEpisodes.firstOrNull()?.name,
+                                                episodeIndex = 0,
+                                                totalEpisodesInSeason = currentEpisodes
+                                                    .size
+                                                    .takeIf { it > 0 },
+                                            )
+                                        )
+                                    } else {
+                                        onPlay(item)
+                                    }
+                                },
                                 onFavourite = onFavourite,
                                 onMediaShare = onMediaShare,
                                 isFavourite = isFavourite,
@@ -142,23 +215,63 @@ fun MediaDetailsBottomSheet(
                                 )
                             }
 
-                            itemsIndexed(
-                                items = currentEpisodes,
-                                key = { _, episode -> episode.id }
-                            ) { index, episode ->
-                                TvEpisodeItem(
-                                    episode = episode,
-                                    index = index,
-                                    isLast = index == currentEpisodes.lastIndex,
-                                    isLiked = likedEpisodeIds.contains(episode.id),
-                                    onLike = {
-                                        onEpisodeLike?.invoke(
-                                            tvItem.id,
-                                            selectedSeason,
-                                            episode.id
-                                        )
-                                    }
-                                )
+                            when {
+                                state.episodesLoading -> item {
+                                    EpisodeShimmerList()
+                                }
+
+                                state.episodesError != null -> item {
+                                    ErrorState(
+                                        title = "Couldn't load episodes",
+                                        message = state.episodesError,
+                                        onRetry = {
+                                            sheetViewModel.fetchEpisodesOnly(
+                                                selectedSeason,
+                                                tvItem.id
+                                            )
+                                        }
+                                    )
+                                }
+
+                                currentEpisodes.isEmpty() -> item {
+                                    EmptyState(
+                                        icon = Icons.Outlined.VideoLibrary,
+                                        title = "No episodes available",
+                                        subtitle = "This season has no episode data yet."
+                                    )
+                                }
+
+                                else -> itemsIndexed(
+                                    items = currentEpisodes,
+                                    key = { _, episode -> episode.id }
+                                ) { index, episode ->
+                                    TvEpisodeItem(
+                                        episode = episode,
+                                        isLast = index == currentEpisodes.lastIndex,
+                                        isLiked = likedEpisodeIds.contains(episode.id),
+                                        onPlay = {
+                                            onPlayEpisode(
+                                                EpisodePlayRequest(
+                                                    seriesId = tvItem.id,
+                                                    season = selectedSeason,
+                                                    episode = episode.episodeNumber,
+                                                    seriesTitle = tvItem.name,
+                                                    backdropPath = tvItem.backdropPath,
+                                                    episodeTitle = episode.name,
+                                                    episodeIndex = index,
+                                                    totalEpisodesInSeason = currentEpisodes.size,
+                                                )
+                                            )
+                                        },
+                                        onLike = {
+                                            onEpisodeLike?.invoke(
+                                                tvItem.id,
+                                                selectedSeason,
+                                                episode.id
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
 
@@ -171,7 +284,7 @@ fun MediaDetailsBottomSheet(
                                     sheetViewModel.fetchSheetDetails(type, id)
                                 }
                             )
-                            Spacer(modifier = Modifier.height(32.dp))
+                            Spacer(modifier = Modifier.height(AppTheme.spacing.xxl))
                         }
                     }
                 }
@@ -193,21 +306,32 @@ private fun TvSeasonSelector(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Episodes",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(
+                horizontal = AppTheme.spacing.lg,
+                vertical = AppTheme.spacing.sm
+            )
         )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 12.dp)
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm),
+            modifier = Modifier.padding(bottom = AppTheme.spacing.md)
         ) {
             items(seasons) { index ->
                 val seasonNumber = index + 1
                 FilterChip(
                     selected = seasonNumber == selectedSeasonNumber,
                     onClick = { onSeasonSelected(seasonNumber) },
-                    label = { Text("Season $seasonNumber") }
+                    label = {
+                        Text(
+                            text = "Season $seasonNumber",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
+                    shape = ShapePill,
+                    // 48dp hit area without inflating the visual chip height.
+                    modifier = Modifier.minimumInteractiveComponentSize()
                 )
             }
         }

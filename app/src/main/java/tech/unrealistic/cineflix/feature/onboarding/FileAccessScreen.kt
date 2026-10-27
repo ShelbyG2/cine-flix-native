@@ -3,7 +3,6 @@ package tech.unrealistic.cineflix.feature.onboarding
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.Button
@@ -39,14 +37,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.withAlpha
+
+/** Decorative folder tilt loop length. */
+private const val FOLDER_TILT_MS = 2_600
 
 /**
  * Screen 2 — File Access Permission.
- * 3D tilted frosted-glass folder (tab + body layers, file lines, download icon,
- * ground shadow) above a system-style glass permission card.
+ * 3D tilted folder (tab + body layers, file lines, download icon,
+ * ground shadow) above a system-style permission card.
  * Both buttons advance the flow.
  */
 @Composable
@@ -54,94 +56,103 @@ fun FileAccessScreen(
     onContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── 3D folder icon ─────────────────────────────────────────────────
         FolderIcon3D(modifier = Modifier.weight(1f))
 
-        // ── System-style permission card ───────────────────────────────────
-        Box {
-            GlassMorphOverlay(
-                modifier = Modifier.matchParentSize(),
-                cornerRadius = 24.dp,
-                frostedAlpha = 0.08f,
-                glossAlpha = 0.14f,
-                borderAlpha = 0.25f
-            )
-
-            Column(modifier = Modifier.padding(22.dp)) {
+        // ── Permission card — solid raised surface with a hairline rim ──────
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.extraLarge)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                    width = sizes.hairline,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = MaterialTheme.shapes.extraLarge
+                )
+        ) {
+            Column(modifier = Modifier.padding(spacing.xl)) {
                 Text(
                     text = "Allow access to your files?",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(spacing.sm))
                 Text(
                     text = "CINEFLIX needs storage access so you can save movies and episodes for offline watching.",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.75f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(spacing.md))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(6.dp)
-                            .clip(RoundedCornerShape(50))
+                            .size(spacing.sm)
+                            .clip(ShapeCircle)
                             .background(MaterialTheme.colorScheme.primary)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(spacing.sm))
                     Text(
                         text = "Your downloads stay on this device — used for offline playback only.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.55f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── Actions ────────────────────────────────────────────────────────
         Button(
             onClick = onContinue,
-            shape = RoundedCornerShape(14.dp),
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color(0xFF131313)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            contentPadding = PaddingValues(
+                horizontal = spacing.buttonPaddingH,
+                vertical = spacing.buttonPaddingV
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "Allow Access",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-            )
+            Text(text = "Allow Access", style = MaterialTheme.typography.labelLarge)
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(spacing.sm))
 
         // Ghost border button — also advances the flow
         Button(
             onClick = onContinue,
-            shape = RoundedCornerShape(14.dp),
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = Color.White.copy(alpha = 0.85f)
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             border = androidx.compose.foundation.BorderStroke(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.25f)
+                width = sizes.borderWidth,
+                color = MaterialTheme.colorScheme.outline
             ),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            contentPadding = PaddingValues(
+                horizontal = spacing.buttonPaddingH,
+                vertical = spacing.buttonPaddingV
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -150,28 +161,36 @@ fun FileAccessScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(spacing.sm))
     }
 }
 
 /**
- * Folder built from two frosted-glass layers (tab + body) tilted back on the
- * X axis with a perspective camera, file lines and a download glyph inside,
- * and a soft ground shadow ellipse underneath for depth.
+ * Folder built from two raised surfaces (tab + body) tilted back on the X axis
+ * with a perspective camera, file lines and a download glyph inside, and a soft
+ * ground shadow ellipse underneath for depth.
  */
 @Composable
 private fun FolderIcon3D(modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+    val motion = AppTheme.motion
+
     // Gentle floating tilt — keeps the 3D perspective alive
+    // Decorative: frozen mid-tilt under reduce-motion
     val tilt = rememberInfiniteTransition(label = "folder_tilt")
-    val tiltX by tilt.animateFloat(
+    val animatedTiltX by tilt.animateFloat(
         initialValue = 14f,
         targetValue = 22f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_600, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = FOLDER_TILT_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "folder_tilt_x"
     )
+    val tiltX = if (motion.reduceMotion) 18f else animatedTiltX
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -197,51 +216,39 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                         // ── Tab layer (behind, peeking above the body) ────
                         Box(
                             modifier = Modifier
-                                .width(96.dp)
-                                .height(26.dp)
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 18.dp,
-                                        topEnd = 18.dp,
-                                        bottomStart = 6.dp,
-                                        bottomEnd = 6.dp
-                                    )
-                                )
-                                .background(Color.White.copy(alpha = 0.10f))
+                                .width(OnboardingArt.folderTabW)
+                                .height(OnboardingArt.folderTabH)
+                                .clip(OnboardingArt.folderTabShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(
-                                    width = 1.dp,
-                                    color = Color.White.copy(alpha = 0.22f),
-                                    shape = RoundedCornerShape(
-                                        topStart = 18.dp,
-                                        topEnd = 18.dp,
-                                        bottomStart = 6.dp,
-                                        bottomEnd = 6.dp
-                                    )
+                                    width = sizes.borderWidth,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = OnboardingArt.folderTabShape
                                 )
                         )
 
-                        // ── Body layer — frosted glass, holds the content ─
+                        // ── Body layer — raised surface, holds the content ─
                         Box(
                             modifier = Modifier
-                                .width(200.dp)
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
-                                .background(Color.White.copy(alpha = 0.08f))
+                                .width(OnboardingArt.folderBodyW)
+                                .height(OnboardingArt.folderBodyH)
+                                .clip(OnboardingArt.folderBodyShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(
-                                    width = 1.dp,
-                                    color = Color.White.copy(alpha = 0.20f),
-                                    shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 18.dp, bottomEnd = 18.dp)
+                                    width = sizes.borderWidth,
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = OnboardingArt.folderBodyShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Gloss streak on the glass
+                            // Soft top highlight
                             Box(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .background(
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                Color.White.copy(alpha = 0.14f),
+                                                MaterialTheme.colorScheme.surfaceContainerHigh,
                                                 Color.Transparent
                                             )
                                         )
@@ -251,37 +258,37 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                                 // File lines
-                                listOf(120.dp, 88.dp, 104.dp).forEach { lineWidth ->
+                                OnboardingArt.fileLineWidths.forEach { lineWidth ->
                                     Box(
                                         modifier = Modifier
-                                            .padding(vertical = 5.dp)
+                                            .padding(vertical = spacing.xs)
                                             .width(lineWidth)
-                                            .height(8.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(Color.White.copy(alpha = 0.28f))
+                                            .height(OnboardingArt.fileLineH)
+                                            .clip(ShapePill)
+                                            .background(MaterialTheme.colorScheme.outline)
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(spacing.sm))
 
-                                // Download glyph in a small glass disc
+                                // Download glyph in a small raised disc
                                 Box(
                                     modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Color.White.copy(alpha = 0.16f))
+                                        .size(OnboardingArt.downloadDisc)
+                                        .clip(ShapeCircle)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                         .border(
-                                            width = 1.dp,
-                                            color = Color.White.copy(alpha = 0.28f),
-                                            shape = RoundedCornerShape(50)
+                                            width = sizes.borderWidth,
+                                            color = MaterialTheme.colorScheme.outlineVariant,
+                                            shape = ShapeCircle
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.FileDownload,
                                         contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(20.dp)
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(sizes.iconMd)
                                     )
                                 }
                             }
@@ -290,19 +297,19 @@ private fun FolderIcon3D(modifier: Modifier = Modifier) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             // ── Ground shadow ellipse ──────────────────────────────────────
             Box(
                 modifier = Modifier
-                    .width(170.dp)
-                    .height(22.dp)
-                    .clip(RoundedCornerShape(50))
+                    .width(OnboardingArt.folderShadowW)
+                    .height(OnboardingArt.folderShadowH)
+                    .clip(ShapePill)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                Color.Black.copy(alpha = 0.55f),
-                                Color.Black.copy(alpha = 0f)
+                                colors.image.chipSurface,
+                                Color.Transparent
                             )
                         )
                     )

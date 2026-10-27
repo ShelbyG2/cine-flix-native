@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -43,13 +41,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import tech.unrealistic.cineflix.R
-import tech.unrealistic.cineflix.feature.home.components.GlassMorphOverlay
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapePill
+import tech.unrealistic.cineflix.ui.theme.withAlpha
+
+/** Decorative glow-ring loop length. */
+private const val PULSE_MS = 2_200
 
 private const val GITHUB_REPO_URL = "https://github.com/ShelbyG2/cine-flix-native"
 
@@ -66,69 +67,77 @@ fun GitHubStarScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(spacing.xxl))
 
-        // ── Glass sphere with the GitHub mark ──────────────────────────────
+        // ── Sphere with the GitHub mark ─────────────────────────────────────
         GitHubSphere(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(spacing.sectionPaddingBottom))
 
         // ── Copy ───────────────────────────────────────────────────────────
         Text(
             text = "Like CINEFLIX?",
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(spacing.sm))
         Text(
             text = "A star on GitHub takes two seconds and helps more people discover the app. It means a lot to an indie project!",
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White.copy(alpha = 0.72f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(spacing.lg))
 
-        // ── Social proof pill (liquid glass) ───────────────────────────────
-        Box {
-            GlassMorphOverlay(
-                modifier = Modifier.matchParentSize(),
-                cornerRadius = 50.dp,
-                frostedAlpha = 0.10f,
-                glossAlpha = 0.16f,
-                borderAlpha = 0.26f
-            )
+        // ── Social proof pill — solid raised surface with a hairline rim ────
+        Box(
+            modifier = Modifier
+                .clip(ShapePill)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                    width = sizes.hairline,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = ShapePill
+                )
+        ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp),
+                modifier = Modifier.padding(
+                    horizontal = spacing.lg,
+                    vertical = spacing.sm
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(15.dp)
+                    tint = colors.accent.rating,
+                    modifier = Modifier.size(sizes.iconSm)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(spacing.buttonGap))
                 Text(
                     text = "Starred by 2k+ developers",
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(spacing.xl))
 
         // ── Star on GitHub CTA ─────────────────────────────────────────────
         Button(
@@ -141,89 +150,112 @@ fun GitHubStarScreen(
                 }
                 onComplete()
             },
-            shape = RoundedCornerShape(14.dp),
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color(0xFF131313)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            contentPadding = PaddingValues(
+                horizontal = spacing.buttonPaddingH,
+                vertical = spacing.buttonPaddingV
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             // Mini GitHub mark on the button
             GitHubMark(
-                size = 18.dp,
-                tint = Color(0xFF131313)
+                size = sizes.iconCompact,
+                tint = MaterialTheme.colorScheme.onPrimary
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(spacing.sm))
+            Text(text = "Star on GitHub", style = MaterialTheme.typography.labelLarge)
+        }
+
+        Spacer(modifier = Modifier.height(spacing.buttonGap))
+
+        // ── Maybe Later text link — 48dp target ────────────────────────────
+        Box(
+            modifier = Modifier
+                .height(sizes.touchTarget)
+                .clip(ShapePill)
+                .clickable(onClick = onComplete)
+                .padding(horizontal = spacing.xl),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = "Star on GitHub",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                text = "Maybe Later",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // ── Maybe Later text link ──────────────────────────────────────────
-        Text(
-            text = "Maybe Later",
-            style = MaterialTheme.typography.labelLarge,
-            color = Color.White.copy(alpha = 0.55f),
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .clickable(onClick = onComplete)
-                .padding(horizontal = 20.dp, vertical = 10.dp)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(spacing.sm))
     }
 }
 
 /**
- * The 3D glass sphere: dual pulsing glow rings, radial glass body, a primary
+ * The 3D sphere: dual pulsing glow rings, radial body, a primary
  * specular ellipse, a secondary rim highlight and a ground shadow. The GitHub
  * mark sits in the centre with a soft drop shadow.
+ * Pulse rings are frozen mid-glow under reduce-motion.
  */
 @Composable
 private fun GitHubSphere(modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
+    val motion = AppTheme.motion
+
     // Dual pulsing glow rings — scale + opacity keyframes
     val pulse = rememberInfiniteTransition(label = "sphere_pulse")
-    val ring1Scale by pulse.animateFloat(
+    val animRing1Scale by pulse.animateFloat(
         initialValue = 0.9f,
         targetValue = 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "ring1_scale"
     )
-    val ring1Alpha by pulse.animateFloat(
+    val animRing1Alpha by pulse.animateFloat(
         initialValue = 0.45f,
         targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, easing = FastOutSlowInEasing),
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
             repeatMode = RepeatMode.Reverse
         ),
         label = "ring1_alpha"
     )
     // Second ring runs on an offset phase so one is always glowing
-    val ring2Scale by pulse.animateFloat(
+    val animRing2Scale by pulse.animateFloat(
         initialValue = 1.05f,
         targetValue = 1.45f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, delayMillis = 1_100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
+            repeatMode = RepeatMode.Reverse,
+            delayMs = PULSE_MS / 2
         ),
         label = "ring2_scale"
     )
-    val ring2Alpha by pulse.animateFloat(
+    val animRing2Alpha by pulse.animateFloat(
         initialValue = 0.3f,
         targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2_200, delayMillis = 1_100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+        animationSpec = motion.infinite(
+            durationMs = PULSE_MS,
+            easing = motion.standard,
+            repeatMode = RepeatMode.Reverse,
+            delayMs = PULSE_MS / 2
         ),
         label = "ring2_alpha"
     )
+
+    // Reduce motion → rings rest at a static mid-glow instead of pulsing
+    val ring1Scale = if (motion.reduceMotion) 1.075f else animRing1Scale
+    val ring1Alpha = if (motion.reduceMotion) 0.225f else animRing1Alpha
+    val ring2Scale = if (motion.reduceMotion) 1.25f else animRing2Scale
+    val ring2Alpha = if (motion.reduceMotion) 0.15f else animRing2Alpha
 
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -234,78 +266,80 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
             // Sphere + rings
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(220.dp)
+                modifier = Modifier.size(OnboardingArt.sphereBox)
             ) {
                 val sphereColor = MaterialTheme.colorScheme.primary
 
                 // Glow ring 1
                 Box(
                     modifier = Modifier
-                        .size(200.dp)
+                        .size(OnboardingArt.sphereRing)
                         .graphicsLayer {
                             scaleX = ring1Scale
                             scaleY = ring1Scale
                             alpha = ring1Alpha
                         }
                         .border(
-                            width = 2.dp,
-                            color = sphereColor.copy(alpha = 0.8f),
-                            shape = RoundedCornerShape(50)
+                            width = OnboardingArt.ringBorderWide,
+                            color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha1),
+                            shape = ShapePill
                         )
                 )
                 // Glow ring 2
                 Box(
                     modifier = Modifier
-                        .size(200.dp)
+                        .size(OnboardingArt.sphereRing)
                         .graphicsLayer {
                             scaleX = ring2Scale
                             scaleY = ring2Scale
                             alpha = ring2Alpha
                         }
                         .border(
-                            width = 1.5.dp,
-                            color = sphereColor.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(50)
+                            width = OnboardingArt.ringBorderThin,
+                            color = sphereColor.withAlpha(OnboardingArt.pulseRingAlpha2),
+                            shape = ShapePill
                         )
                 )
 
-                // Glass body + highlights + mark
+                // Sphere body + highlights + mark
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(170.dp)
-                        .clip(RoundedCornerShape(50))
+                        .size(OnboardingArt.sphereOrb)
+                        .clip(ShapePill)
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    Color.White.copy(alpha = 0.22f),
-                                    Color.White.copy(alpha = 0.06f),
-                                    Color.Black.copy(alpha = 0.25f)
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    OnboardingArt.sphereShade
                                 ),
                                 center = Offset(90f, 60f),
                                 radius = 260f
                             )
                         )
                         .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = RoundedCornerShape(50)
+                            width = sizes.borderWidth,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = ShapePill
                         )
                 ) {
                     // Primary specular highlight (top-left ellipse)
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .padding(start = 24.dp, top = 18.dp)
-                            .width(70.dp)
-                            .height(40.dp)
+                            .padding(start = spacing.xl, top = spacing.lg)
+                            .width(OnboardingArt.specularW)
+                            .height(OnboardingArt.specularH)
                             .graphicsLayer { rotationZ = -24f }
-                            .clip(RoundedCornerShape(50))
+                            .clip(ShapePill)
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        Color.White.copy(alpha = 0.55f),
-                                        Color.White.copy(alpha = 0.05f)
+                                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.withAlpha(
+                                            MaterialTheme.colorScheme.surfaceContainerHigh.alpha * 0.1f
+                                        )
                                     )
                                 )
                             )
@@ -314,36 +348,37 @@ private fun GitHubSphere(modifier: Modifier = Modifier) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = 20.dp, bottom = 26.dp)
-                            .width(46.dp)
-                            .height(16.dp)
+                            .padding(end = spacing.xl, bottom = spacing.xl)
+                            .width(OnboardingArt.rimSliverW)
+                            .height(OnboardingArt.rimSliverH)
                             .graphicsLayer { rotationZ = -30f }
-                            .clip(RoundedCornerShape(50))
-                            .background(Color.White.copy(alpha = 0.20f))
+                            .clip(ShapePill)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                     )
 
-                    // GitHub mark with drop shadow
+                    // GitHub mark with drop shadow — themed so it reads on
+                    // light glass in light mode too
                     GitHubMark(
-                        size = 74.dp,
-                        tint = Color.White,
+                        size = OnboardingArt.githubMarkLarge,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         drawShadow = true
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(spacing.lg))
 
             // Ground shadow ellipse
             Box(
                 modifier = Modifier
-                    .width(150.dp)
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(50))
+                    .width(OnboardingArt.sphereShadowW)
+                    .height(OnboardingArt.sphereShadowH)
+                    .clip(ShapePill)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                Color.Black.copy(alpha = 0.55f),
-                                Color.Black.copy(alpha = 0f)
+                                colors.image.chipSurface,
+                                Color.Transparent
                             )
                         )
                     )
@@ -365,11 +400,11 @@ private fun GitHubMark(
 ) {
     Box(modifier = modifier.size(size)) {
         if (drawShadow) {
-            // Fake drop shadow — dark offset copy
+            // Fake drop shadow — dark offset copy (45% black token)
             Icon(
                 painter = painterResource(R.drawable.ic_github),
                 contentDescription = null,
-                tint = Color.Black.copy(alpha = 0.45f),
+                tint = AppTheme.colors.image.vignette,
                 modifier = Modifier
                     .matchParentSize()
                     .graphicsLayer {

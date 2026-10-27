@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,14 +25,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.rememberHazeState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
-import tech.unrealistic.cineflix.core.components.shimmerEffect
-import tech.unrealistic.cineflix.feature.home.components.GlassHeroBackground
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
+import tech.unrealistic.cineflix.core.components.ShimmerBox
+import tech.unrealistic.cineflix.feature.home.components.HeroBackdrop
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
 
 @Composable
@@ -42,9 +47,15 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
     // 1. Setup density and top bar tracking state to match production exactly
     var topBarHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
+    val topBarHaze = rememberHazeState()
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val calculatedHeroHeight = maxHeight * 0.5f
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = "Loading…" }
+    ) {
+        // Same fraction the loaded HomeScreen uses — skeletons match content.
+        val calculatedHeroHeight = maxHeight * AppTheme.sizes.heroHeightFraction
 
         // 2. ROOT LAYER Stacking Box
         Box(modifier = Modifier.fillMaxSize()) {
@@ -53,6 +64,8 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(bottom = LocalBottomBarInset.current)
+                    .haze(topBarHaze)
             ) {
                 // ── 1. Hero Section Skeleton ──
                 HeroSectionSkeleton(
@@ -63,7 +76,7 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
                         .height(calculatedHeroHeight)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.lg))
 
                 // ── 2. Horizontal Rows Skeletons ──
                 MediaSectionSkeleton(itemCount = 5)
@@ -73,13 +86,15 @@ fun HomeScreenSkeleton(modifier: Modifier = Modifier) {
             // ── 3. FLOATING APP BAR SKELETON LAYER ──
             // Stays static, matches the transparent layout footprint of production perfectly
             FloatingTopBar(
+                hazeState = topBarHaze,
+                onSearchClick = {},
+                // Skeleton mirrors the top of the screen — still over the hero.
+                isScrolled = false,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .onGloballyPositioned { coordinates ->
                         topBarHeight = with(density) { coordinates.size.height.toDp() }
                     },
-                onSearchClick = {},
-                isScrolled = false // Keep it false so it stays transparent while loading
             )
         }
     }
@@ -90,32 +105,33 @@ fun HeroSectionSkeleton(
     modifier: Modifier = Modifier,
     topPadding: Dp,
 ) {
-    val skeletonVibrant = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-    val skeletonMuted = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+    // Heights derive from the production type scale, not separate literals.
+    val density = LocalDensity.current
+    val chipHeight = with(density) {
+        MaterialTheme.typography.labelLarge.lineHeight.toDp()
+    } + AppTheme.spacing.chipPaddingV * 2
 
-    GlassHeroBackground(
-        vibrantColor = skeletonVibrant,
-        mutedColor = skeletonMuted,
-        modifier = modifier.fillMaxWidth()
-    ) {
+    HeroBackdrop(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
             // ── 1. Carousel Skeleton Track Block ────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // 💡 Uses the exact topPadding dynamic token passed from HomeScreenSkeleton
-                    .padding(top = topPadding)
-                    .height(340.dp),
+                    .weight(1f)
+                    // Uses the exact topPadding dynamic token passed from HomeScreenSkeleton
+                    .padding(top = topPadding),
                 contentAlignment = Alignment.Center
             ) {
-                Box(
+                ShimmerBox(
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(0.65f)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .shimmerEffect()
+                        .padding(
+                            horizontal = AppTheme.spacing.lg,
+                            vertical = AppTheme.spacing.md
+                        ),
+                    shape = MaterialTheme.shapes.large
                 )
             }
 
@@ -123,51 +139,53 @@ fun HeroSectionSkeleton(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .padding(
+                        horizontal = AppTheme.spacing.xl,
+                        vertical = AppTheme.spacing.lg
+                    )
             ) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.md))
 
                 // Mock Chips Row (Rating + Genres)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.sm)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 45.dp, height = 24.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .shimmerEffect()
+                    ShimmerBox(
+                        modifier = Modifier.size(
+                            width = AppTheme.sizes.skeletonChipW,
+                            height = chipHeight
+                        ),
+                        shape = MaterialTheme.shapes.small
                     )
                     repeat(2) {
-                        Box(
-                            modifier = Modifier
-                                .size(width = 75.dp, height = 24.dp)
-                                .clip(RoundedCornerShape(50))
-                                .shimmerEffect()
+                        ShimmerBox(
+                            modifier = Modifier.size(
+                                width = AppTheme.sizes.skeletonGenreW,
+                                height = chipHeight
+                            ),
+                            shape = ShapePill
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(AppTheme.spacing.xl))
 
                 // Mock Action Buttons Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
+                    ShimmerBox(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .shimmerEffect()
+                            .height(AppTheme.sizes.touchTarget),
+                        shape = MaterialTheme.shapes.medium
                     )
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .shimmerEffect()
+                    ShimmerBox(
+                        modifier = Modifier.size(AppTheme.sizes.actionButton),
+                        shape = ShapeCircle
                     )
                 }
             }
@@ -180,36 +198,43 @@ fun MediaSectionSkeleton(
     modifier: Modifier = Modifier,
     itemCount: Int = 5 // Shows 5 visible shimmering items by default
 ) {
-    Column(modifier = modifier.padding(bottom = 28.dp)) {
+    val density = LocalDensity.current
+    val titleHeight = with(density) {
+        MaterialTheme.typography.titleLarge.lineHeight.toDp()
+    }
+
+    Column(modifier = modifier.padding(bottom = AppTheme.spacing.sectionPaddingBottom)) {
 
         // ── 1. Mock Section Title Header ─────────────────────────────────────
-        // Replicates the padding bounds of the text title line
-        Box(
+        // Replicates the padding bounds and the titleLarge line height
+        ShimmerBox(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .width(160.dp) // Fixed width block representing a text title row
-                .height(24.dp) // Matches the typographic spatial height of titleLarge
-                .clip(RoundedCornerShape(6.dp))
-                .shimmerEffect()
+                .padding(
+                    horizontal = AppTheme.spacing.lg,
+                    vertical = AppTheme.spacing.sm
+                )
+                .width(AppTheme.sizes.skeletonTitleW)
+                .height(titleHeight),
+            shape = MaterialTheme.shapes.small
         )
 
         // ── 2. Mock Media Item Row Track ──────────────────────────────────────
         // Keeps the exact contentPadding and arrangement metrics as your production row
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = AppTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.md),
             userScrollEnabled = false // Prevents the user from flicking incomplete rows
         ) {
             items(itemCount) {
-                // Mock Card Item
-                // Replace widths and heights here with your MediaCard default design specifications
-                // (Assuming standard non-hero poster dimensions are roughly 120.dp width by 180.dp height)
-                Box(
+                // Mock Card Item — same width and 2:3 poster ratio as MediaCard
+                ShimmerBox(
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(12.dp)) // Mirror the MediaCard custom corner shapes
-                        .shimmerEffect()
+                        .width(AppTheme.sizes.mediaCardWidth)
+                        .height(
+                            AppTheme.sizes.mediaCardWidth *
+                                    AppTheme.sizes.mediaCardPosterRatio
+                        ),
+                    shape = MaterialTheme.shapes.medium
                 )
             }
         }

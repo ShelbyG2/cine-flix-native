@@ -77,7 +77,7 @@ class DiscoverViewModel : ViewModel() {
         // Genre lists per category — static TMDB ids, same source GenreHelper uses
         refreshGenresForCategory(DiscoverCategory.MOVIES)
 
-        // Debounced search: fire 450 ms after the user stops typing
+        // Debounced search: fire 400 ms after the user stops typing
         // (the initial emission is a blank query, which loads the first page)
         viewModelScope.launch {
             _searchQuery
@@ -87,7 +87,7 @@ class DiscoverViewModel : ViewModel() {
                         if (query.isBlank()) {
                             fetchFirstPage()
                         } else {
-                            delay(450)
+                            delay(SEARCH_DEBOUNCE_MS)
                             fetchFirstPage()
                         }
                     }
@@ -99,6 +99,15 @@ class DiscoverViewModel : ViewModel() {
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
+    }
+
+    /**
+     * Keyboard submit: skip the debounce and search the current query now.
+     * Cancelling the pending debounce keeps the request list to one page.
+     */
+    fun onSearchSubmitted() {
+        searchJob?.cancel()
+        fetchFirstPage()
     }
 
     fun onCategorySelected(category: DiscoverCategory) {
@@ -209,7 +218,7 @@ class DiscoverViewModel : ViewModel() {
                             "No internet connection. Please turn on mobile data or Wi-Fi."
                         is SocketTimeoutException ->
                             "The server took too long to respond. Please try again."
-                        else -> "An ${e.localizedMessage} error occurred"
+                        else -> "Something went wrong. Please try again."
                     }
                 )
             } else {
@@ -240,6 +249,8 @@ class DiscoverViewModel : ViewModel() {
     }
 
     companion object {
+        private const val SEARCH_DEBOUNCE_MS = 400L
+
         val movieGenres = listOf(
             Genre(28, "Action"), Genre(12, "Adventure"), Genre(16, "Animation"),
             Genre(35, "Comedy"), Genre(80, "Crime"), Genre(99, "Documentary"),

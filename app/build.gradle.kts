@@ -10,6 +10,15 @@ plugins {
 }
 val localProps = Properties()
 val file = file("local.properties")
+
+// Release signing — values live in keystore.properties at the repo root
+// (gitignored alongside the keystore). Without the file the release build
+// stays unsigned, exactly as before.
+val releaseSigning = Properties().apply {
+    val propsFile = rootProject.file("keystore.properties")
+    if (propsFile.exists()) propsFile.inputStream().use { load(it) }
+}.takeIf { it.isNotEmpty() }
+
 android {
     namespace = "tech.unrealistic.cineflix"
     compileSdk = 37
@@ -24,10 +33,23 @@ android {
 
     }
 
+    signingConfigs {
+        releaseSigning?.let { props ->
+            create("release") {
+                storeFile = rootProject.file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            releaseSigning?.let {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
@@ -39,6 +61,11 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        // Media3's Format calls into android.text.TextUtils when it derives a
+        // default label, which the JVM stubs would otherwise reject.
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -47,6 +74,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -54,6 +82,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui)
+    implementation(libs.haze)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -90,10 +119,10 @@ dependencies {
     //color palette extractoir
     implementation("androidx.palette:palette-ktx:1.0.0")
 
-    //google fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.5")    //exoplayer
+    //exoplayer
     implementation("androidx.media3:media3-exoplayer:1.10.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.10.1")
     implementation("androidx.media3:media3-ui:1.10.1")
     implementation("androidx.media3:media3-ui-compose-material3:1.10.1")
     implementation("androidx.media3:media3-datasource-okhttp:1.10.1")

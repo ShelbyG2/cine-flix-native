@@ -1,7 +1,6 @@
 package tech.unrealistic.cineflix.core.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,15 +8,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -33,12 +31,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import tech.unrealistic.cineflix.data.remote.models.MediaItem
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ShapeCircle
+import tech.unrealistic.cineflix.ui.theme.ShapePill
 
+/**
+ * Action row used by the home hero and the details sheet:
+ * one solid primary Play pill plus the existing circular icon actions.
+ * Same actions, same order, same content descriptions.
+ */
 @Composable
 fun ActionButtons(
     modifier: Modifier = Modifier,
@@ -51,101 +54,78 @@ fun ActionButtons(
     isSaved: Boolean = false,
     onSave: (() -> Unit)? = null
 ) {
+    val colors = AppTheme.colors
+    val motion = AppTheme.motion
+    val spacing = AppTheme.spacing
+    val sizes = AppTheme.sizes
 
-    val contentColor = Color.White
+    // The row sits over (scrimmed) imagery in both themes.
+    val contentColor = colors.image.onImage
 
     Column(modifier = modifier) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 20.dp,
-                    vertical = 16.dp
+                    horizontal = spacing.lg,
+                    vertical = spacing.lg
                 ),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            // Play button  primary solid action
             Button(
                 onClick = onPlay,
-                shape = RoundedCornerShape(12.dp),
+                shape = ShapePill,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White, contentColor = Color.Black
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                modifier = Modifier.weight(1f)
+                contentPadding = PaddingValues(
+                    horizontal = spacing.buttonPaddingH,
+                    vertical = spacing.buttonPaddingV
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = sizes.touchTarget)
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(sizes.iconMd)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Play", style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                Spacer(modifier = Modifier.width(spacing.buttonGap))
+                Text(text = "Play", style = MaterialTheme.typography.labelLarge)
             }
-            if (onMediaClick != null) {  // Info button glass icon button
-                val detailScale by animateFloatAsState(
-                    targetValue = 1.0f,
-                    animationSpec = tween(200),
-                    label = "fav_scale"
-                )
-                IconButton(
+
+            if (onMediaClick != null) {
+                IconDiscButton(
                     onClick = { onMediaClick(item?.id ?: -1, item?.mediaType ?: "") },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        contentColor = contentColor
-                    ), modifier = Modifier
-                        .size(52.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
-                        )
+                    contentColor = contentColor
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Info,
-                        contentDescription = "Add to favourites",
-                        modifier = Modifier
-                            .size(22.dp)
-                            .graphicsLayer {
-                                scaleX = detailScale
-                                scaleY = detailScale
-                            })
+                        contentDescription = "Show details",
+                        modifier = Modifier.size(sizes.iconLg)
+                    )
                 }
             }
 
-            //  Favourite button glass icon button
-            val favouriteScale by animateFloatAsState(
-                targetValue = if (isFavourite) 1.25f else 1.0f,
-                animationSpec = tween(200),
-                label = "fav_scale"
-            )
-
-            //  Saved (watchlist) button glass icon button
+            // Save (watchlist) — keeps its position, pops on activation.
             val savedScale by animateFloatAsState(
-                targetValue = if (isSaved) 1.25f else 1.0f,
-                animationSpec = tween(200),
+                targetValue = when {
+                    motion.reduceMotion -> 1.0f
+                    isSaved -> 1.15f
+                    else -> 1.0f
+                },
+                animationSpec = motion.pressSpec,
                 label = "save_scale"
             )
 
             if (onSave != null) {
-                IconButton(
-                    onClick = onSave, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        contentColor = if (isSaved) Color(0xFFFFC107) else contentColor
-                    ), modifier = Modifier
-                        .size(52.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
-                        )
+                IconDiscButton(
+                    onClick = onSave,
+                    contentColor = if (isSaved) colors.accent.saved else contentColor
                 ) {
                     Icon(
                         imageVector = if (isSaved) Icons.Filled.Bookmark
@@ -153,26 +133,30 @@ fun ActionButtons(
                         contentDescription = if (isSaved) "Remove from saved"
                         else "Save for later",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = savedScale
                                 scaleY = savedScale
-                            })
+                            }
+                    )
                 }
             }
 
+            // Favourite heart — the only chromatic element in the row.
+            val favouriteScale by animateFloatAsState(
+                targetValue = when {
+                    motion.reduceMotion -> 1.0f
+                    isFavourite -> 1.15f
+                    else -> 1.0f
+                },
+                animationSpec = motion.pressSpec,
+                label = "fav_scale"
+            )
+
             if (onFavourite != null) {
-                IconButton(
-                    onClick = onFavourite, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        contentColor = if (isFavourite) Color(0xFFFF6B6B) else contentColor
-                    ), modifier = Modifier
-                        .size(52.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
-                        )
+                IconDiscButton(
+                    onClick = onFavourite,
+                    contentColor = if (isFavourite) colors.accent.favourite else contentColor
                 ) {
                     Icon(
                         imageVector = if (isFavourite) Icons.Filled.Favorite
@@ -180,42 +164,54 @@ fun ActionButtons(
                         contentDescription = if (isFavourite) "Remove from favourites"
                         else "Add to favourites",
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(sizes.iconLg)
                             .graphicsLayer {
                                 scaleX = favouriteScale
                                 scaleY = favouriteScale
-                            })
+                            }
+                    )
                 }
             }
 
-            //share button
-            val onShare = null
             if (onMediaShare != null) {
-                IconButton(
-                    onClick = onMediaShare, colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
-
-                        ), modifier = Modifier
-                        .size(52.dp)
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.30f),
-                            shape = CircleShape
-                        )
+                IconDiscButton(
+                    onClick = onMediaShare,
+                    contentColor = contentColor
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Share,
-                        contentDescription = if (isFavourite) "Remove from favourites"
-                        else "Add to favourites",
-                        modifier = Modifier
-                            .size(22.dp)
-                            .graphicsLayer {
-                                scaleX = favouriteScale
-                                scaleY = favouriteScale
-                            })
+                        contentDescription = "Share",
+                        modifier = Modifier.size(sizes.iconLg)
+                    )
                 }
             }
         }
     }
 }
 
+/** Circular secondary action on a subtle dark disc with a hairline rim. */
+@Composable
+private fun IconDiscButton(
+    onClick: () -> Unit,
+    contentColor: androidx.compose.ui.graphics.Color,
+    content: @Composable () -> Unit,
+) {
+    val sizes = AppTheme.sizes
+
+    IconButton(
+        onClick = onClick,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = AppTheme.colors.image.scrimSoft,
+            contentColor = contentColor
+        ),
+        modifier = Modifier
+            .size(sizes.actionButton)
+            .border(
+                width = sizes.hairline,
+                color = AppTheme.colors.image.pillBorder,
+                shape = ShapeCircle
+            )
+    ) {
+        content()
+    }
+}

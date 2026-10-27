@@ -8,34 +8,42 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import okhttp3.OkHttpClient
+import java.net.URI
 
+private const val DESKTOP_USER_AGENT =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
+/**
+ * Builds an [ExoPlayer] that fetches [streamUrl] with the headers the hoster
+ * checks: `Referer` is the embed page the stream was discovered on and `Origin`
+ * is that page's site root (a full URL is not a valid Origin).
+ */
 @OptIn(UnstableApi::class)
-fun createCustomStreamingPlayer(
+fun createStreamingPlayer(
     context: Context,
-    extractedStreamUrl: String,
-    originReferer: String
+    streamUrl: String,
+    referrer: String,
 ): ExoPlayer {
-    //the network layer
-    val okHttpClient = OkHttpClient.Builder().build()
+    val headers = buildMap {
+        put("Referer", referrer)
+        referrer.siteRoot()?.let { put("Origin", it) }
+    }
+    val dataSourceFactory = OkHttpDataSource.Factory(OkHttpClient.Builder().build())
+        .setUserAgent(DESKTOP_USER_AGENT)
+        .setDefaultRequestProperties(headers)
 
-    //a customised http dataSource factory that that spoofs hosters security check
-    val dataSourceFactory = OkHttpDataSource.Factory(okHttpClient)
-        .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-        .setDefaultRequestProperties(
-            mapOf(
-                "Referer" to originReferer,
-                "Origin" to originReferer.substringBefore("/eembed")
-            )
-        )
-    //create an ExoPlayer instance linked natively to our safe proxy data injector
-    val player = ExoPlayer.Builder(context)
+    return ExoPlayer.Builder(context)
         .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
         .build()
-
-    //mount the stream media cleanly
-    val mediaItem = MediaItem.fromUri(extractedStreamUrl)
-    player.setMediaItem(mediaItem)
-    player.prepare()
-    return player
+        .apply {
+            setMediaItem(MediaItem.fromUri(streamUrl))
+            playWhenReady = true
+            prepare()
+        }
 }
+
+private fun String.siteRoot(): String? = runCatching {
+    val uri = URI(this)
+    if (uri.scheme == null || uri.host == null) null else "${uri.scheme}://${uri.host}"
+}.getOrNull()

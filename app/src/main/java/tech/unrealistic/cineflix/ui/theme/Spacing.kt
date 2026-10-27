@@ -1,48 +1,43 @@
 package tech.unrealistic.cineflix.ui.theme
 
-
-
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SPACING TOKENS (resolved from JSON)
-//
-//   dimension.scale = 2
-//   dimension.xs    = 4dp
-//   dimension.sm    = xs × scale   =  4 × 2 =  8dp
-//   dimension.md    = sm × scale   =  8 × 2 = 16dp
-//   dimension.lg    = md × scale   = 16 × 2 = 32dp
-//   dimension.xl    = lg × scale   = 32 × 2 = 64dp
-//
-//   spacing tokens mirror dimension tokens 1:1
-//   spacing.multi-value = sm + xl = 8dp + 64dp (horizontal + vertical)
+// SPACING — one 4-point grid: 4 / 8 / 12 / 16 / 24 / 32 / 48.
+// Spacing owns gaps and padding; Sizes owns icon and control dimensions.
 // ═══════════════════════════════════════════════════════════════════════════
 
 data class AppSpacing(
-    // ── Base scale ───────────────────────────────────────────────────────
-    val xs:  Dp = 4.dp,    // dimension.xs
-    val sm:  Dp = 8.dp,    // dimension.sm  = xs × 2
-    val md:  Dp = 16.dp,   // dimension.md  = sm × 2
-    val lg:  Dp = 32.dp,   // dimension.lg  = md × 2
-    val xl:  Dp = 64.dp,   // dimension.xl  = lg × 2
+    // ── Grid ────────────────────────────────────────────────────────────────
+    val xs:   Dp = 4.dp,
+    val sm:   Dp = 8.dp,
+    val md:   Dp = 12.dp,
+    val lg:   Dp = 16.dp,
+    val xl:   Dp = 24.dp,
+    val xxl:  Dp = 32.dp,
+    val xxxl: Dp = 48.dp,
 
-    // ── Semantic aliases ──────────────────────────────────────────────────
-    // Maps the token names to intent-based names for use in composables
-    val iconSize:          Dp = 20.dp,  // standard icon
-    val iconSizeLg:        Dp = 24.dp,  // large icon
-    val touchTarget:       Dp = 48.dp,  // minimum accessible tap target
-    val cardPadding:       Dp = 16.dp,  // = md
-    val screenPadding:     Dp = 16.dp,  // = md, horizontal screen margin
-    val sectionGap:        Dp = 32.dp,  // = lg, between sections
-    val itemGap:           Dp = 8.dp,   // = sm, between list items
-    val inlineGap:         Dp = 4.dp,   // = xs, between inline elements
+    // ── Semantic aliases ────────────────────────────────────────────────────
+    val screenPadding: Dp = 16.dp,  // horizontal screen margin
+    val sectionGap:    Dp = 32.dp,  // between sections
+    val itemGap:       Dp = 8.dp,   // between list items
+    val inlineGap:     Dp = 4.dp,   // between inline elements
 
-    // ── multi-value spacing token (spacing.multi-value = sm xl = 8dp 64dp)
-    // Interpreted as: vertical=8dp, horizontal=64dp
-    val multiValueVertical:   Dp = 8.dp,
-    val multiValueHorizontal: Dp = 64.dp,
+    // ── Component spacing (all on the grid) ─────────────────────────────────
+    val topBarPadding:      Dp = 8.dp,   // floating top bar inner padding
+    val chipPaddingH:       Dp = 12.dp,  // chip horizontal padding
+    val chipPaddingV:       Dp = 8.dp,   // chip vertical padding
+    val chipRowGap:         Dp = 4.dp,   // rating chip icon ↔ label
+    val actionRowH:         Dp = 16.dp,  // action row horizontal
+    val actionRowV:         Dp = 16.dp,  // action row vertical
+    val buttonPaddingH:     Dp = 24.dp,  // primary button content padding
+    val buttonPaddingV:     Dp = 12.dp,
+    val buttonGap:          Dp = 8.dp,   // icon ↔ label inside buttons
+    val sectionPaddingBottom: Dp = 24.dp,
+    val heroTopInset:       Dp = 12.dp,  // gap between the floating top bar and the hero cards
+    val titleOverlap:       Dp = 24.dp,  // details title overlap onto backdrop
 )
 
 // staticCompositionLocalOf — spacing never changes at runtime

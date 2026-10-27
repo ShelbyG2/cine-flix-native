@@ -1,20 +1,16 @@
 package tech.unrealistic.cineflix.feature.home
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.WifiOff
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -32,12 +28,20 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import tech.unrealistic.cineflix.EpisodePlayRequest
+import tech.unrealistic.cineflix.core.components.ErrorState
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.rememberHazeState
 import tech.unrealistic.cineflix.core.components.FloatingTopBar
+import tech.unrealistic.cineflix.core.navigation.LocalBottomBarInset
 import tech.unrealistic.cineflix.data.local.LibraryRepository
 import tech.unrealistic.cineflix.data.local.LibraryItemEntity
+import tech.unrealistic.cineflix.data.remote.models.MediaItem
 import tech.unrealistic.cineflix.feature.details.MediaDetailsBottomSheet
 import tech.unrealistic.cineflix.feature.home.components.HeroSection
 import tech.unrealistic.cineflix.feature.home.components.MediaSection
+import tech.unrealistic.cineflix.ui.theme.AppTheme
+import tech.unrealistic.cineflix.ui.theme.ForceLightSystemBarIcons
 
 
 @SuppressLint("SuspiciousIndentation")
@@ -46,13 +50,20 @@ import tech.unrealistic.cineflix.feature.home.components.MediaSection
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onNavigate: (() -> Unit)? = null, viewModel: HomeViewModel = viewModel()
+    onNavigate: (() -> Unit)? = null,
+    onPlay: (MediaItem) -> Unit = {},
+    onPlayEpisode: (request: EpisodePlayRequest) -> Unit =
+        { _ -> },
+    viewModel: HomeViewModel = viewModel()
 ) {
     val scrollState = rememberScrollState()
+    // The top bar has its own blur source so it can sample the scrolling hero
+    // directly. The nav bar samples the app-level source.
+    val topBarHaze = rememberHazeState()
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val carouselHeight = screenHeight * 0.4f
+    val carouselHeight = screenHeight * AppTheme.sizes.heroHeightFraction
     val isScrolledPastHero by remember {
         derivedStateOf { scrollState.value > carouselHeight.value.toInt() }
     }
@@ -103,24 +114,23 @@ fun HomeScreen(
         }
 
         is HomeUiState.Error -> {
-            Column() {
-                Icon(
-                    imageVector = Icons.TwoTone.WifiOff,
-                    contentDescription = "Error",
-
-                    )
-                AnimatedImageDrawable(
-
-                )
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyLarge
+            // Centred error state with retry — offline vs generic handled by icon
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                ErrorState(
+                    message = state.message,
+                    onRetry = viewModel::onRetry
                 )
             }
         }
 
         is HomeUiState.Success -> {
+            // The hero is full-bleed behind the status bar, so icons must stay pale
+            // while it is on screen; below it the bar is solid and theme icons win.
+            ForceLightSystemBarIcons(enabled = !isScrolledPastHero)
             val carouselState = rememberCarouselState(
                 itemCount = { state.trendingMixed.size })
             Box(
@@ -133,7 +143,9 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
-
+                        // Last item can scroll clear of the translucent bar.
+                        .padding(bottom = LocalBottomBarInset.current)
+                        .haze(topBarHaze)
                 ) {
 
                     HeroSection(
@@ -142,6 +154,7 @@ fun HomeScreen(
                         modifier = Modifier,
                         carouselHeight = carouselHeight,
                         onMediaClick = openMediaDetails,
+                        onPlayClick = onPlay,
                         favouriteIds = favouriteIds,
                         onFavourite = { LibraryRepository.toggleFavourite(it.id, it.mediaType) },
                         savedIds = savedIds,
@@ -182,13 +195,19 @@ fun HomeScreen(
                         mediaId = selectedMediaId ?: 0,
                         mediaType = selectedMediaType ?: "na",
                         sheetState = mediaDetailsSheetState,
-                        isFavourite = (selectedMediaId ?: 0) in favouriteIds,
-                        onFavourite = {
-                            LibraryRepository.toggleFavourite(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        onPlay = { item ->
+                            isMediaDetailsSheetOpen = false
+                            onPlay(item)
                         },
-                        isSaved = (selectedMediaId ?: 0) in savedIds,
-                        onSave = {
-                            LibraryRepository.toggleSaved(selectedMediaId ?: 0, selectedMediaType ?: "movie")
+                        onPlayEpisode = { request ->
+                            isMediaDetailsSheetOpen = false
+                            onPlayEpisode(request)
+                        },
+                        onFavourite = { item ->
+                            LibraryRepository.toggleFavourite(item.id, item.mediaType)
+                        },
+                        onSave = { item ->
+                            LibraryRepository.toggleSaved(item.id, item.mediaType)
                         },
                         likedEpisodeIds = likedEpisodeIds,
                         onEpisodeLike = { seriesId, seasonNumber, episodeId ->
@@ -197,13 +216,14 @@ fun HomeScreen(
                     )
                 }
                 FloatingTopBar(
+                    hazeState = topBarHaze,
+                    onSearchClick = { onNavigate?.invoke() },
+                    isScrolled = isScrolledPastHero,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .onGloballyPositioned { coordinates ->
                             topBarHeight = with(density) { coordinates.size.height.toDp() }
                         },
-                    { onNavigate?.invoke() },
-                    isScrolled = isScrolledPastHero
                 )
             }
         }
